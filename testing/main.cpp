@@ -1,11 +1,9 @@
 ﻿// Algorithms.cpp: 定义应用程序的入口点。
 //
-#include <iostream>
-
-#include <structures/BinaryTree.h>
+#include <gtest/gtest.h>
 
 int main()
 {
-	std::cout << "Hello CMake。" << std::endl;
-	return 0;
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
