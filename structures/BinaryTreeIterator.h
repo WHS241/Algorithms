@@ -1,14 +1,15 @@
 #ifndef TREE_ITERATOR_H
 #define TREE_ITERATOR_H
 
+template<typename T> class BinaryTree;
+
 #include <memory>
 
 enum Traversal {PreOrder, InOrder, PostOrder, LevelOrder};
 
-template<typename T> class BinaryNode;
 template<typename T> class TreeIteratorImpl;
-template<typename T> class BinaryTree;
 
+// The iterator pattern for the BinaryTree
 template<typename T>
 class TreeIterator {
 public :
@@ -26,7 +27,7 @@ public :
     TreeIterator operator++(int);
 
 private :
-    TreeIterator(BinaryNode<T>* root, Traversal order);
+    TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order);
 
     std::unique_ptr<TreeIteratorImpl<T>> impl;
 
@@ -48,7 +49,7 @@ public :
     TreeConstIterator operator++(int);
 
 private :
-    TreeConstIterator(BinaryNode<T>* root, Traversal order);
+    TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order);
 
     std::shared_ptr<TreeIteratorImpl<T>> impl;
 

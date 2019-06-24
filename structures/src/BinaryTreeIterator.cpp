@@ -4,7 +4,7 @@
 #include <structures/BinaryTreeIteratorImpl.h>
 
 template<typename T>
-TreeIterator<T>::TreeIterator(BinaryNode<T>* root, Traversal order)
+TreeIterator<T>::TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order)
 {
     switch (order) {
     case PreOrder:
@@ -34,7 +34,7 @@ bool TreeIterator<T>::operator==(const TreeIterator<T>& rhs) const {
 
 template<typename T>
 bool TreeIterator<T>::operator!=(const TreeIterator<T>& rhs) const {
-    return !operator==(rhs)
+    return !operator==(rhs);
 }
 
 template<typename T>
@@ -94,7 +94,7 @@ TreeIterator<T> TreeIterator<T>::operator++(int) {
 }
 
 template<typename T>
-TreeConstIterator<T>::TreeConstIterator(BinaryNode<T>* root, Traversal order) {
+TreeConstIterator<T>::TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order) {
     switch (order) {
     case PreOrder:
         impl.reset(new PreOrderTreeIteratorImpl<T>(root));
@@ -146,7 +146,7 @@ bool TreeConstIterator<T>::operator==(const TreeConstIterator<T>& rhs) const {
 
 template<typename T>
 bool TreeConstIterator<T>::operator!=(const TreeConstIterator<T>& rhs) const {
-    return !operator==(rhs)
+    return !operator==(rhs);
 }
 
 template<typename T>

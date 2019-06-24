@@ -2,70 +2,71 @@
 #define TREE_ITERATOR_IMPL_H
 
 #include <list>
+#include "BinaryTree.h"
 
-template<typename T> class BinaryNode;
 template<typename T> class TreeIterator;
 
+// The implementation for the Binary Tree iterator
 template<typename T>
 class TreeIteratorImpl {
 public:
     TreeIteratorImpl() = delete;
-    TreeIteratorImpl(BinaryNode<T>* current);
+    TreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
-    virtual bool operator==(const TreeIteratorImpl<T>&) const;
-    virtual bool operator!=(const TreeIteratorImpl<T>&) const;
+    virtual bool operator==(const TreeIteratorImpl<T>&) const noexcept;
+    virtual bool operator!=(const TreeIteratorImpl<T>&) const noexcept;
 
-    virtual const T& operator*() const;
-    virtual T& operator*();
-    virtual const T* operator->() const;
-    virtual T* operator->();
+    virtual const T& operator*() const noexcept;
+    virtual T& operator*() noexcept;
+    virtual const T* operator->() const noexcept;
+    virtual T* operator->() noexcept;
 
-    virtual TreeIteratorImpl& operator++() = 0;
+    virtual TreeIteratorImpl& operator++() noexcept = 0;
 
 protected:
-    BinaryNode<T>* current;
+    typename BinaryTree<T>::BinaryNode* current;
 };
 
 template<typename T>
 class PreOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
-    PreOrderTreeIteratorImpl(BinaryNode<T>* current);
+    PreOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
-    PreOrderTreeIteratorImpl& operator++();
+    PreOrderTreeIteratorImpl& operator++() noexcept;
 
 private:
-    static BinaryNode<T>* preOrderStart(BinaryNode<T>* root);
+    static typename BinaryTree<T>::BinaryNode* preOrderStart(typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
 template<typename T>
 class InOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
-    InOrderTreeIteratorImpl(BinaryNode<T>* current);
+    InOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
-    InOrderTreeIteratorImpl& operator++();
+    InOrderTreeIteratorImpl& operator++() noexcept;
 
 private:
-    static BinaryNode<T>* leftmostDescendant(BinaryNode<T>* root);
+    static typename BinaryTree<T>::BinaryNode* leftmostDescendant(typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
 template<typename T>
 class PostOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
-    PostOrderTreeIteratorImpl(BinaryNode<T>* current);
+    PostOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
-    PostOrderTreeIteratorImpl& operator++();
+    PostOrderTreeIteratorImpl& operator++() noexcept;
 };
 
 template<typename T>
 class LevelOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
-    LevelOrderTreeIteratorImpl(BinaryNode<T>* current);
+    LevelOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
-    LevelOrderTreeIteratorImpl& operator++();
+    LevelOrderTreeIteratorImpl& operator++() noexcept;
 
 private:
-    std::list<BinaryNode<T>*> buffer;
-    typename std::list<BinaryNode<T>*>::iterator pos;
+    std::list<typename BinaryTree<T>::BinaryNode*> buffer;
+    typename std::list<typename BinaryTree<T>::BinaryNode*>::iterator pos;
 
     friend class TreeIterator<T>;
 };
