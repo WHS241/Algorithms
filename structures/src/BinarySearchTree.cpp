@@ -19,8 +19,11 @@ typename BinaryTree<T>::BinaryNode* BinarySearchTree<T, Compare>::generate(const
 
     uint32_t middle = (first + last) / 2;
     std::unique_ptr<typename BinaryTree<T>::BinaryNode> root(new typename BinaryTree<T>::BinaryNode(elements[middle], parent));
-    root->addLeft(generate(elements, first, middle, root.get()));
-    root->addRight(generate(elements, middle + 1, last, root.get()));
+
+    if (last - first > 1) {
+        root->replaceLeft(generate(elements, first, middle, root.get()));
+        root->replaceRight(generate(elements, middle + 1, last, root.get()));
+    }
     return root.release();
 }
 
@@ -30,7 +33,7 @@ typename BinaryTree<T>::BinaryNode* BinarySearchTree<T, Compare>::find(const T& 
 
     typename BinaryTree<T>::BinaryNode* current = this->root.get();
     while ((current != nullptr) && (current->_item != item))
-        current = compare(item, current->_item) ? current->_left.get() : current->_right.get();
+        current = compare(item, current->_item) ? current->_left : current->_right;
     
     return current;
 }

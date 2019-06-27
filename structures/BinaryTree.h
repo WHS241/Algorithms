@@ -46,15 +46,26 @@ protected:
                 right->_parent = this;
         };
 
-        void addLeft(BinaryNode* toAdd) noexcept;
-        void addRight(BinaryNode* toAdd) noexcept;
+        ~BinaryNode() noexcept {
+            delete _left;
+            delete _right;
+        }
+
+        virtual BinaryNode* changeLeft(BinaryNode* toAdd) noexcept;
+        virtual BinaryNode* changeRight(BinaryNode* toAdd) noexcept;
+        virtual void replaceLeft(BinaryNode* toAdd) noexcept;
+        virtual void replaceRight(BinaryNode* toAdd) noexcept;
+        virtual BinaryNode* clone() const;
 
         T _item;
 
         BinaryNode* _parent;
-        std::unique_ptr<BinaryNode> _left;
-        std::unique_ptr<BinaryNode> _right;
+        BinaryNode* _left;
+        BinaryNode* _right;
     };
+
+    static BinaryNode* getNode(iterator it);
+    static BinaryNode* getNode(const_iterator it);
 
     // Returns a pointer to the node containing an element; nullptr if not found
     virtual BinaryNode* find(const T&) const = 0;

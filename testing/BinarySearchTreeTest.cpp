@@ -1,7 +1,9 @@
+#include <structures/AVLTree.h>
 #include <structures/PrimitiveBinarySearchTree.h>
 
 #include <gtest/gtest.h>
 #include <vector>
+#include <memory>
 #include <random>
 
 template<typename T, typename C>
@@ -11,7 +13,7 @@ void verifySearchTree(const BinarySearchTree<T, C>& tree) {
         auto it2(it);
         ++it2;
         if (it2 != tree.end()) {
-            EXPECT_TRUE(tester(*it, *it2));
+            EXPECT_TRUE(tester(*it, *it2) || *it == *it2);
         }
     }
 }
@@ -35,9 +37,88 @@ protected :
 };
 
 TEST_F(PrimitiveBinarySearchTreeTest, PrimitiveConstructor) {
-    for (uint32_t i = 5; i < 20; ++i) {
-        auto data(generateData(i, i, engine));
-        PrimitiveBinarySearchTree tree(data);
+    for (uint32_t i = 0; i < 100; ++i) {
+        auto data(generateData(100, 100, engine));
+        PrimitiveBinarySearchTree<double> tree(data.begin(), data.end());
         verifySearchTree(tree);
+        for (auto val : data) {
+            EXPECT_TRUE(tree.contains(val));
+        }
+    }
+}
+
+TEST_F(PrimitiveBinarySearchTreeTest, InsertTest) {
+    for (uint32_t i = 5; i < 20; ++i) {
+        auto data(generateData(2 * i, i, engine));
+        PrimitiveBinarySearchTree<double> tree(data.begin(), data.end());
+
+        std::uniform_real_distribution<> dist(0, i + 1);
+        for (uint32_t j = 0; j < 30; ++j) {
+            double insertVal = dist(engine);
+            tree.insert(insertVal);
+            EXPECT_TRUE(tree.contains(insertVal));
+        }
+
+        verifySearchTree(tree);
+    }
+}
+
+TEST_F(PrimitiveBinarySearchTreeTest, RemoveTest) {
+    for (uint32_t i = 0; i < 100; ++i) {
+        auto data(generateData(100, 100, engine));
+        std::unique_ptr<BinarySearchTree<double>> tree(new PrimitiveBinarySearchTree<double>(data.begin(), data.end()));
+        for (uint32_t j = 0; j < data.size(); ++j) {
+            tree->remove(data[j]);
+            verifySearchTree(*tree);
+        }
+    }
+}
+
+
+class AVLTreeTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        std::random_device base;
+        engine = std::mt19937_64(base());
+    }
+
+    std::mt19937_64 engine;
+};
+
+TEST_F(AVLTreeTest, PrimitiveConstructor) {
+    for (uint32_t i = 0; i < 100; ++i) {
+        auto data(generateData(100, 100, engine));
+        AVLSearchTree<double> tree(data.begin(), data.end());
+        verifySearchTree(tree);
+        for (auto val : data) {
+            EXPECT_TRUE(tree.contains(val));
+        }
+    }
+}
+
+TEST_F(AVLTreeTest, InsertTest) {
+    for (uint32_t i = 5; i < 20; ++i) {
+        auto data(generateData(2 * i, i, engine));
+        AVLSearchTree<double> tree(data.begin(), data.end());
+
+        std::uniform_real_distribution<> dist(0, i + 1);
+        for (uint32_t j = 0; j < 30; ++j) {
+            double insertVal = dist(engine);
+            tree.insert(insertVal);
+            EXPECT_TRUE(tree.contains(insertVal));
+        }
+
+        verifySearchTree(tree);
+    }
+}
+
+TEST_F(AVLTreeTest, RemoveTest) {
+    for (uint32_t i = 0; i < 100; ++i) {
+        auto data(generateData(100, 100, engine));
+        std::unique_ptr<BinarySearchTree<double>> tree(new AVLSearchTree<double>(data.begin(), data.end()));
+        for (uint32_t j = 0; j < data.size(); ++j) {
+            tree->remove(data[j]);
+            verifySearchTree(*tree);
+        }
     }
 }

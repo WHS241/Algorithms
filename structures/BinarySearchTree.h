@@ -7,18 +7,21 @@
 
 // A Binary Search Tree (BST) abstract class
 template<typename T, typename Compare = std::less<>>
-class BinarySearchTree : virtual public BinaryTree<T> {
+class BinarySearchTree : public BinaryTree<T> {
 public:
     // initialize empty BST
     BinarySearchTree() = default;
 
     // populate with data; [first, last) can be dereferenced to reach data. Need not be sorted.
-    BinarySearchTree(std::vector<T>& elements, Compare comp = Compare())
+    template<typename It>
+    BinarySearchTree(It first, It last, Compare comp = Compare())
         : BinaryTree<T>()
         , compare(comp)
     {
+        std::vector<T> elements(first, last);
         std::sort(elements.begin(), elements.end(), comp);
         this->root.reset(generate(elements, 0, elements.size(), nullptr));
+        this->_size = elements.size();
     }
 
     // searches the BST for an element. Returns true if element exists

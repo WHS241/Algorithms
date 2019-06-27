@@ -25,6 +25,7 @@ public:
 
 protected:
     typename BinaryTree<T>::BinaryNode* current;
+    friend class TreeIterator<T>;
 };
 
 template<typename T>
@@ -33,9 +34,10 @@ public:
     PreOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
     PreOrderTreeIteratorImpl& operator++() noexcept;
+    PreOrderTreeIteratorImpl& operator--() noexcept;
 
 private:
-    static typename BinaryTree<T>::BinaryNode* preOrderStart(typename BinaryTree<T>::BinaryNode* root) noexcept;
+    static typename BinaryTree<T>::BinaryNode* preOrderEnd(typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
 template<typename T>
@@ -44,9 +46,11 @@ public:
     InOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
     InOrderTreeIteratorImpl& operator++() noexcept;
+    InOrderTreeIteratorImpl& operator--() noexcept;
 
 private:
     static typename BinaryTree<T>::BinaryNode* leftmostDescendant(typename BinaryTree<T>::BinaryNode* root) noexcept;
+    static typename BinaryTree<T>::BinaryNode* rightmostDescendant(typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
 template<typename T>
@@ -55,6 +59,10 @@ public:
     PostOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
     PostOrderTreeIteratorImpl& operator++() noexcept;
+    PostOrderTreeIteratorImpl& operator--() noexcept;
+
+private:
+    static typename BinaryTree<T>::BinaryNode* postOrderStart(typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
 template<typename T>
@@ -63,6 +71,7 @@ public:
     LevelOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
     LevelOrderTreeIteratorImpl& operator++() noexcept;
+    LevelOrderTreeIteratorImpl& operator--() noexcept;
 
 private:
     std::list<typename BinaryTree<T>::BinaryNode*> buffer;

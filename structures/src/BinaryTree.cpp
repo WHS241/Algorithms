@@ -28,12 +28,12 @@ typename BinaryTree<T>::const_iterator BinaryTree<T>::begin(Traversal traversal)
 
 template<typename T>
 typename BinaryTree<T>::const_iterator BinaryTree<T>::end() const {
-    return const_iterator(nullptr, PostOrder);
+    return const_iterator(nullptr, PreOrder);
 }
 
 template<typename T>
 void BinaryTree<T>::remove(const T& item) {
-    iterator toRemove(find(item), PostOrder);
+    iterator toRemove(find(item), PreOrder);
     if (toRemove == end())
         throw std::invalid_argument("Not found in tree");
 
@@ -46,15 +46,58 @@ uint32_t BinaryTree<T>::size() const noexcept {
 }
 
 template<typename T>
-void BinaryTree<T>::BinaryNode::addLeft(typename BinaryTree<T>::BinaryNode* add) noexcept {
-    _left.reset(add);
-    add->_parent = this;
+typename BinaryTree<T>::BinaryNode* BinaryTree<T>::BinaryNode::changeLeft(typename BinaryTree<T>::BinaryNode* add) noexcept {
+    auto ptr = _left;
+    _left = add;
+
+    if (add != nullptr)
+        add->_parent = this;
+
+    // Middle of complex move?
+    if(ptr && (ptr->_parent == this))
+        ptr->_parent = nullptr;
+    return ptr;
 }
 
 template<typename T>
-void BinaryTree<T>::BinaryNode::addRight(typename BinaryTree<T>::BinaryNode* add) noexcept {
-    _right.reset(add);
-    add->_parent = this;
+typename BinaryTree<T>::BinaryNode* BinaryTree<T>::BinaryNode::changeRight(typename BinaryTree<T>::BinaryNode* add) noexcept {
+    auto ptr = _right;
+    _right = add;
+
+    if (add != nullptr)
+        add->_parent = this;
+
+    // Middle of complex move?
+    if (ptr && (ptr->_parent == this))
+        ptr->_parent = nullptr;
+    return ptr;
+}
+
+template<typename T>
+void BinaryTree<T>::BinaryNode::replaceLeft(typename BinaryTree<T>::BinaryNode* add) noexcept {
+    auto prev = changeLeft(add);
+    delete prev;
+}
+
+template<typename T>
+void BinaryTree<T>::BinaryNode::replaceRight(typename BinaryTree<T>::BinaryNode* add) noexcept {
+    auto prev = changeRight(add);
+    delete prev;
+}
+
+template<typename T>
+typename BinaryTree<T>::BinaryNode* BinaryTree<T>::BinaryNode::clone() const {
+    return new BinaryNode(this->_item, nullptr, (this->_left) ? this->_left->clone() : nullptr, (this->_right) ? this->_right->clone() : nullptr);
+}
+
+template<typename T>
+typename BinaryTree<T>::BinaryNode* BinaryTree<T>::getNode(typename BinaryTree<T>::iterator it) {
+    return it.getNode();
+}
+
+template<typename T>
+typename BinaryTree<T>::BinaryNode* BinaryTree<T>::getNode(typename BinaryTree<T>::const_iterator it) {
+    return it.getNode();
 }
 
 #endif // BINARY_TREE_CPP

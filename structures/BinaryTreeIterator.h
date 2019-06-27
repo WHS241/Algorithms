@@ -25,9 +25,13 @@ public :
     T* operator->();
     TreeIterator& operator++();
     TreeIterator operator++(int);
+    TreeIterator& operator--();
+    TreeIterator operator--(int);
 
 private :
     TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order);
+
+    typename BinaryTree<T>::BinaryNode* getNode();
 
     std::unique_ptr<TreeIteratorImpl<T>> impl;
 
@@ -47,9 +51,13 @@ public :
     const T* operator->() const;
     TreeConstIterator& operator++();
     TreeConstIterator operator++(int);
+    TreeConstIterator& operator--();
+    TreeConstIterator operator--(int);
 
 private :
     TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order);
+
+    typename BinaryTree<T>::BinaryNode* getNode();
 
     std::shared_ptr<TreeIteratorImpl<T>> impl;
 

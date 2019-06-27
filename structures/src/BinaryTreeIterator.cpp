@@ -94,6 +94,24 @@ TreeIterator<T> TreeIterator<T>::operator++(int) {
 }
 
 template<typename T>
+TreeIterator<T>& TreeIterator<T>::operator--() {
+    --(*impl);
+    return *this;
+}
+
+template<typename T>
+TreeIterator<T> TreeIterator<T>::operator--(int) {
+    TreeIterator<T> temp(*this);
+    --(*this);
+    return temp;
+}
+
+template<typename T>
+typename BinaryTree<T>::BinaryNode* TreeIterator<T>::getNode() {
+    return impl->current;
+}
+
+template<typename T>
 TreeConstIterator<T>::TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order) {
     switch (order) {
     case PreOrder:
@@ -101,15 +119,15 @@ TreeConstIterator<T>::TreeConstIterator(typename BinaryTree<T>::BinaryNode* root
         break;
 
     case InOrder:
-        impl.reset(new PreOrderTreeIteratorImpl<T>(root));
+        impl.reset(new InOrderTreeIteratorImpl<T>(root));
         break;
 
     case PostOrder:
-        impl.reset(new PreOrderTreeIteratorImpl<T>(root));
+        impl.reset(new PostOrderTreeIteratorImpl<T>(root));
         break;
 
     case LevelOrder:
-        impl.reset(new PreOrderTreeIteratorImpl<T>(root));
+        impl.reset(new LevelOrderTreeIteratorImpl<T>(root));
 
     default:
         break;
@@ -170,6 +188,24 @@ TreeConstIterator<T> TreeConstIterator<T>::operator++(int) {
     TreeIterator<T> temp(*this);
     ++(*this);
     return temp;
+}
+
+template<typename T>
+TreeConstIterator<T>& TreeConstIterator<T>::operator--() {
+    --(*impl);
+    return *this;
+}
+
+template<typename T>
+TreeConstIterator<T> TreeConstIterator<T>::operator--(int) {
+    TreeIterator<T> temp(*this);
+    --(*this);
+    return temp;
+}
+
+template<typename T>
+typename BinaryTree<T>::BinaryNode* TreeConstIterator<T>::getNode() {
+    return impl->current;
 }
 
 #endif //TREE_ITERATOR_CPP
