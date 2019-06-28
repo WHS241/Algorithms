@@ -20,7 +20,7 @@ public:
     {
         std::vector<T> elements(first, last);
         std::sort(elements.begin(), elements.end(), comp);
-        this->root.reset(generate(elements, 0, elements.size(), nullptr));
+        this->root.reset(this->generate(elements, 0, elements.size(), nullptr));
         this->_size = elements.size();
     }
 
@@ -28,10 +28,10 @@ public:
     virtual bool contains(const T&) const noexcept;
 
 protected:
-
     Compare compare;
     static typename BinaryTree<T>::BinaryNode* generate(const std::vector<T>&, uint32_t, uint32_t, typename BinaryTree<T>::BinaryNode*);
     virtual typename BinaryTree<T>::BinaryNode* find(const T&) const noexcept override;
+    void rotate(typename BinaryTree<T>::BinaryNode* upper, bool useLeftChild);
 };
 
 #include "src/BinarySearchTree.cpp"

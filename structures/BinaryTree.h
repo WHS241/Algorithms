@@ -34,22 +34,13 @@ public:
 protected:
 
     struct BinaryNode {
-        BinaryNode(const T& item = T(), BinaryNode* parent = nullptr, BinaryNode* left = nullptr, BinaryNode* right = nullptr)
-            : _item(item)
-            , _parent(parent)
-            , _left(left)
-            , _right(right)
-        {
-            if (left)
-                left->_parent = this;
-            if (right)
-                right->_parent = this;
-        };
+        BinaryNode(const T& item = T(), BinaryNode* parent = nullptr, BinaryNode* left = nullptr, BinaryNode* right = nullptr);
 
-        ~BinaryNode() noexcept {
-            delete _left;
-            delete _right;
-        }
+        virtual ~BinaryNode() noexcept;
+        BinaryNode(const BinaryNode&) = delete;
+        virtual const BinaryNode& operator=(const BinaryNode&) = delete;
+        BinaryNode(BinaryNode&&);
+        virtual const BinaryNode& operator=(BinaryNode&&);
 
         virtual BinaryNode* changeLeft(BinaryNode* toAdd) noexcept;
         virtual BinaryNode* changeRight(BinaryNode* toAdd) noexcept;

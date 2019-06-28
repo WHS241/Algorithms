@@ -61,21 +61,6 @@ private :
     std::vector<T> heap;
 };
 
-// Tree-based binary heap
-template<typename T, typename Compare = std::less<>>
-class BinaryTreeHeap : virtual public Heap<T, Compare>, virtual public BinaryTree<T> {
-public:
-    BinaryTreeHeap();
-
-    template<typename It>
-    BinaryTreeHeap(iterator first, iterator last);
-
-    virtual void insert(const T&);
-    virtual T getRoot() const;
-    virtual T removeRoot();
-    virtual uint32_t size() const;
-};
-
 #include "src/Heap.cpp"
 
 #endif // HEAP_H

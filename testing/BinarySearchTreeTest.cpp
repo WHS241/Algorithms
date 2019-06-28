@@ -1,10 +1,12 @@
-#include <structures/AVLTree.h>
-#include <structures/PrimitiveBinarySearchTree.h>
-
-#include <gtest/gtest.h>
-#include <vector>
+#include <iostream>
 #include <memory>
 #include <random>
+#include <vector>
+
+#include <gtest/gtest.h>
+
+#include <structures/AVLTree.h>
+#include <structures/PrimitiveBinarySearchTree.h>
 
 template<typename T, typename C>
 void verifySearchTree(const BinarySearchTree<T, C>& tree) {
@@ -36,7 +38,7 @@ protected :
     std::mt19937_64 engine;
 };
 
-TEST_F(PrimitiveBinarySearchTreeTest, PrimitiveConstructor) {
+TEST_F(PrimitiveBinarySearchTreeTest, Constructor) {
     for (uint32_t i = 0; i < 100; ++i) {
         auto data(generateData(100, 100, engine));
         PrimitiveBinarySearchTree<double> tree(data.begin(), data.end());
@@ -74,6 +76,22 @@ TEST_F(PrimitiveBinarySearchTreeTest, RemoveTest) {
     }
 }
 
+/*
+// timing test
+TEST_F(PrimitiveBinarySearchTreeTest, SortedTest) {
+    for (uint32_t i = 0; i < 500; ++i) {
+        auto data(generateData(1000, 1000, engine));
+        std::sort(data.begin(), data.end());
+        std::unique_ptr<BinarySearchTree<double>> tree(new PrimitiveBinarySearchTree<double>());
+        for (uint32_t j = 0; j < data.size(); ++j) {
+            tree->insert(data[j]);
+        }
+        for (uint32_t j = 0; j < data.size(); ++j) {
+            tree->remove(data[j]);
+        }
+    }
+}*/
+
 
 class AVLTreeTest : public ::testing::Test {
 protected:
@@ -85,7 +103,7 @@ protected:
     std::mt19937_64 engine;
 };
 
-TEST_F(AVLTreeTest, PrimitiveConstructor) {
+TEST_F(AVLTreeTest, Constructor) {
     for (uint32_t i = 0; i < 100; ++i) {
         auto data(generateData(100, 100, engine));
         AVLSearchTree<double> tree(data.begin(), data.end());
@@ -117,8 +135,24 @@ TEST_F(AVLTreeTest, RemoveTest) {
         auto data(generateData(100, 100, engine));
         std::unique_ptr<BinarySearchTree<double>> tree(new AVLSearchTree<double>(data.begin(), data.end()));
         for (uint32_t j = 0; j < data.size(); ++j) {
-            tree->remove(data[j]);
+            tree->remove(data[j]); 
             verifySearchTree(*tree);
         }
     }
 }
+
+/*
+// timing test
+TEST_F(AVLTreeTest, SortedTest) {
+    for (uint32_t i = 0; i < 500; ++i) {
+        auto data(generateData(1000, 1000, engine));
+        std::sort(data.begin(), data.end());
+        std::unique_ptr<BinarySearchTree<double>> tree(new AVLSearchTree<double>());
+        for (uint32_t j = 0; j < data.size(); ++j) {
+            tree->insert(data[j]);
+        }
+        for (uint32_t j = 0; j < data.size(); ++j) {
+            tree->remove(data[j]);
+        }
+    }
+}*/

@@ -38,4 +38,41 @@ typename BinaryTree<T>::BinaryNode* BinarySearchTree<T, Compare>::find(const T& 
     return current;
 }
 
+template<typename T, typename Compare>
+void BinarySearchTree<T, Compare>::rotate(typename BinaryTree<T>::BinaryNode* upper, bool useLeftChild) {
+    auto parent = upper->_parent;
+    bool isRoot = (parent == nullptr);
+    bool isLeftChild = !isRoot && (upper == parent->_left);
+
+    if ((useLeftChild && upper->_left == nullptr) || (!useLeftChild && upper->_right == nullptr)) {
+        throw std::invalid_argument("No such child");
+    }
+
+    typename BinaryTree<T>::BinaryNode *newRoot, *toSwap;
+
+    if (useLeftChild) {
+        newRoot = upper->_left;
+        toSwap = newRoot->_right;
+        newRoot->changeRight(upper);
+        upper->changeLeft(toSwap);
+    }
+    else {
+        newRoot = upper->_right;
+        toSwap = newRoot->_left;
+        newRoot->changeLeft(upper);
+        upper->changeRight(toSwap);
+    }
+
+    if (isRoot) {
+        this->root.release();
+        this->root.reset(newRoot);
+    }
+    else if (isLeftChild) {
+        parent->changeLeft(newRoot);
+    }
+    else {
+        parent->changeRight(newRoot);
+    }
+}
+
 #endif // BINARY_SEARCH_TREE_CPP
