@@ -3,6 +3,8 @@
 
 #include "BinarySearchTree.h"
 
+// AVL tree implementation
+// For any node, difference in height between subtrees <= 1
 template<typename T, typename Compare = std::less<>>
 class AVLSearchTree : virtual public BinarySearchTree<T, Compare> {
 public:
