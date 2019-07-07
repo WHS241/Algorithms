@@ -1,6 +1,7 @@
 #ifndef GRAPH_CPP
 #define GRAPH_CPP
 
+#include <algorithm>
 #include <functional>
 #include <iterator>
 #include <list>

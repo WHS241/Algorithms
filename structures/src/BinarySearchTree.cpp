@@ -1,8 +1,6 @@
 #ifndef BINARY_SEARCH_TREE_CPP
 #define BINARY_SEARCH_TREE_CPP
-
-#include <algorithm>
-#include <iterator>
+#include <stdexcept>
 #include <memory>
 #include <vector>
 

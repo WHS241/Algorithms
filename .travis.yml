@@ -10,42 +10,20 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.9
+            - g++-8
       env:
-         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 
-    # works on Precise and Trusty
+    # works on Trusty
     - os: linux
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - llvm-toolchain-trusty-8
           packages:
-            - g++-5
+            - clang-5.0
       env:
-         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-
-    # works on Precise and Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-
-    # works on Precise and Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
 
 before_install:
   - sudo apt-get update
