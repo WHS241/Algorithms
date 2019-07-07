@@ -1,8 +1,5 @@
 language: cpp
-
-compiler:
-    - gcc
-    - clang
+sudo: false
 
 before_install:
     - test -n $CC  && unset CC
