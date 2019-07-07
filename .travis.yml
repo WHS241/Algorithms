@@ -53,7 +53,14 @@ before_install:
   - eval "${MATRIX_EVAL}"
 
 script:
-  - . .travis.sh
+    # Build main and tests
+    - mkdir build
+    - cd build
+    - cmake .. 
+    - make
+    - ./testing
+
+
 
 after_success:
     - echo "Success"
