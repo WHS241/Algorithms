@@ -17,17 +17,26 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     execute_process(COMMAND ${GIT_EXECUTABLE} -C ${PROJECT_SOURCE_DIR} submodule update --init --recursive)
     execute_process(COMMAND ${GIT_EXECUTABLE} -C ${PROJECT_SOURCE_DIR}/lib/googletest checkout tags/release-1.8.1)
 endif()
-# Make sure GTest is built
-include(gtest.cmake)
 
-include_directories("./")
+include_directories("./include")
+
+# Make sure libraries built
+include(gtest.cmake)
+include(structures.cmake)
 
 set(SOURCE_FILES
+        src/misc/algebra.cpp
+		testing/generator.cpp
         testing/main.cpp
-		testing/BinarySearchTreeTest.cpp
-		testing/UnionFindTest.cpp
+		testing/misc/AlgebraTest.cpp
+		testing/misc/GraphMiscTest.cpp
+		testing/structures/BinarySearchTreeTest.cpp
+		testing/structures/UnionFindTest.cpp
         )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_executable(testing ${SOURCE_FILES})
+
 add_dependencies(testing gtest)
 target_link_libraries(testing gtest ${CMAKE_THREAD_LIBS_INIT})
+add_dependencies(testing structures)
+target_link_libraries(testing structures ${CMAKE_THREAD_LIBS_INIT})

@@ -5,8 +5,8 @@
 
 #include <gtest/gtest.h>
 
-#include <structures/AVLTree.h>
-#include <structures/PrimitiveBinarySearchTree.h>
+#include <AVLTree.h>
+#include <PrimitiveBinarySearchTree.h>
 
 template<typename T, typename C>
 void verifySearchTree(const BinarySearchTree<T, C>& tree) {
@@ -20,7 +20,7 @@ void verifySearchTree(const BinarySearchTree<T, C>& tree) {
     }
 }
 
-std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine) {
+static std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine) {
     std::vector<double> result(size);
     std::uniform_real_distribution<> dist(0, bound);
     std::generate(result.begin(), result.end(), [&dist, &engine]() {return dist(engine); });

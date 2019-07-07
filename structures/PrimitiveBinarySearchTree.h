@@ -4,7 +4,7 @@
 #include "BinarySearchTree.h"
 
 // A basic Binary Search Tree, with no self-balancing techniques
-// Operations may be O(n)
+// Operations may be жи(n)
 template<typename T, typename Compare = std::less<>>
 class PrimitiveBinarySearchTree : virtual public BinarySearchTree<T, Compare> {
 public :

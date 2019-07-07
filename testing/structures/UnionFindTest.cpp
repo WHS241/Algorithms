@@ -5,9 +5,9 @@
 
 #include <gtest/gtest.h>
 
-#include <structures/UnionFind.h>
+#include <UnionFind.h>
 
-std::vector<uint32_t> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine) {
+static std::vector<uint32_t> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine) {
         std::vector<uint32_t> result(size);
         std::uniform_int_distribution<uint32_t> dist(0, bound);
         std::generate(result.begin(), result.end(), [&dist, &engine]() {return dist(engine); });

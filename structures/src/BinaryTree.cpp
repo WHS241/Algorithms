@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include <structures/BinaryTreeIterator.h>
+#include <BinaryTreeIterator.h>
 
 template<typename T>
 BinaryTree<T>::BinaryTree() noexcept

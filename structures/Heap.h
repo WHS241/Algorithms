@@ -28,7 +28,7 @@ public :
 
     // жи(n)
     template<typename It>
-    BinaryHeap(iterator first, iterator last, Compare comp = Compare()) 
+    BinaryHeap(It first, It last, Compare comp = Compare()) 
         : Heap<T, Compare>(comp)
         , heap(first, last) {
         for (uint32_t position = heap.size() - 1; position != -1; --position) {

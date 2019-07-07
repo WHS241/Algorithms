@@ -1,9 +1,10 @@
 #ifndef BINARY_SEARCH_TREE_H
 #define BINARY_SEARCH_TREE_H
 
-#include <structures/BinaryTree.h>
 #include <functional>
 #include <vector>
+
+#include "BinaryTree.h"
 
 // A Binary Search Tree (BST) abstract class
 template<typename T, typename Compare = std::less<>>

@@ -135,7 +135,7 @@ void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
         return;
     if (this->_size == 1) {
         this->root.reset();
-        _size = 0;
+        this->_size = 0;
         return;
     }
 

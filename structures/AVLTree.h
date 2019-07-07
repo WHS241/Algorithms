@@ -18,7 +18,10 @@ public:
         this->_size = elements.size();
     }
 
+    // жи(log n)
     void insert(const T&) override;
+
+    // жи(log n)
     virtual void remove(typename BinaryTree<T>::iterator it);
 
 protected:
@@ -33,7 +36,9 @@ protected:
         uint32_t leftHeight;
         uint32_t rightHeight;
     };
+
     static AVLNode* generate(const std::vector<T>&, uint32_t, uint32_t, AVLNode*);
+
     void balanceTree(AVLNode* start) noexcept;
 };
 
