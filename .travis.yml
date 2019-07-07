@@ -19,11 +19,11 @@ matrix:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-8
+            - llvm-toolchain-trusty
           packages:
-            - clang-8
+            - clang
       env:
-        - MATRIX_EVAL="CC=clang-8 && CXX=clang++-8"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
 
 before_install:
   - sudo apt-get update
