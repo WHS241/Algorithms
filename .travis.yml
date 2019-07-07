@@ -1,12 +1,12 @@
 language: cpp
 
 compiler:
-	- gcc
-	- clang
+    - gcc
+    - clang
 
 before_install:
-  - test -n $CC  && unset CC
-  - test -n $CXX && unset CXX
+    - test -n $CC  && unset CC
+    - test -n $CXX && unset CXX
 
 matrix:
   allow_failures:
@@ -19,7 +19,7 @@ matrix:
         - KEY=clang++-7 MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
     - os: linux
       env:
-		- KEY=g++-8 MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - KEY=g++-8 MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 
 before_install:
     - eval "${MATRIX_EVAL}"
@@ -27,15 +27,15 @@ before_install:
 
 script:
     # Build main and tests
-     - mkdir -p build
-     - cd build
-     - cmake .. 
-	 - make
-	 - ./testing
+    - mkdir -p build
+    - cd build
+    - cmake .. 
+    - make
+    - ./testing
 	 
 
 after_success:
-  - echo "Success"
+    - echo "Success"
 
 after_failure:
-- echo "Something went wrong"
+    - echo "Something went wrong"
