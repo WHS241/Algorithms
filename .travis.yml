@@ -1,56 +1,59 @@
-# Use new trusty images, should yield newer compilers and packages
-sudo: required
 language: cpp
+sudo: false
 
 matrix:
   include:
-    - compiler: gcc
+    # works on Precise and Trusty
+    - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - g++-4.9
-      env: COMPILER=g++-4.9
-    - compiler: gcc
+      env:
+         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+
+    # works on Precise and Trusty
+    - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-8
-      env: COMPILER=g++-8
-    - compiler: clang
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+    # works on Precise and Trusty
+    - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
           packages:
-            - clang-3.6
-      env: COMPILER=clang++-3.6
-    - compiler: clang
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+
+    # works on Precise and Trusty
+    - os: linux
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-trusty-8
           packages:
-            - clang-8
-      env: COMPILER=clang++-8
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y libopencv-dev
+  - sudo apt-get update
+  # Setup the build environment variables
+  - eval "${MATRIX_EVAL}"
 
 script:
-    # Build main and tests
-    - mkdir -p build
-    - cd build
-    - cmake .. 
-    - make
-    - ./testing
-
+  - . .travis.sh
 
 after_success:
     - echo "Success"
