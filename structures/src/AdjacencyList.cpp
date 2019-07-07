@@ -1,6 +1,7 @@
 #include <AdjacencyList.h>
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <limits>
 

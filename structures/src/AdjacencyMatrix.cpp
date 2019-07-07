@@ -1,6 +1,7 @@
 #include <AdjacencyMatrix.h>
 
 #include <algorithm>
+#include <functional>
 #include <limits>
 
 AdjacencyMatrix::AdjacencyMatrix(bool directed, bool weighted)
