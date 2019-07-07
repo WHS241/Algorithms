@@ -1,6 +1,7 @@
 #include <AdjacencyMatrix.h>
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <limits>
 
