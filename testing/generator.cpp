@@ -1,12 +1,12 @@
 
 #include "generator.h"
 
-Graph<int> random_graph(std::mt19937_64& gen, bool directed, bool weighted, bool cyclic) {
+Graph<int> random_graph(std::mt19937_64& gen, bool directed, bool weighted, bool cyclic, GraphType type) {
     std::uniform_int_distribution<uint32_t> dist(0, 100);
     std::uniform_real_distribution<double> weight(0, 1000);
 
     auto num_vertices = dist(gen);
-    Graph<int> graph(directed, weighted);
+    Graph<int> graph(directed, weighted, type);
 
     if (directed && cyclic) {
         for (uint32_t i = 0; i < num_vertices; ++i)

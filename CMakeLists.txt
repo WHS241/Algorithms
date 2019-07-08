@@ -30,6 +30,7 @@ set(SOURCE_FILES
         testing/main.cpp
 		testing/misc/AlgebraTest.cpp
 		testing/misc/GraphMiscTest.cpp
+		testing/misc/FunctionTest.cpp
 		testing/structures/BinarySearchTreeTest.cpp
 		testing/structures/UnionFindTest.cpp
         )
@@ -37,6 +38,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_executable(testing ${SOURCE_FILES})
 
 add_dependencies(testing gtest)
-target_link_libraries(testing gtest pthread)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_link_libraries(testing gtest ${CMAKE_THREAD_LIBS_INIT})
+else ()
+    target_link_libraries(testing gtest pthread)
+endif()
+
 add_dependencies(testing structures)
 target_link_libraries(testing structures ${CMAKE_THREAD_LIBS_INIT})

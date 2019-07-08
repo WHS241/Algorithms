@@ -40,7 +40,7 @@ TEST_F(AlgebraTest, PolynomialPowerTest) {
         double polyInput = dist(engine);
 
         double result = Algebraic::polynomialEval(coeffInput, polyInput).real();
-        EXPECT_LE(std::abs(result - std::pow(polyInput + constant, power)), 1e-5);
+        EXPECT_NEAR(result, std::pow(polyInput + constant, power), 1e-5);
     }
 }
 
