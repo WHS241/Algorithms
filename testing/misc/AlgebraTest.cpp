@@ -77,7 +77,7 @@ TEST_F(AlgebraTest, SubArrayTest) {
         std::generate(values.begin(), values.end(), [this, &valueDist]() {return valueDist(engine); });
         auto result = Algebraic::maximumConsecutiveSum(values.begin(), values.end());
         double accumulator = 0.;
-        std::for_each(std::make_reverse_iterator(result.first), values.rend(), [&accumulator](double value) {
+        std::for_each(std::vector<double>::reverse_iterator(result.first), values.rend(), [&accumulator](double value) {
             accumulator += value;
             EXPECT_LE(accumulator, 0.);
             });
