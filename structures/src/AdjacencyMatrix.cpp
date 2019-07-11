@@ -44,7 +44,7 @@ double AdjacencyMatrix::edgeCost(const uint32_t& start, const uint32_t& dest) co
 uint32_t AdjacencyMatrix::degree(const uint32_t& start) const {
     if (start >= graph.size())
         throw std::out_of_range("Degree number");
-    return std::count_if(graph[start].begin(), graph[start].end(), [this](auto edge) {
+    return std::count_if(graph[start].begin(), graph[start].end(), [](auto edge) {
         return !std::isnan(edge);
         });
 }
