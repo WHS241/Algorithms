@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iterator>
 
-template<typename It, typename Compare = std::less<>>
+template<typename It, typename Compare>
 std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare compare) {
     if (first == last)
         return std::make_pair(first, first);
