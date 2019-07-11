@@ -9,3 +9,8 @@
 #include "Heap.h"
 
 #include "UnionFind.h"
+
+void useAll() {
+    BinaryHeap<int> test;
+    test.combine(test);
+}

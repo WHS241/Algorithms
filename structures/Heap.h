@@ -31,7 +31,7 @@ public :
     BinaryHeap(It first, It last, Compare comp = Compare()) 
         : Heap<T, Compare>(comp)
         , heap(first, last) {
-        for (uint32_t position = heap.size() - 1; position != -1; --position) {
+        for (uint32_t position = heap.size() - 1; position + 1 > 0; --position) {
             uint32_t current(position);
             while (2 * current + 1 < heap.size()) {
                 uint32_t child(2 * current + 1);
@@ -51,6 +51,11 @@ public :
 
     // 成(log n)
     virtual void insert(const T&);
+
+    // 成(n)
+    void combine(const BinaryHeap<T, Compare>&);
+
+    // 成(log n)
     virtual T removeRoot();
 
     // 成(1)

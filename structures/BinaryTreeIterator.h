@@ -3,6 +3,7 @@
 
 template<typename T> class BinaryTree;
 
+#include <iterator>
 #include <memory>
 
 enum Traversal {PreOrder, InOrder, PostOrder, LevelOrder};
@@ -13,6 +14,12 @@ template<typename T> class TreeIteratorImpl;
 template<typename T>
 class TreeIterator {
 public :
+    typedef int difference_type;
+    typedef T value_type;
+    typedef T* pointer;
+    typedef T& reference;
+    typedef std::bidirectional_iterator_tag iterator_category;
+
     TreeIterator() = delete;
     TreeIterator(const TreeIterator<T>&);
 
@@ -41,6 +48,12 @@ private :
 template<typename T>
 class TreeConstIterator {
 public :
+    typedef int difference_type;
+    typedef T value_type;
+    typedef const T* pointer;
+    typedef const T& reference;
+    typedef std::bidirectional_iterator_tag iterator_category;
+
     TreeConstIterator() = delete;
     TreeConstIterator(const TreeConstIterator<T>&);
 

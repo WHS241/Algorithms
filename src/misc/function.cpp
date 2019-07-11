@@ -41,7 +41,7 @@ std::unordered_set<T> Function::subsetAutomorphism(const std::unordered_map<T, T
 
 template<typename T>
 std::unordered_set<T> Function::subsetAutomorphism(const std::map<T, T>& f) {
-    return subsetAutomorphism(std::unordered_map<T, T>(map.begin(), map.end()));
+    return subsetAutomorphism(std::unordered_map<T, T>(f.begin(), f.end()));
 }
 
 #endif // FUNCTION_CPP

@@ -1,6 +1,10 @@
 #ifndef HEAP_CPP
 #define HEAP_CPP
 
+#include <algorithm>
+#include <iterator>
+#include <list>
+
 template<typename T, typename Compare>
 Heap<T, Compare>::Heap(Compare comp)
     : compare(comp)
@@ -11,6 +15,14 @@ BinaryHeap<T, Compare>::BinaryHeap(Compare comp)
     : Heap<T, Compare>(comp)
     , heap()
 {}
+
+template<typename T, typename Compare>
+void BinaryHeap<T, Compare>::combine(const BinaryHeap<T, Compare>& src) {
+    std::list<T> temp(heap.begin(), heap.end());
+    std::copy(src.heap.begin(), src.heap.end(), std::back_inserter(temp));
+    BinaryHeap<T, Compare> result(temp.begin(), temp.end(), this->compare);
+    std::swap(heap, result.heap);
+}
 
 template<typename T, typename Compare>
 void BinaryHeap<T, Compare>::insert(const T& item) {

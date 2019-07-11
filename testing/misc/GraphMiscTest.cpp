@@ -57,8 +57,9 @@ TEST_F(GraphMiscTest, CelebrityTest) {
                 int celebrity = GraphMisc::celebrity(input);
                 EXPECT_EQ(input.degree(celebrity), 0);
                 for (int vertex : input.vertices())
-                    if (vertex != celebrity)
+                    if (vertex != celebrity) {
                         EXPECT_TRUE(input.hasEdge(vertex, celebrity));
+                    }
             } catch(std::invalid_argument&) {}
         }
     }

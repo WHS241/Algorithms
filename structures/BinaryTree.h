@@ -9,6 +9,28 @@ Abstract base class for any binary tree structure
 template<typename T>
 class BinaryTree {
 public:
+    struct BinaryNode {
+        BinaryNode(const T& item = T(), BinaryNode* parent = nullptr, BinaryNode* left = nullptr, BinaryNode* right = nullptr);
+
+        virtual ~BinaryNode() noexcept;
+        BinaryNode(const BinaryNode&) = delete;
+        virtual const BinaryNode& operator=(const BinaryNode&) = delete;
+        BinaryNode(BinaryNode&&);
+        virtual const BinaryNode& operator=(BinaryNode&&);
+
+        virtual BinaryNode* changeLeft(BinaryNode* toAdd) noexcept;
+        virtual BinaryNode* changeRight(BinaryNode* toAdd) noexcept;
+        virtual void replaceLeft(BinaryNode* toAdd) noexcept;
+        virtual void replaceRight(BinaryNode* toAdd) noexcept;
+        virtual BinaryNode* clone() const;
+
+        T _item;
+
+        BinaryNode* _parent;
+        BinaryNode* _left;
+        BinaryNode* _right;
+    };
+
     typedef TreeIterator<T> iterator;
     typedef TreeConstIterator<T> const_iterator;
 
@@ -32,29 +54,6 @@ public:
     virtual void remove(iterator it) = 0;
 
 protected:
-
-    struct BinaryNode {
-        BinaryNode(const T& item = T(), BinaryNode* parent = nullptr, BinaryNode* left = nullptr, BinaryNode* right = nullptr);
-
-        virtual ~BinaryNode() noexcept;
-        BinaryNode(const BinaryNode&) = delete;
-        virtual const BinaryNode& operator=(const BinaryNode&) = delete;
-        BinaryNode(BinaryNode&&);
-        virtual const BinaryNode& operator=(BinaryNode&&);
-
-        virtual BinaryNode* changeLeft(BinaryNode* toAdd) noexcept;
-        virtual BinaryNode* changeRight(BinaryNode* toAdd) noexcept;
-        virtual void replaceLeft(BinaryNode* toAdd) noexcept;
-        virtual void replaceRight(BinaryNode* toAdd) noexcept;
-        virtual BinaryNode* clone() const;
-
-        T _item;
-
-        BinaryNode* _parent;
-        BinaryNode* _left;
-        BinaryNode* _right;
-    };
-
     static BinaryNode* getNode(iterator it);
     static BinaryNode* getNode(const_iterator it);
 

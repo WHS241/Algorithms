@@ -1,5 +1,7 @@
 #include <cmath>
 #include <complex>
+#include <iterator>
+#include <numeric>
 #include <random>
 
 #include <gtest/gtest.h>
@@ -21,7 +23,7 @@ TEST_F(AlgebraTest, PolynomialPowerTest) {
     std::uniform_int_distribution<uint32_t> powerDist(0, 8);
     std::uniform_real_distribution<double> dist(-10, 10);
 
-    for (uint32_t i = 0; i < 10; ++i) {
+    for (uint32_t i = 0; i < 100; ++i) {
         int constant = constantDist(engine);
         uint32_t power = powerDist(engine);
         std::vector<int> coeffs(power + 1);
@@ -46,7 +48,7 @@ TEST_F(AlgebraTest, PolynomialPowerTest) {
 
 TEST_F(AlgebraTest, QuadraticZeroTest) {
     std::uniform_int_distribution<int> coeffDist(-1000, 1000);
-    for (uint32_t i = 0; i < 20; ++i) {
+    for (uint32_t i = 0; i < 100; ++i) {
         std::vector<std::complex<double>> coeff(3);
         for (uint32_t j = 0; j < 3; ++j)
             coeff[j] = coeffDist(engine);
@@ -64,5 +66,26 @@ TEST_F(AlgebraTest, QuadraticZeroTest) {
         }
 
         EXPECT_LE(std::abs(result), 1e-5);
+    }
+}
+
+TEST_F(AlgebraTest, SubArrayTest) {
+    std::uniform_real_distribution<double> valueDist(-1, 1);
+    std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
+    for (uint32_t i = 0; i < 100; ++i) {
+        std::vector<double> values(sizeDist(engine));
+        std::generate(values.begin(), values.end(), [this, &valueDist]() {return valueDist(engine); });
+        auto result = Algebraic::maximumConsecutiveSum(values.begin(), values.end());
+        double accumulator = 0.;
+        std::for_each(std::make_reverse_iterator(result.first), values.rend(), [&accumulator](double value) {
+            accumulator += value;
+            EXPECT_LE(accumulator, 0.);
+            });
+
+        accumulator = 0.;
+        std::for_each(result.second, values.end(), [&accumulator](double value) {
+            accumulator += value;
+            EXPECT_LE(accumulator, 0.);
+            });
     }
 }
