@@ -1,8 +1,7 @@
 #include <stdexcept>
 
 #include <gtest/gtest.h>
-
-#include <misc/GraphMisc.h>
+#include <induction/GraphMisc.h>
 
 #include "../generator.h"
 

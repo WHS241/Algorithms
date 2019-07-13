@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include <misc/function.h>
+#include <induction/function.h>
 
 class FunctionTest : public ::testing::Test {
 protected :

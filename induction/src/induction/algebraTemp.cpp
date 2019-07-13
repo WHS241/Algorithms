@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <iterator>
 
-template<typename It, typename Compare>
-std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare compare) {
+template<typename It, typename Compare, typename Function>
+std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare compare, Function func) {
     if (first == last)
         return std::make_pair(first, first);
 
@@ -30,7 +30,7 @@ std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare co
         subResults[i].current = first;
         if (compare(defaultValue, subResults[i - 1].sum)) {
             subResults[i].start = subResults[i - 1].start;
-            subResults[i].sum = subResults[i - 1].sum + *first;
+            subResults[i].sum = func(subResults[i - 1].sum, *first);
         }
         else {
             subResults[i].start = first;
@@ -38,15 +38,12 @@ std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare co
         }
     }
 
-    // find max among the sub-answers; would an empty array yield a greater sum?
+    // find max among the sub-answers
     auto answer = std::max_element(subResults.begin(), subResults.end(), [&compare](const Decider& x, const Decider& y) {
         return compare(x.sum, y.sum);
         });
 
-    if (compare(answer->sum, defaultValue))
-        return std::make_pair(first, first);
-    else
-        return std::make_pair(answer->start, ++answer->current);
+    return std::make_pair(answer->start, ++(answer->current));
     
 }
 

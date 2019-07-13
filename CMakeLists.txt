@@ -23,9 +23,9 @@ include_directories("./include")
 # Make sure libraries built
 include(gtest.cmake)
 include(structures.cmake)
+include(induction.cmake)
 
 set(SOURCE_FILES
-        src/misc/algebra.cpp
 		testing/generator.cpp
         testing/main.cpp
 		testing/misc/AlgebraTest.cpp
@@ -35,6 +35,7 @@ set(SOURCE_FILES
 		testing/structures/UnionFindTest.cpp
         )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
 add_executable(testing ${SOURCE_FILES})
 
 add_dependencies(testing gtest)
@@ -46,3 +47,7 @@ endif()
 
 add_dependencies(testing structures)
 target_link_libraries(testing structures ${CMAKE_THREAD_LIBS_INIT})
+
+add_dependencies(induction structures)
+add_dependencies(testing induction)
+target_link_libraries(testing induction ${CMAKE_THREAD_LIBS_INIT})

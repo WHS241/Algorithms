@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include <misc/algebra.h>
+#include <induction/algebra.h>
 
 class AlgebraTest : public ::testing::Test {
 protected:

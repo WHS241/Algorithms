@@ -14,6 +14,6 @@ namespace Function {
     std::unordered_set<T> subsetAutomorphism(const std::map<T, T>& f);
 };
 
-#include "../../src/misc/function.cpp"
+#include <src/induction/function.cpp>
 
 #endif //FUNCTION_H

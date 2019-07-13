@@ -12,10 +12,11 @@ namespace GraphMisc {
     // Celebrity problem
     // Find a vertex (person) with in-degree V-1 and out-degree 0
     // throw std::invalid_argument if none exists
+    // O(V) for adjacency matrices, O(E) for adjacency lists
     template<typename T>
     T celebrity(const Graph<T>& src);
 }
 
-#include "../../src/misc/GraphMisc.cpp"
+#include <src/induction/GraphMisc.cpp>
 
 #endif // !GRAPH_MISC_H
