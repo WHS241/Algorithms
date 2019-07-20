@@ -22,13 +22,15 @@ include_directories("./include")
 
 # Make sure libraries built
 include(gtest.cmake)
-include(structures.cmake)
 include(induction.cmake)
+include(sequence.cmake)
+include(structures.cmake)
 
 set(SOURCE_FILES
 		testing/generator.cpp
         testing/main.cpp
 		testing/misc/AlgebraTest.cpp
+		testing/misc/GraphicTest.cpp
 		testing/misc/GraphMiscTest.cpp
 		testing/misc/FunctionTest.cpp
 		testing/structures/BinarySearchTreeTest.cpp

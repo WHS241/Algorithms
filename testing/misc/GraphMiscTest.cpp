@@ -54,6 +54,8 @@ TEST_F(GraphMiscTest, CelebrityTest) {
         else {
             try {
                 int celebrity = GraphMisc::celebrity(input);
+
+                // above line should throw, but in case it passes, verify celebrity
                 EXPECT_EQ(input.degree(celebrity), 0);
                 for (int vertex : input.vertices())
                     if (vertex != celebrity) {

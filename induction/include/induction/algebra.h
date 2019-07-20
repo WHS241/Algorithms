@@ -7,7 +7,7 @@
 
 namespace Algebraic {
     // Evaluate a[0] + a[1]x + a[2]x^2 + a[3]x^3 + ...
-    // O(coefficients.size())
+    // O(coefficients.size()) with Horner's method
     std::complex<double> polynomialEval(const std::vector<std::complex<double>>& coefficients, std::complex<double> x);
 
     /* 
