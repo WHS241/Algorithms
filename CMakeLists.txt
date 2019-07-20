@@ -53,3 +53,6 @@ target_link_libraries(testing structures ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies(induction structures)
 add_dependencies(testing induction)
 target_link_libraries(testing induction ${CMAKE_THREAD_LIBS_INIT})
+
+add_dependencies(testing sequence)
+target_link_libraries(testing sequence ${CMAKE_THREAD_LIBS_INIT})
