@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <random>
 #include <string>
 
@@ -83,8 +84,9 @@ TEST_F(BinarySearchTest, SpecialIndexTest) {
                 input[j] = input[j - 1] + 1;
 
         auto resultIndex = BinarySearch::specialIndex(input.begin(), input.end());
-        if (resultIndex != index)
+        if (resultIndex != index) {
             EXPECT_EQ(resultIndex, input[resultIndex]);
+        }
     }
 }
 
