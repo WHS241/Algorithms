@@ -22,3 +22,52 @@ QED
 ## 5.6
 See provided implementation
 
+## 5.11
+Given two generated skylines, the intersection can be calculated by modifying the "merge" portion of the algorithm to take the lower of the skyline, instead of the higher.
+
+## 5.12
+To find the maximum product, we modify Kadane's algorithm to keep track of both the greatest positive value and the lowest negative value.
+For each index i, we consider the following three values: `mostPositive[i-1] * input[i]`, `mostNegative[i-1] * input[i]`, input[i]`.
+One of these is the most positive consecutive product ending at index i, and one is the most negative.
+We can then scan the mostPositive array for the maximum consecutive product in the whole array.
+
+We increase each iterative step by at most a constant, so the runtime is still жи(n).
+
+## 5.13
+**Inductive hypothesis**: We know how to determine if each child of a vertex `v` is an AVL node with only AVL nodes as descendants ("accepted AVL node"), marked, or neither, as well as the height of the subtrees rooted at each child.
+
+The height of the tree rooted at v is max(left subtree, right subtree) + 1
+
+If either of v's children is not an accepted AVL node (or null), v is categorized as "neither".
+
+If both of v's children are accepted AVL nodes (or null), and the difference in subtree heights is <= 1, then v is categorized as an accepted AVL node.
+
+If both of v's children are accepted AVL nodes (or null), but the difference in subtree heights is > 1, then we mark v.
+
+## 5.14
+It may be difficult to determine the root of a binary tree given in adjacency list form, but we can easily find a leaf: they have degree 1.
+
+**Inductive hypothesis**: We know how to find the distance between all vertices of a binary tree with size `n-1`.
+
+Suppose we have a tree of size `n`. If we peel off a leaf `x``(call its parent `y`), we have a tree of size `n-1`. Once we find the distance between all vertices in this tree, the distance from any of them to `x` is the distance to `y` + 1.
+
+We need to fill an entire n * n matrix, but it takes constant time to calculate one entry (distance to parent + 1, or 0 if distance to self), while the process of "peeling off" leaves can be done in linear time. Hence this is an жи(n^2) algorithm.
+
+## 5.15
+Recursively find the diameter of each subtree and subtree height
+Subtree height = max(left subtree height, right subtree height) + 1
+Diameter = max(left diameter, right diameter, (left subtree height + 1) + (right subtree height + 1))
+Note: If subtree is empty (does not exist), use 0 instead of (height + 1) in third value
+
+T(n) = 2T(n/2) + O(1) -> O(n)
+
+## 5.16
+It is possible to use O(K) space by storing the last added item at a given capacity instead of just a single flag. When we reconstruct the solution, we start with the last entry and work backwards until we reach 0, adding each element that we find.
+
+## 5.17
+For each element of size x, look at the array in groups of x. Mark indices that have been occupied; starting with index x, mark the corresponding index (mod x) with element x.
+
+## 5.20
+Note that this problem is essentially asking us to solve the knapsack problem for value `S/2`.
+
+

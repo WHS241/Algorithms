@@ -29,12 +29,7 @@ include(structures.cmake)
 set(SOURCE_FILES
 		testing/generator.cpp
         testing/main.cpp
-		testing/misc/AlgebraTest.cpp
-		testing/misc/GraphicTest.cpp
-		testing/misc/GraphMiscTest.cpp
-		testing/misc/FunctionTest.cpp
-		testing/structures/BinarySearchTreeTest.cpp
-		testing/structures/UnionFindTest.cpp
+		testing/AlgorithmTest.cpp
         )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 

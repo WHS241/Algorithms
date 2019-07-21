@@ -22,6 +22,7 @@ public:
     virtual T* operator->() noexcept;
 
     virtual TreeIteratorImpl& operator++() noexcept = 0;
+    virtual TreeIteratorImpl& operator--() noexcept = 0;
 
 protected:
     typename BinaryTree<T>::BinaryNode* current;

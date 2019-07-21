@@ -7,3 +7,5 @@ Covered books:
 
 Udi Manber
 Introduction to Algorithms - A Creative Approach
+
+To limit code size, tests are only implemented for newly added algorithms and are removed once passed.
