@@ -17,7 +17,7 @@ namespace Graphic {
     };
 
     // generate skyline from buildings
-    // divide and conquer: O(n log n)
+    // divide and conquer: Θ(n log n)
     // RandomIt not necessary, but helpful
     // It::value_type must be of type Silhouette
     template<typename It>

@@ -7,7 +7,7 @@ namespace Subsequence {
     /*
     Verify if [targetFirst, targetLast) is a subsequence of [masterFirst, masterLast)
     Conditions: It1::value_type is equivalent to It2::value_type
-    жи(distance(targetFirst, targetLast) + distance(masterFirst, masterLast))
+    ╬Ш(distance(targetFirst, targetLast) + distance(masterFirst, masterLast))
     */
     template<typename It1, typename It2>
     bool isSubsequence(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast);
@@ -17,7 +17,7 @@ namespace Subsequence {
     Find the maximum value of x such that the sequence a_i described by the following is a subsequence of the master
     a_i = targetFirst[i % x]
 
-    жи((n+m)log(n/m)) where m = distance(targetFirst, targetLast), n = distance(masterFirst, masterLast)
+    ╬Ш((n+m)log(n/m)) where m = distance(targetFirst, targetLast), n = distance(masterFirst, masterLast)
     */
     template<typename It1, typename It2>
     uint32_t maxStutter(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast);

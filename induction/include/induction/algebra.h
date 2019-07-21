@@ -7,12 +7,13 @@
 
 namespace Algebraic {
     // Evaluate a[0] + a[1]x + a[2]x^2 + a[3]x^3 + ...
-    // O(coefficients.size()) with Horner's method
+    // Θ(coefficients.size()) with Horner's method
     std::complex<double> polynomialEval(const std::vector<std::complex<double>>& coefficients, std::complex<double> x);
 
     /* 
-    Evaluate the consecutive series of iterators such that func(func(...func(*first, *(first + 1)), *(first + 2), ...), *(last -1 )) is a maximum
-    Jay Kadane: O(distance(first, last))
+    Evaluate the consecutive series of iterators such that
+    func(func(...func(*first, *(first + 1)), *(first + 2), ...), *(last -1 )) is a maximum
+    Jay Kadane: Θ(distance(first, last))
 
     Requirements:
     compare is an order relation (antisymmetric, transitive) between values of type It::value_type
