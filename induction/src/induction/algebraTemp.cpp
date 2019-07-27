@@ -16,8 +16,7 @@ std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare co
         T sum;
     };
     
-    typename std::iterator_traits<It>::difference_type size = std::distance(first, last);
-    std::vector<Decider> subResults(size);
+    std::vector<Decider> subResults(std::distance(first, last));
     T defaultValue = T();
 
     subResults[0].current = first;

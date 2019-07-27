@@ -33,6 +33,8 @@ public :
         , heap(first, last) {
         for (uint32_t position = heap.size() - 1; position + 1 > 0; --position) {
             uint32_t current(position);
+
+            // bubble down
             while (2 * current + 1 < heap.size()) {
                 uint32_t child(2 * current + 1);
                 if (2 * current + 2 < heap.size() && !this->compare(heap[child], heap[child + 1]))

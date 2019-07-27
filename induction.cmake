@@ -11,3 +11,5 @@ set(INDUCTION_SOURCES
 )
 
 add_library(induction ${INDUCTION_SOURCES})
+
+add_dependencies(induction structures)

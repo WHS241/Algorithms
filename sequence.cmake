@@ -10,3 +10,4 @@ set(SEQUENCE_ALGORITHM_SOURCES
 )
 
 add_library(sequence ${SEQUENCE_ALGORITHM_SOURCES})
+add_dependencies(sequence structures)

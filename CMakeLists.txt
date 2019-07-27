@@ -45,7 +45,6 @@ endif()
 add_dependencies(testing structures)
 target_link_libraries(testing structures ${CMAKE_THREAD_LIBS_INIT})
 
-add_dependencies(induction structures)
 add_dependencies(testing induction)
 target_link_libraries(testing induction ${CMAKE_THREAD_LIBS_INIT})
 

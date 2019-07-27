@@ -5,8 +5,10 @@
 
 template<typename T>
 std::unordered_set<T> Function::subsetAutomorphism(const std::unordered_map<T, T>& f) {
-    std::unordered_map<T, uint32_t> mapOnto;
+    std::unordered_map<T, uint32_t> mapOnto; // the number of values mapped to a particular value
     std::unordered_set<T> result, toRemove;
+
+    // load toRemove and result with all the domain values; take out of set as needed
     for (auto& rel : f) {
         if (mapOnto.find(rel.first) == mapOnto.end()) {
             mapOnto[rel.first] = 0;
@@ -27,6 +29,7 @@ std::unordered_set<T> Function::subsetAutomorphism(const std::unordered_map<T, T
         result.insert(rel.second);
     }
 
+    // eliminate values that are not mapped to
     while (!toRemove.empty()) {
         T toDelete = *toRemove.begin();
         toRemove.erase(toRemove.begin());
