@@ -25,24 +25,14 @@ namespace CompareSort {
     */
     template<typename BiDirIt, typename Compare = std::less<>>
     void quicksort(BiDirIt first, BiDirIt last, Compare compare = Compare());
-    
-    /*
-    Heapsort with external heap
-    Forward iterators
-    O(n log n) worst case
-    O(n) extra space
-    */
-    template<typename ForwardIt, typename Compare = std::less<>>
-    void heapsortOutPlace(ForwardIt first, ForwardIt last, Compare compare = Compare());
 
     /*
-    In-place heapsort
-    Random-access iterators
+    Heapsort
     O(n log n) worst case
-    O(1) extra space
+    O(1) extra space for random access iterators, O(n) for any other type
     */
-    template<typename RandomIt, typename Compare = std::less<>>
-    void heapsortInPlace(RandomIt first, RandomIt last, Compare compare = Compare());
+    template<typename It, typename Compare = std::less<>>
+    void heapsort(It first, It last, Compare compare = Compare());
 
     namespace {
         std::random_device rd;

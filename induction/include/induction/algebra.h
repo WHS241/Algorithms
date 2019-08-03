@@ -8,7 +8,8 @@
 namespace Algebraic {
     // Evaluate a[0] + a[1]x + a[2]x^2 + a[3]x^3 + ...
     // Θ(coefficients.size()) with Horner's method
-    std::complex<double> polynomialEval(const std::vector<std::complex<double>>& coefficients, std::complex<double> x);
+    std::complex<double> polynomialEval(const std::vector<std::complex<double>>& coefficients,
+            std::complex<double> x);
 
     /* 
     Evaluate the consecutive series of iterators such that
@@ -23,7 +24,8 @@ namespace Algebraic {
     2. compare(zero, x) is true iff compare(a, func(a, x)) is true
     */
     template<typename It, typename Compare = std::less<>, typename Function = std::plus<>>
-    std::pair<It, It> maximumConsecutiveSum(It first, It last, Compare compare = Compare(), Function func = Function());
+    std::pair<It, It> maximumConsecutiveSum(It first, It last, Compare compare = Compare(),
+            Function func = Function());
 }
 
 #include <src/induction/algebraTemp.cpp>

@@ -21,7 +21,7 @@ std::unordered_set<T> Function::subsetAutomorphism(const std::unordered_map<T, T
         else {
             if (mapOnto[rel.second] == 0)
                 toRemove.erase(toRemove.find(rel.second));
-            
+
             ++mapOnto[rel.second];
         }
 

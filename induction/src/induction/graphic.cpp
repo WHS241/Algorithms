@@ -36,7 +36,7 @@ Graphic::Skyline Graphic::generateSkyline(It first, It last) {
 
     auto it = std::find_if(subproblemA.section.begin(), subproblemA.section.end(), [&subproblemB](auto section) {
         return section.second >= subproblemB.leftEnd;
-        });
+    });
 
     if (it == subproblemA.section.end()) {
         subproblemA.section.push_back(std::make_pair(0, subproblemB.leftEnd));
@@ -95,7 +95,7 @@ Graphic::Skyline Graphic::generateSkyline(It first, It last) {
         if (it2 == result.section.end()) {
             if (it->first == 0)
                 result.section.erase(it);
-            
+
             break;
         }
 

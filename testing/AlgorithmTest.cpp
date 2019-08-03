@@ -62,30 +62,35 @@ TEST_F(SortTest, QuickSort) {
     }
 }
 
-TEST_F(SortTest, OutHeapSort) {
+TEST_F(SortTest, RandomAccessHeapSort) {
     for (uint32_t i = 0; i < 100; ++i) {
         std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
         std::vector<uint32_t> input(sizeDist(engine));
         std::uniform_int_distribution<uint32_t> dist;
         std::generate(input.begin(), input.end(), [&dist, this]() { return dist(engine); });
 
-        CompareSort::heapsortOutPlace(input.begin(), input.end());
+        CompareSort::heapsort(input.begin(), input.end());
 
         for (auto it = input.begin() + 1; it != input.end(); ++it)
             EXPECT_LE(*(it - 1), *it);
     }
 }
 
-TEST_F(SortTest, InHeapSort) {
+TEST_F(SortTest, LimitedAccessHeapSort) {
     for (uint32_t i = 0; i < 100; ++i) {
         std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
-        std::vector<uint32_t> input(sizeDist(engine));
+        auto size = sizeDist(engine);
+        std::list<uint32_t> input;
         std::uniform_int_distribution<uint32_t> dist;
-        std::generate(input.begin(), input.end(), [&dist, this]() { return dist(engine); });
+        for (uint32_t j = 0; j < size; ++j)
+            input.push_back(dist(engine));
 
-        CompareSort::heapsortInPlace(input.begin(), input.end());
+        CompareSort::heapsort(input.begin(), input.end());
 
-        for (auto it = input.begin() + 1; it != input.end(); ++it)
-            EXPECT_LE(*(it - 1), *it);
+        for (auto it = ++input.begin(); it != input.end(); ++it) {
+            auto temp = it;
+            --temp;
+            EXPECT_LE(*temp, *it);
+        }
     }
 }

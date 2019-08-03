@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <list>
+#include <type_traits>
 
 #include <Heap.h>
 
@@ -84,65 +85,69 @@ void CompareSort::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
     quicksort(backwardTemp, last, compare);
 }
 
-template<typename ForwardIt, typename Compare>
-void CompareSort::heapsortOutPlace(ForwardIt first, ForwardIt last, Compare compare) {
-    BinaryHeap<typename std::iterator_traits<ForwardIt>::value_type, Compare> heap(first, last, compare);
-    std::generate(first, last, [&heap]() {return heap.removeRoot(); });
-}
+template<typename It, typename Compare>
+void CompareSort::heapsort(It first, It last, Compare compare) {
+    if (first == last)
+        return;
 
-template<typename RandomIt, typename Compare>
-void CompareSort::heapsortInPlace(RandomIt first, RandomIt last, Compare compare) {
-    auto distance = last - first;
+    // Random access: can sort without extra space
+    if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category, std::random_access_iterator_tag>::value) {
+        auto distance = last - first;
 
-    // heapify in opposite direction
-    for (auto position = distance - 1; position + 1 > 0; --position) {
-        auto current(position);
-        RandomIt currentIt = first + current;
+        // heapify in opposite direction
+        for (auto position = distance - 1; position + 1 > 0; --position) {
+            auto current(position);
+            It currentIt = first + current;
 
-        while (2 * current + 1 < distance) {
-            auto child(2 * current + 1);
-            RandomIt childIt = first + child;
-            if (2 * current + 2 < distance && compare(childIt[0], childIt[1])) {
-                ++child;
-                ++childIt;
+            while (2 * current + 1 < distance) {
+                auto child(2 * current + 1);
+                It childIt = first + child;
+                if (2 * current + 2 < distance && compare(childIt[0], childIt[1])) {
+                    ++child;
+                    ++childIt;
+                }
+
+                if (compare(*currentIt, *childIt)) {
+                    std::iter_swap(currentIt, childIt);
+                    current = child;
+                    currentIt = childIt;
+                }
+                else {
+                    break;
+                }
             }
+        }
 
-            if (compare(*currentIt, *childIt)) {
-                std::iter_swap(currentIt, childIt);
-                current = child;
-                currentIt = childIt;
-            }
-            else {
-                break;
+        // swap root to end
+        for (--last; last != first; --last) {
+            std::iter_swap(first, last);
+            --distance;
+
+
+            typename std::iterator_traits<It>::difference_type current = 0;
+            It currentIt = first;
+            while (2 * current + 1 < distance) {
+                auto child(2 * current + 1);
+                It childIt = first + child;
+                if (2 * current + 2 < distance && compare(*childIt, childIt[1])) {
+                    ++child;
+                    ++childIt;
+                }
+
+                if (compare(*currentIt, *childIt)) {
+                    std::iter_swap(currentIt, childIt);
+                    current = child;
+                    currentIt = childIt;
+                }
+                else {
+                    break;
+                }
             }
         }
     }
-
-    // swap root to end
-    for (--last; last != first; --last) {
-        std::iter_swap(first, last);
-        --distance;
-
-        
-        typename std::iterator_traits<RandomIt>::difference_type current = 0;
-        RandomIt currentIt = first;
-        while (2 * current + 1 < distance) {
-            auto child(2 * current + 1);
-            RandomIt childIt = first + child;
-            if (2 * current + 2 < distance && compare(*childIt, childIt[1])) {
-                ++child;
-                ++childIt;
-            }
-
-            if (compare(*currentIt, *childIt)) {
-                std::iter_swap(currentIt, childIt);
-                current = child;
-                currentIt = childIt;
-            }
-            else {
-                break;
-            }
-        }
+    else {
+        BinaryHeap<typename std::iterator_traits<It>::value_type, Compare> heap(first, last, compare);
+        std::generate(first, last, [&heap]() {return heap.removeRoot(); });
     }
 }
 

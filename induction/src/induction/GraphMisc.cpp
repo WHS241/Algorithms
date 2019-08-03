@@ -13,7 +13,7 @@ Graph<T> GraphMisc::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit
     if (src.directed())
         throw std::domain_error("Directed graph");
     Graph<T> temp(src);
-    
+
     std::unordered_map<T, uint32_t> degree;
     std::unordered_set<T> toRemove;
     for (const T& vertex : temp.vertices()) {
@@ -45,20 +45,20 @@ T GraphMisc::celebrity(const Graph<T>& src) {
 
     auto vertices = src.vertices();
     std::list<T> vertList(vertices.begin(), vertices.end());
-    
+
     // eliminate all but one candidate
     while (vertList.size() > 1)
         if (src.hasEdge(vertList.front(), vertList.back()))
             vertList.pop_front();
         else
             vertList.pop_back();
-    
+
     // verify
     bool isCelebrity = src.degree(vertList.front()) == 0;
     for (auto it = vertices.begin(); isCelebrity && it != vertices.end(); ++it)
         if (*it != vertList.front() && !src.hasEdge(*it, vertList.front()))
             isCelebrity = false;
-    
+
     if (isCelebrity)
         return vertList.front();
     throw std::invalid_argument("No celebrity");

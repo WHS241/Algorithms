@@ -15,7 +15,7 @@ std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare co
         It start;
         T sum;
     };
-    
+
     std::vector<Decider> subResults(std::distance(first, last));
     T defaultValue = T();
 
@@ -40,10 +40,9 @@ std::pair<It, It> Algebraic::maximumConsecutiveSum(It first, It last, Compare co
     // find max among the sub-answers
     auto answer = std::max_element(subResults.begin(), subResults.end(), [&compare](const Decider& x, const Decider& y) {
         return compare(x.sum, y.sum);
-        });
+    });
 
     return std::make_pair(answer->start, ++(answer->current));
-    
 }
 
 #endif // !ALGEBRA_TEMP_CPP
