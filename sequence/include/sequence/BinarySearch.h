@@ -7,11 +7,13 @@
 All algorithms require random access iterators
 */
 namespace BinarySearch {
-    /* Straightforward binary search
-    Values iterators point to should be sorted with Compare
-    */
-    template<typename RandomIt, typename T, typename Compare = std::less<>>
-    RandomIt find(RandomIt first, RandomIt last, const T& item, Compare comp = Compare());
+    /*
+     Straightforward binary search
+     Values iterators point to should be sorted with Compare
+     */
+    template <typename RandomIt, typename T, typename Compare = std::less<>>
+    RandomIt find(RandomIt first, RandomIt last, const T &item,
+                  Compare comp = Compare());
 
     /*
     Find minimum of cyclically sorted list
@@ -32,7 +34,7 @@ namespace BinarySearch {
     */
     template<typename RandomIt>
     uint32_t specialIndex(RandomIt first, RandomIt last);
-}
+} // namespace BinarySearch
 
 #include "../../src/sequence/BinarySearch.cpp"
 

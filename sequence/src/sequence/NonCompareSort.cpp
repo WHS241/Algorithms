@@ -7,21 +7,22 @@
 #include <typeinfo>
 #include <vector>
 
-template<typename It>
+template <typename It>
 void NonCompareSort::radixSort(It first, It last, uint32_t base) {
     std::list<uint32_t> processor(first, last);
     std::vector<std::list<uint32_t>> bins(base);
 
     uint32_t max = *std::max_element(first, last);
     for (uint32_t place = 1; place <= max; place *= base) {
-        // value / place % base gives the least significant unprocessed digit in value in the given base
+        // value / place % base gives the least significant unprocessed digit in value in the base
         while (!processor.empty()) {
             uint32_t current = *processor.begin();
-            auto& destList = bins[(current / place) % base];
-            destList.splice(destList.end(), processor, processor.begin(), ++processor.begin()); // process one at a time
+            auto &destList = bins[(current / place) % base];
+            destList.splice(destList.end(), processor, processor.begin(),
+                            ++processor.begin()); // process one at a time
         }
 
-        for (auto& fullBin : bins) {
+        for (auto &fullBin : bins) {
             processor.splice(processor.end(), fullBin);
         }
     }

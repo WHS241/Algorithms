@@ -1,8 +1,9 @@
 #ifndef BINARY_SEARCH_CPP
 #define BINARY_SEARCH_CPP
 
-template<typename RandomIt, typename T, typename Compare>
-RandomIt BinarySearch::find(RandomIt first, RandomIt last, const T& item, Compare comp) {
+template <typename RandomIt, typename T, typename Compare>
+RandomIt BinarySearch::find(RandomIt first, RandomIt last, const T &item,
+                            Compare comp) {
     if (first == last)
         return first;
 
@@ -21,8 +22,9 @@ RandomIt BinarySearch::find(RandomIt first, RandomIt last, const T& item, Compar
     return (*first == item) ? first : noMatch;
 }
 
-template<typename RandomIt, typename Compare>
-RandomIt BinarySearch::cyclicFindMin(RandomIt first, RandomIt last, Compare comp) {
+template <typename RandomIt, typename Compare>
+RandomIt BinarySearch::cyclicFindMin(RandomIt first, RandomIt last,
+                                     Compare comp) {
     if (first == last)
         return first;
 
@@ -37,7 +39,7 @@ RandomIt BinarySearch::cyclicFindMin(RandomIt first, RandomIt last, Compare comp
     return comp(*first, *last) ? first : last;
 }
 
-template<typename RandomIt>
+template <typename RandomIt>
 uint32_t BinarySearch::specialIndex(RandomIt first, RandomIt last) {
     RandomIt noMatch = last, begin = first;
     while (last - first > 1) {
@@ -47,8 +49,7 @@ uint32_t BinarySearch::specialIndex(RandomIt first, RandomIt last) {
             return midValue;
         if (*mid < midValue) {
             first = mid + 1;
-        }
-        else {
+        } else {
             last = mid;
         }
     }

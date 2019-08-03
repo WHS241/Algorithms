@@ -7,7 +7,7 @@
 
 #include <Heap.h>
 
-template<typename ForwardIt, typename Compare>
+template <typename ForwardIt, typename Compare>
 void CompareSort::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
     // base case
     if (first == last)
@@ -23,14 +23,15 @@ void CompareSort::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
     mergesort(temp, last, compare);
 
     // merge sub-solutions
-    std::list<typename std::iterator_traits<ForwardIt>::value_type> firstHalf(first, temp), secondHalf(temp, last);
-    auto it1 = firstHalf.begin(), it2 = secondHalf.begin(); 
+    std::list<typename std::iterator_traits<ForwardIt>::value_type> firstHalf(
+            first, temp),
+            secondHalf(temp, last);
+    auto it1 = firstHalf.begin(), it2 = secondHalf.begin();
     while (it1 != firstHalf.end() && it2 != secondHalf.end()) {
         if (compare(*it1, *it2)) {
             *first++ = std::move(*it1);
             ++it1;
-        }
-        else {
+        } else {
             *first++ = std::move(*it2);
             ++it2;
         }
@@ -41,8 +42,7 @@ void CompareSort::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
     std::copy(it2, secondHalf.end(), first);
 }
 
-
-template<typename BiDirIt, typename Compare>
+template <typename BiDirIt, typename Compare>
 void CompareSort::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
     // base case
     auto size = std::distance(first, last);
@@ -53,20 +53,33 @@ void CompareSort::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
     auto forwardTemp(first);
     std::uniform_int_distribution<uint32_t> indexGen(0, size - 1);
     std::advance(forwardTemp, indexGen(engine));
-    std::iter_swap(forwardTemp, first);
+
+    auto partitionIt = partition(first, last, forwardTemp, compare);
+
+    quicksort(first, partitionIt, compare);
+    quicksort(++partitionIt, last, compare);
+}
+
+template <typename BiDirIt, typename Compare>
+BiDirIt CompareSort::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
+                               Compare compare) {
+    std::iter_swap(partition, first);
 
     // setup for partition
-    forwardTemp = first + 1;
-    auto backwardTemp(last - 1);
-    bool processedBack = false; // "false" indicates we have not yet considered backwardTemp
+    auto forwardTemp(first), backwardTemp(last);
+    ++forwardTemp;
+    --backwardTemp;
+    bool processedBack =
+            false; // "false" indicates we have not yet considered backwardTemp
 
     // partition: on each pass, find two values that need to be swapped
     while (true) {
-        while (((processedBack && forwardTemp != backwardTemp) || (!processedBack && forwardTemp != last)) 
-                && compare(*forwardTemp, *first))
+        while (((processedBack && forwardTemp != backwardTemp) ||
+                (!processedBack && forwardTemp != last)) &&
+               compare(*forwardTemp, *first))
             ++forwardTemp;
-        if ((processedBack && forwardTemp == backwardTemp) || (!processedBack && forwardTemp == last)) {
-            backwardTemp = forwardTemp;
+        if ((processedBack && forwardTemp == backwardTemp) ||
+              (!processedBack && forwardTemp == last)) {
             break;
         }
 
@@ -79,19 +92,20 @@ void CompareSort::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
         std::iter_swap(forwardTemp, backwardTemp);
     }
 
-    // move partition value to correct place and recurse
+    // move partition value to correct place
     std::iter_swap(first, --forwardTemp);
-    quicksort(first, forwardTemp, compare);
-    quicksort(backwardTemp, last, compare);
+    return forwardTemp;
 }
 
-template<typename It, typename Compare>
+template <typename It, typename Compare>
 void CompareSort::heapsort(It first, It last, Compare compare) {
     if (first == last)
         return;
 
     // Random access: can sort without extra space
-    if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category, std::random_access_iterator_tag>::value) {
+    if constexpr (std::is_same<
+            typename std::iterator_traits<It>::iterator_category,
+            std::random_access_iterator_tag>::value) {
         auto distance = last - first;
 
         // heapify in opposite direction
@@ -111,8 +125,7 @@ void CompareSort::heapsort(It first, It last, Compare compare) {
                     std::iter_swap(currentIt, childIt);
                     current = child;
                     currentIt = childIt;
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -122,7 +135,6 @@ void CompareSort::heapsort(It first, It last, Compare compare) {
         for (--last; last != first; --last) {
             std::iter_swap(first, last);
             --distance;
-
 
             typename std::iterator_traits<It>::difference_type current = 0;
             It currentIt = first;
@@ -138,16 +150,15 @@ void CompareSort::heapsort(It first, It last, Compare compare) {
                     std::iter_swap(currentIt, childIt);
                     current = child;
                     currentIt = childIt;
-                }
-                else {
+                } else {
                     break;
                 }
             }
         }
-    }
-    else {
-        BinaryHeap<typename std::iterator_traits<It>::value_type, Compare> heap(first, last, compare);
-        std::generate(first, last, [&heap]() {return heap.removeRoot(); });
+    } else {
+        BinaryHeap<typename std::iterator_traits<It>::value_type, Compare> heap(
+                first, last, compare);
+        std::generate(first, last, [&heap]() { return heap.removeRoot(); });
     }
 }
 

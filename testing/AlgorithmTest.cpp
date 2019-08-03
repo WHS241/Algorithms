@@ -1,15 +1,12 @@
 #include <algorithm>
-#include <array>
-#include <climits>
 #include <random>
-#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 
-#include <sequence/CompareSort.h>
-#include <sequence/NonCompareSort.h>
+#include <sequence/OrderStatistics.h>
 
-class SortTest : public ::testing::Test {
+class AlgorithmTest : public ::testing::Test {
 protected:
     void SetUp() override {
         std::random_device base;
@@ -19,78 +16,28 @@ protected:
     std::mt19937_64 engine;
 };
 
-TEST_F(SortTest, RadixSort) {
+TEST_F(AlgorithmTest, ExtremaTest) {
     for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
+        std::uniform_int_distribution<uint32_t> sizeDist(1, 10000);
+        std::uniform_int_distribution<uint32_t> inputDist;
         std::vector<uint32_t> input(sizeDist(engine));
-        std::uniform_int_distribution<uint32_t> dist(0, 1000000);
-        std::generate(input.begin(), input.end(), [&dist, this]() { return dist(engine); });
+        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
 
-        std::uniform_int_distribution<uint32_t> baseDist(2, 16);
-        NonCompareSort::radixSort(input.begin(), input.end(), baseDist(engine));
-
-        for (auto it = input.begin() + 1; it != input.end(); ++it)
-            EXPECT_LE(*(it - 1), *it);    
+        auto result = OrderStatistics::extrema(input.begin(), input.end());
+        EXPECT_EQ(result, std::minmax_element(input.begin(), input.end()));
     }
 }
 
-TEST_F(SortTest, MergeSort) {
+TEST_F(AlgorithmTest, SelectionTest) {
     for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
+        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
+        std::uniform_int_distribution<uint32_t> inputDist;
         std::vector<uint32_t> input(sizeDist(engine));
-        std::uniform_int_distribution<uint32_t> dist;
-        std::generate(input.begin(), input.end(), [&dist, this]() { return dist(engine); });
-        
-        CompareSort::mergesort(input.begin(), input.end());
+        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
 
-        for (auto it = input.begin() + 1; it != input.end(); ++it)
-            EXPECT_LE(*(it - 1), *it);
-    }
-}
-
-TEST_F(SortTest, QuickSort) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::uniform_int_distribution<uint32_t> dist;
-        std::generate(input.begin(), input.end(), [&dist, this]() { return dist(engine); });
-
-        CompareSort::quicksort(input.begin(), input.end());
-
-        for (auto it = input.begin() + 1; it != input.end(); ++it)
-            EXPECT_LE(*(it - 1), *it);
-    }
-}
-
-TEST_F(SortTest, RandomAccessHeapSort) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::uniform_int_distribution<uint32_t> dist;
-        std::generate(input.begin(), input.end(), [&dist, this]() { return dist(engine); });
-
-        CompareSort::heapsort(input.begin(), input.end());
-
-        for (auto it = input.begin() + 1; it != input.end(); ++it)
-            EXPECT_LE(*(it - 1), *it);
-    }
-}
-
-TEST_F(SortTest, LimitedAccessHeapSort) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 100);
-        auto size = sizeDist(engine);
-        std::list<uint32_t> input;
-        std::uniform_int_distribution<uint32_t> dist;
-        for (uint32_t j = 0; j < size; ++j)
-            input.push_back(dist(engine));
-
-        CompareSort::heapsort(input.begin(), input.end());
-
-        for (auto it = ++input.begin(); it != input.end(); ++it) {
-            auto temp = it;
-            --temp;
-            EXPECT_LE(*temp, *it);
-        }
+        std::uniform_int_distribution<uint32_t> targetDist(0, input.size() - 1);
+        auto target = targetDist(engine);
+        auto result = OrderStatistics::selection(input.begin(), input.end(), target);
+        EXPECT_EQ(target, std::count_if(input.begin(), input.end(), [result](uint32_t x) {return x < result; }));
     }
 }
