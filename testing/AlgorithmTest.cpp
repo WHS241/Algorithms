@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 
+#include <sequence/Huffman.h>
 #include <sequence/OrderStatistics.h>
 
 class AlgorithmTest : public ::testing::Test {
@@ -39,5 +40,13 @@ TEST_F(AlgorithmTest, SelectionTest) {
         auto target = targetDist(engine);
         auto result = OrderStatistics::selection(input.begin(), input.end(), target);
         EXPECT_EQ(target, std::count_if(input.begin(), input.end(), [result](uint32_t x) {return x < result; }));
+        EXPECT_NE(input.end(), std::find(input.begin(), input.end(), result));
     }
+}
+
+// Tested manually
+TEST_F(AlgorithmTest, HuffmanTest) {
+    std::string input("this is an example of a huffman tree");
+    std::unique_ptr<BinaryTree<char>::BinaryNode> result(Huffman::generateTree(input));
+    result.reset();
 }

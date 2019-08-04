@@ -17,7 +17,7 @@ namespace OrderStatistics {
      Parameter 4 (optional) is the size of subproblems algorithm divides into
      Must be >=5 for algorithm to be O(n), preferably odd. Infinite recursion/looping if 1
      Manuel Blum, Robert Floyd, Vaughan Pratt, Ronald Rivest, Robert Tarjan (1972)
-*/
+     */
     template <typename It, typename Compare = std::less<>>
     typename std::iterator_traits<It>::value_type selection(It first, It last, uint32_t rank, 
                  Compare compare = Compare(), uint32_t partitionSize = 9);
