@@ -77,6 +77,6 @@ private :
     friend class BinaryTree<T>;
 };
 
-#include "src/BinaryTreeIterator.cpp"
+#include "src/structures/BinaryTreeIterator.cpp"
 
 #endif // TREE_ITERATOR_H

@@ -1,4 +1,4 @@
-#include <AdjacencyMatrix.h>
+#include <structures/AdjacencyMatrix.h>
 
 #include <algorithm>
 #include <cmath>

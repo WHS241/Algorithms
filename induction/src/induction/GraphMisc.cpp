@@ -6,10 +6,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include <Graph.h>
+#include <structures/Graph.h>
 
 template<typename T>
-Graph<T> GraphMisc::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit) {
+Graph<T> Induction::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit) {
     if (src.directed())
         throw std::domain_error("Directed graph");
     Graph<T> temp(src);
@@ -37,7 +37,7 @@ Graph<T> GraphMisc::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit
 }
 
 template<typename T>
-T GraphMisc::celebrity(const Graph<T>& src) {
+T Induction::celebrity(const Graph<T>& src) {
     if (!src.directed())
         throw std::domain_error("Undirected graph");
     if (src.order() == 0)

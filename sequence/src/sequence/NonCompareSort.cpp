@@ -8,7 +8,7 @@
 #include <vector>
 
 template <typename It>
-void NonCompareSort::radixSort(It first, It last, uint32_t base) {
+void Sequence::radixSort(It first, It last, uint32_t base) {
     std::list<uint32_t> processor(first, last);
     std::vector<std::list<uint32_t>> bins(base);
 

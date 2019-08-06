@@ -8,7 +8,7 @@
 #include <sequence/CompareSort.h>
 
 template <typename It, typename Compare>
-std::pair<It, It> OrderStatistics::extrema(It first, It last, Compare compare) {
+std::pair<It, It> Sequence::extrema(It first, It last, Compare compare) {
     if (first == last)
         return std::make_pair(first, first);
 
@@ -22,6 +22,7 @@ std::pair<It, It> OrderStatistics::extrema(It first, It last, Compare compare) {
                                : std::make_pair(temp, first);
     first = ++temp;
 
+    // extend two at a time: compare against each other before result
     while (first != last) {
         ++temp;
         if (temp == last) {
@@ -48,7 +49,7 @@ std::pair<It, It> OrderStatistics::extrema(It first, It last, Compare compare) {
 }
 
 template <typename It, typename Compare>
-typename std::iterator_traits<It>::value_type OrderStatistics::selection(It first, It last, uint32_t rank, 
+typename std::iterator_traits<It>::value_type Sequence::selection(It first, It last, uint32_t rank,
                               Compare compare, uint32_t partitionSize) {
     typedef typename std::iterator_traits<It>::value_type T;
     std::list<T> buffer(first, last);
@@ -61,42 +62,45 @@ typename std::iterator_traits<It>::value_type OrderStatistics::selection(It firs
 
     while (buffer.size() > partitionSize) {
         std::vector<T> subset;
+
+        // put into columns and find median of each
         std::list<T> medians;
         for (auto &item : buffer) {
             subset.push_back(item);
             if (subset.size() == partitionSize) {
-                CompareSort::quicksort(subset.begin(), subset.end(), compare);
+                quicksort(subset.begin(), subset.end(), compare);
                 medians.push_back(subset[partitionSize / 2]);
                 subset.clear();
             }
         }
-
         if (!subset.empty()) {
-            CompareSort::quicksort(subset.begin(), subset.end(), compare);
+            quicksort(subset.begin(), subset.end(), compare);
             medians.push_back(subset[subset.size() / 2]);
         }
 
-        auto partition = selection(medians.begin(), medians.end(),
+        // median of medians, then partition
+        auto partitionVal = selection(medians.begin(), medians.end(),
                                    medians.size() / 2, compare, partitionSize);
-        auto partitionIt = std::find(buffer.begin(), buffer.end(), partition);
-        partitionIt = CompareSort::partition(buffer.begin(), buffer.end(),
-                                             partitionIt, compare);
+        auto partitionIt = std::find(buffer.begin(), buffer.end(), partitionVal);
+        partitionIt = partition(buffer.begin(), buffer.end(), partitionIt, compare);
 
         // eliminate candidates
         std::list<T> tempBuffer;
         tempBuffer.splice(tempBuffer.begin(), buffer, buffer.begin(), partitionIt);
         if (rank < tempBuffer.size()) {
             std::swap(buffer, tempBuffer);
-        } else if (rank == tempBuffer.size()) {
+        }
+        else if (rank == tempBuffer.size()) {
             return *partitionIt;
-        } else {
+        }
+        else {
             rank -= (tempBuffer.size() + 1);
             buffer.pop_front(); // known to be partitionIt
         }
 
         // tempBuffer cleans up, eliminating members
     }
-    CompareSort::quicksort(buffer.begin(), buffer.end(), compare);
+    quicksort(buffer.begin(), buffer.end(), compare);
     auto it = buffer.begin();
     std::advance(it, rank);
     return *it;

@@ -3,7 +3,7 @@
 
 #include <iterator>
 
-namespace Subsequence {
+namespace Sequence {
     /*
     Verify if [targetFirst, targetLast) is a subsequence of [masterFirst, masterLast)
     Conditions: It1::value_type is equivalent to It2::value_type
@@ -18,10 +18,19 @@ namespace Subsequence {
     a_i = targetFirst[i % x]
     Andranik Mirzaian (1987): Θ((n+m)log(n/m)) where m = distance(targetFirst,
     targetLast), n = distance(masterFirst, masterLast)
-*/
+    */
     template <typename It1, typename It2>
     uint32_t maxStutter(It1 targetFirst, It1 targetLast, It2 masterFirst,
                         It2 masterLast);
+
+    /*
+    Longest ordered (increasing) subsequence
+    Find the longest sequence n_0, n_2, ..., n_x such that 0 <= n_0 <= n_1 <= ... <= n_x <= (last - first)
+    and compare(first[n_(i-1)], first[n_i]) is true for any 0 < i <= x
+    O(n log n)
+    */
+    template <typename It, typename Compare = std::less<>>
+    std::list<It> longestOrderedSubsequence(It first, It last, Compare comp = Compare());
 
     namespace {
         /*

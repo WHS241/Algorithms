@@ -37,7 +37,7 @@ private :
     std::unordered_map<T, Data> sets;
 };
 
-#include "src/UnionFind.cpp"
+#include "src/structures/UnionFind.cpp"
 
 #endif // !UNION_FIND_H
 

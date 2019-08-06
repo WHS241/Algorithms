@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace NonCompareSort {
+namespace Sequence {
     /*
      Radix sort, customizable base
      Herman Hollerth (1887)

@@ -3,7 +3,7 @@
 #include <array>
 
 template<typename CharT>
-typename std::basic_string<CharT>::const_iterator SequenceComp::findSubstring(const std::basic_string<CharT>& input, const std::basic_string<CharT>& target) {
+typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(const std::basic_string<CharT>& input, const std::basic_string<CharT>& target) {
     if (target.empty())
         return input.begin();
 
@@ -36,12 +36,13 @@ typename std::basic_string<CharT>::const_iterator SequenceComp::findSubstring(co
 }
 
 template<typename CharT>
-std::vector<SequenceComp::Instruction> SequenceComp::editDistance(const std::basic_string<CharT>& src, const std::basic_string<CharT>& target) {
+std::vector<Sequence::Instruction> Sequence::editDistance(const std::basic_string<CharT>& src, const std::basic_string<CharT>& target) {
     struct CompNode {
         Instruction::Category step;
         uint32_t cost;
     };
 
+    // grid[i][j] denotes the edit distance from src.substring(0, i + 1) to target.substring(0, j + 1)
     std::vector<std::vector<CompNode>> grid(src.size() + 1, std::vector<CompNode>(target.size() + 1));
     for (uint32_t i = 0; i < grid.size(); ++i) {
         grid[i][0].step = Instruction::Category::Delete;
@@ -51,6 +52,8 @@ std::vector<SequenceComp::Instruction> SequenceComp::editDistance(const std::bas
         grid[0][i].step = Instruction::Category::Insert;
         grid[0][i].cost = i;
     }
+
+    // dynamic programming
     for (uint32_t i = 1; i < grid.size(); ++i) {
         for (uint32_t j = 1; j < grid[i].size(); ++j) {
             // the three possible steps to reach this node
@@ -68,6 +71,7 @@ std::vector<SequenceComp::Instruction> SequenceComp::editDistance(const std::bas
         }
     }
 
+    // backtrack from final node to first
     std::vector<Instruction> result;
     uint32_t currentX = grid.size() - 1, currentY = grid[0].size() - 1;
     while (currentX != 0 || currentY != 0) {
@@ -80,6 +84,7 @@ std::vector<SequenceComp::Instruction> SequenceComp::editDistance(const std::bas
             result.push_back(instruction);
         }
 
+        // recalibrate currentX and currentY
         if (node.step != Instruction::Category::Delete)
             --currentY;
         if (node.step != Instruction::Category::Insert)

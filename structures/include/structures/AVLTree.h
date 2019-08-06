@@ -42,6 +42,6 @@ protected:
     void balanceTree(AVLNode* start) noexcept;
 };
 
-#include "src/AVLTree.cpp"
+#include "src/structures/AVLTree.cpp"
 
 #endif // !AVL_TREE_H

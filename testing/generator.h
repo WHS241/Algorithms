@@ -2,7 +2,7 @@
 #define GENERATOR_H
 #include <random>
 
-#include <Graph.h>
+#include <structures/Graph.h>
 
 Graph<int> random_graph(std::mt19937_64& gen, bool directed, bool weighted, bool cyclic = true, GraphType type = AdjList);
 

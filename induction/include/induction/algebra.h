@@ -5,7 +5,7 @@
 #include <utility>
 #include <vector>
 
-namespace Algebraic {
+namespace Induction {
     // Evaluate a[0] + a[1]x + a[2]x^2 + a[3]x^3 + ...
     // Θ(coefficients.size()) with Horner's method
     std::complex<double> polynomialEval(const std::vector<std::complex<double>>& coefficients,

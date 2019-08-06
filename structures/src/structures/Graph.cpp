@@ -7,8 +7,8 @@
 #include <list>
 #include <stdexcept>
 
-#include <AdjacencyMatrix.h>
-#include <AdjacencyList.h>
+#include <structures/AdjacencyMatrix.h>
+#include <structures/AdjacencyList.h>
 
 template<typename T>
 Graph<T>::Graph(bool directed, bool weighted, GraphType type)

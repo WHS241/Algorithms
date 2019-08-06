@@ -1,9 +1,9 @@
 ﻿#ifndef GRAPH_MISC_H
 #define GRAPH_MISC_H
 
-#include <Graph.h>
+#include <structures/Graph.h>
 
-namespace GraphMisc {
+namespace Induction {
     // find k-core: maximal induced subgraph with all degrees >= k
     // David W. Matula and Leland D. Beck (1983): Θ(V)
     template<typename T>

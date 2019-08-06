@@ -17,6 +17,6 @@ public :
     virtual void remove(typename BinaryTree<T>::iterator it);
 };
 
-#include "src/PrimitiveBinarySearchTree.cpp"
+#include "src/structures/PrimitiveBinarySearchTree.cpp"
 
 #endif // PRIMITIVE_BINARY_SEARCH_TREE_H

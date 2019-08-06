@@ -72,6 +72,6 @@ protected:
     friend class LevelOrderTreeIteratorImpl<T>;
 };
 
-#include "src/BinaryTree.cpp"
+#include "src/structures/BinaryTree.cpp"
 
 #endif // BINARY_TREE_H

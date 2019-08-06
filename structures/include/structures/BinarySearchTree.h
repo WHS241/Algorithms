@@ -36,6 +36,6 @@ protected:
     void rotate(typename BinaryTree<T>::BinaryNode* upper, bool useLeftChild);
 };
 
-#include "src/BinarySearchTree.cpp"
+#include "src/structures/BinarySearchTree.cpp"
 
 #endif //BINARY_SEARCH_TREE_H

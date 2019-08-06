@@ -4,7 +4,7 @@
 #include <list>
 
 template<typename T>
-std::unordered_set<T> Function::subsetAutomorphism(const std::unordered_map<T, T>& f) {
+std::unordered_set<T> Induction::subsetAutomorphism(const std::unordered_map<T, T>& f) {
     std::unordered_map<T, uint32_t> mapOnto; // the number of values mapped to a particular value
     std::unordered_set<T> result, toRemove;
 
@@ -43,7 +43,7 @@ std::unordered_set<T> Function::subsetAutomorphism(const std::unordered_map<T, T
 }
 
 template<typename T>
-std::unordered_set<T> Function::subsetAutomorphism(const std::map<T, T>& f) {
+std::unordered_set<T> Induction::subsetAutomorphism(const std::map<T, T>& f) {
     return subsetAutomorphism(std::unordered_map<T, T>(f.begin(), f.end()));
 }
 

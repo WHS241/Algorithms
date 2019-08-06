@@ -5,10 +5,10 @@
 #include <list>
 #include <type_traits>
 
-#include <Heap.h>
+#include <structures/Heap.h>
 
 template <typename ForwardIt, typename Compare>
-void CompareSort::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
+void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
     // base case
     if (first == last)
         return;
@@ -43,7 +43,7 @@ void CompareSort::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
 }
 
 template <typename BiDirIt, typename Compare>
-void CompareSort::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
+void Sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
     // base case
     auto size = std::distance(first, last);
     if (size <= 1)
@@ -61,16 +61,14 @@ void CompareSort::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
 }
 
 template <typename BiDirIt, typename Compare>
-BiDirIt CompareSort::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
+BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
                                Compare compare) {
-    std::iter_swap(partition, first);
-
     // setup for partition
+    std::iter_swap(partition, first);
     auto forwardTemp(first), backwardTemp(last);
     ++forwardTemp;
     --backwardTemp;
-    bool processedBack =
-            false; // "false" indicates we have not yet considered backwardTemp
+    bool processedBack = false; // we have not yet considered backwardTemp
 
     // partition: on each pass, find two values that need to be swapped
     while (true) {
@@ -98,7 +96,7 @@ BiDirIt CompareSort::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
 }
 
 template <typename It, typename Compare>
-void CompareSort::heapsort(It first, It last, Compare compare) {
+void Sequence::heapsort(It first, It last, Compare compare) {
     if (first == last)
         return;
 

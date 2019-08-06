@@ -4,16 +4,23 @@
 #include <functional>
 
 /*
-All algorithms require random access iterators
+All algorithms require random access iterators for O(log n)
 */
-namespace BinarySearch {
+namespace Sequence {
     /*
      Straightforward binary search
      Values iterators point to should be sorted with Compare
      */
     template <typename RandomIt, typename T, typename Compare = std::less<>>
-    RandomIt find(RandomIt first, RandomIt last, const T &item,
+    RandomIt binarySearch(RandomIt first, RandomIt last, const T &item,
                   Compare comp = Compare());
+
+    /*
+    Assuming values are ordered such that all elements x for which pred(x) is true
+    come before those for which pred(x) is false, find the first element after that cutoff.
+    */
+    template <typename RandomIt, typename Function>
+    RandomIt findCutoff(RandomIt first, RandomIt last, Function pred);
 
     /*
     Find minimum of cyclically sorted list

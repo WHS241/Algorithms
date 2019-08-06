@@ -66,6 +66,6 @@ private:
     std::vector<T> reverse_translation;
 };
 
-#include "src/Graph.cpp"
+#include "src/structures/Graph.cpp"
 
 #endif // !GRAPH_H

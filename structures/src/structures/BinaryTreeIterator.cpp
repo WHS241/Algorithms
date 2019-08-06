@@ -1,7 +1,7 @@
 #ifndef TREE_ITERATOR_CPP
 #define TREE_ITERATOR_CPP
 
-#include <BinaryTreeIteratorImpl.h>
+#include <structures/BinaryTreeIteratorImpl.h>
 
 template<typename T>
 TreeIterator<T>::TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order)

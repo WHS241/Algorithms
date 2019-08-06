@@ -1,7 +1,7 @@
 #ifndef TREE_ITERATOR_IMPL_CPP
 #define TREE_ITERATOR_IMPL_CPP
 
-#include <BinaryTree.h>
+#include <structures/BinaryTree.h>
 
 template<typename T>
 bool TreeIteratorImpl<T>::operator==(const TreeIteratorImpl<T>& src) const noexcept {

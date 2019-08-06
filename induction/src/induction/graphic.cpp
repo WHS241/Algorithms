@@ -6,7 +6,7 @@
 #include <typeinfo>
 
 template<typename It>
-Graphic::Skyline Graphic::generateSkyline(It first, It last) {
+Induction::Skyline Induction::generateSkyline(It first, It last) {
     Skyline result;
     if (first == last) {
         return result;

@@ -7,7 +7,7 @@
 /*
 Comparison sorts (compatible with all data types, including objects)
 */
-namespace CompareSort {
+namespace Sequence {
     /*
      Mergesort
      Forward iterators are sufficient

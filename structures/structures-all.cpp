@@ -1,14 +1,14 @@
-#include "AdjacencyList.h"
-#include "AdjacencyMatrix.h"
+#include "structures/AdjacencyList.h"
+#include "structures/AdjacencyMatrix.h"
 
-#include "Graph.h"
+#include "structures/Graph.h"
 
-#include "AVLTree.h"
-#include "PrimitiveBinarySearchTree.h"
+#include "structures/AVLTree.h"
+#include "structures/PrimitiveBinarySearchTree.h"
 
-#include "Heap.h"
+#include "structures/Heap.h"
 
-#include "UnionFind.h"
+#include "structures/UnionFind.h"
 
 void useAll() {
     BinaryHeap<int> test;

@@ -1,4 +1,4 @@
-#include <AdjacencyList.h>
+#include <structures/AdjacencyList.h>
 
 #include <algorithm>
 #include <functional>

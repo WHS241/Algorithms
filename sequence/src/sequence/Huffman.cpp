@@ -6,7 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
-BinaryTree<char>::BinaryNode* Huffman::generateTree(const std::string& message) {
+BinaryTree<char>::BinaryNode* Sequence::createHuffmanTree(const std::string& message) {
     if (message.empty())
         return nullptr;
 
@@ -24,9 +24,9 @@ BinaryTree<char>::BinaryNode* Huffman::generateTree(const std::string& message) 
             return std::make_pair(new BinaryTree<char>::BinaryNode(count.first), count.second);
             });
 
-        values.sort([](auto& x, auto& y) {return x.second < y.second; });
         if (values.size() == 1)
             return values.front().first;
+        values.sort([](auto& x, auto& y) {return x.second < y.second; });
 
         // start creating the tree
         while (!values.empty()) {
@@ -44,7 +44,7 @@ BinaryTree<char>::BinaryNode* Huffman::generateTree(const std::string& message) 
             }
 
 
-            if (buffer.empty() || values.front().second < buffer.front().second) {
+            if (!values.empty() && (buffer.empty() || values.front().second < buffer.front().second)) {
                 node->replaceRight(values.front().first);
                 count += values.front().second;
                 values.pop_front();
@@ -55,18 +55,20 @@ BinaryTree<char>::BinaryNode* Huffman::generateTree(const std::string& message) 
                 buffer.pop_front();
             }
 
-            buffer.push_back(std::make_pair(node.release(), count));
+            buffer.push_back(std::make_pair(node.get(), count));
+            node.release();
         }
 
         // tie up the non-leaf nodes
-        // once we've cleared in first list, the frequencies become irrelevant
+        // once we've cleared the first list, the frequencies become irrelevant
         while (buffer.size() > 1) {
             std::unique_ptr<BinaryTree<char>::BinaryNode> node(new BinaryTree<char>::BinaryNode);
             node->replaceLeft(buffer.front().first);
             buffer.pop_front();
             node->replaceRight(buffer.front().first);
             buffer.pop_front();
-            buffer.push_back(std::make_pair(node.release(), 0));
+            buffer.push_back(std::make_pair(node.get(), 0));
+            node.release();
         }
 
         return buffer.front().first;

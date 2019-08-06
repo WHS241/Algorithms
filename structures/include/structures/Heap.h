@@ -68,6 +68,6 @@ private :
     std::vector<T> heap;
 };
 
-#include "src/Heap.cpp"
+#include "src/structures/Heap.cpp"
 
 #endif // HEAP_H

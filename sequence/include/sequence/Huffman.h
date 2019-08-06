@@ -2,14 +2,14 @@
 #define HUFFMAN_H
 #include <string>
 
-#include <BinaryTree.h>
+#include <structures/BinaryTree.h>
 
-namespace Huffman {
+namespace Sequence {
     /*
     Generate the Huffman encoding
     O(n log n)
     David A. Huffman (1952)
     */
-    BinaryTree<char>::BinaryNode* generateTree(const std::string& message);
+    BinaryTree<char>::BinaryNode* createHuffmanTree(const std::string& message);
 }
 #endif // !HUFFMAN_H
