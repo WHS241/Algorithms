@@ -3,8 +3,8 @@
 #include <iterator>
 
 namespace Sequence {
-    template <typename It>
-    typename std::iterator_traits<It>::value_type findMajority(It first, It last);
+template <typename It>
+typename std::iterator_traits<It>::value_type findMajority(It first, It last);
 }
 
 #include <src/sequence/Majority.cpp>

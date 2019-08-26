@@ -9,8 +9,3 @@
 #include "structures/Heap.h"
 
 #include "structures/UnionFind.h"
-
-void useAll() {
-    BinaryHeap<int> test;
-    test.combine(test);
-}

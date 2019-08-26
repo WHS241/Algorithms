@@ -6,11 +6,11 @@
 /*
 Abstract base class for any binary tree structure
 */
-template<typename T>
-class BinaryTree {
+template <typename T> class BinaryTree {
 public:
     struct BinaryNode {
-        BinaryNode(const T& item = T(), BinaryNode* parent = nullptr, BinaryNode* left = nullptr, BinaryNode* right = nullptr);
+        BinaryNode(const T& item = T(), BinaryNode* parent = nullptr, BinaryNode* left = nullptr,
+            BinaryNode* right = nullptr);
 
         virtual ~BinaryNode() noexcept;
         BinaryNode(const BinaryNode&) = delete;
@@ -48,7 +48,8 @@ public:
     // Returns the number of elements in the tree
     uint32_t size() const noexcept;
 
-    // Insertion/deletion functions. remove(const T&) is transformed into remove(iterator) in implementation
+    // Insertion/deletion functions. remove(const T&) is transformed into
+    // remove(iterator) in implementation
     virtual void insert(const T&) = 0;
     virtual void remove(const T&);
     virtual void remove(iterator it) = 0;

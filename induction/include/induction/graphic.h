@@ -5,24 +5,23 @@
 #include <utility>
 
 namespace Induction {
-    struct Silhouette {
-        int leftIndex;
-        int rightIndex;
-        int height;
-    };
+struct Silhouette {
+    int leftIndex;
+    int rightIndex;
+    int height;
+};
 
-    struct Skyline {
-        int leftEnd;
-        std::list<std::pair<int, int>> section; // first: height, second: right end
-    };
+struct Skyline {
+    int leftEnd;
+    std::list<std::pair<int, int>> section; // first: height, second: right end
+};
 
-    // generate skyline from buildings
-    // divide and conquer: Θ(n log n)
-    // RandomIt not necessary, but helpful
-    // It::value_type must be of type Silhouette
-    template<typename It>
-    Skyline generateSkyline(It first, It last);
-}
+// generate skyline from buildings
+// divide and conquer: Θ(n log n)
+// RandomIt not necessary, but helpful
+// It::value_type must be of type Silhouette
+template <typename It> Skyline generateSkyline(It first, It last);
+} // namespace Induction
 
 #include "../../src/induction/graphic.cpp"
 

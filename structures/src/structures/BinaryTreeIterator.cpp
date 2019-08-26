@@ -3,7 +3,7 @@
 
 #include <structures/BinaryTreeIteratorImpl.h>
 
-template<typename T>
+template <typename T>
 TreeIterator<T>::TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order)
 {
     switch (order) {
@@ -27,18 +27,17 @@ TreeIterator<T>::TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversa
     }
 }
 
-template<typename T>
-bool TreeIterator<T>::operator==(const TreeIterator<T>& rhs) const {
+template <typename T> bool TreeIterator<T>::operator==(const TreeIterator<T>& rhs) const
+{
     return *impl == *rhs.impl;
 }
 
-template<typename T>
-bool TreeIterator<T>::operator!=(const TreeIterator<T>& rhs) const {
+template <typename T> bool TreeIterator<T>::operator!=(const TreeIterator<T>& rhs) const
+{
     return !operator==(rhs);
 }
 
-template<typename T>
-TreeIterator<T>::TreeIterator(const TreeIterator<T>& src)
+template <typename T> TreeIterator<T>::TreeIterator(const TreeIterator<T>& src)
 {
     TreeIteratorImpl<T>* ptr = src.impl.get();
     auto prePtr = dynamic_cast<PreOrderTreeIteratorImpl<T>*>(ptr);
@@ -60,59 +59,48 @@ TreeIterator<T>::TreeIterator(const TreeIterator<T>& src)
     impl.reset(new LevelOrderTreeIteratorImpl<T>(*levelPtr));
 }
 
-template<typename T>
-const T& TreeIterator<T>::operator*() const {
-    return **impl;
-}
+template <typename T> const T& TreeIterator<T>::operator*() const { return **impl; }
 
-template<typename T>
-T& TreeIterator<T>::operator*() {
-    return **impl;
-}
+template <typename T> T& TreeIterator<T>::operator*() { return **impl; }
 
-template<typename T>
-const T* TreeIterator<T>::operator->() const {
-    return &operator*();
-}
+template <typename T> const T* TreeIterator<T>::operator->() const { return &operator*(); }
 
-template<typename T>
-T* TreeIterator<T>::operator->() {
-    return &operator*();
-}
+template <typename T> T* TreeIterator<T>::operator->() { return &operator*(); }
 
-template<typename T>
-TreeIterator<T>& TreeIterator<T>::operator++() {
+template <typename T> TreeIterator<T>& TreeIterator<T>::operator++()
+{
     ++(*impl);
     return *this;
 }
 
-template<typename T>
-TreeIterator<T> TreeIterator<T>::operator++(int) {
+template <typename T> TreeIterator<T> TreeIterator<T>::operator++(int)
+{
     TreeIterator<T> temp(*this);
     ++(*this);
     return temp;
 }
 
-template<typename T>
-TreeIterator<T>& TreeIterator<T>::operator--() {
+template <typename T> TreeIterator<T>& TreeIterator<T>::operator--()
+{
     --(*impl);
     return *this;
 }
 
-template<typename T>
-TreeIterator<T> TreeIterator<T>::operator--(int) {
+template <typename T> TreeIterator<T> TreeIterator<T>::operator--(int)
+{
     TreeIterator<T> temp(*this);
     --(*this);
     return temp;
 }
 
-template<typename T>
-typename BinaryTree<T>::BinaryNode* TreeIterator<T>::getNode() {
+template <typename T> typename BinaryTree<T>::BinaryNode* TreeIterator<T>::getNode()
+{
     return impl->current;
 }
 
-template<typename T>
-TreeConstIterator<T>::TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order) {
+template <typename T>
+TreeConstIterator<T>::TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order)
+{
     switch (order) {
     case PreOrder:
         impl.reset(new PreOrderTreeIteratorImpl<T>(root));
@@ -134,8 +122,7 @@ TreeConstIterator<T>::TreeConstIterator(typename BinaryTree<T>::BinaryNode* root
     }
 }
 
-template<typename T>
-TreeConstIterator<T>::TreeConstIterator(const TreeConstIterator<T>& src)
+template <typename T> TreeConstIterator<T>::TreeConstIterator(const TreeConstIterator<T>& src)
 {
     TreeIteratorImpl<T>* ptr = src.impl.get();
     auto prePtr = dynamic_cast<PreOrderTreeIteratorImpl<T>*>(ptr);
@@ -157,55 +144,49 @@ TreeConstIterator<T>::TreeConstIterator(const TreeConstIterator<T>& src)
     impl.reset(new LevelOrderTreeIteratorImpl<T>(*levelPtr));
 }
 
-template<typename T>
-bool TreeConstIterator<T>::operator==(const TreeConstIterator<T>& rhs) const {
+template <typename T> bool TreeConstIterator<T>::operator==(const TreeConstIterator<T>& rhs) const
+{
     return *impl == *rhs.impl;
 }
 
-template<typename T>
-bool TreeConstIterator<T>::operator!=(const TreeConstIterator<T>& rhs) const {
+template <typename T> bool TreeConstIterator<T>::operator!=(const TreeConstIterator<T>& rhs) const
+{
     return !operator==(rhs);
 }
 
-template<typename T>
-const T& TreeConstIterator<T>::operator*() const {
-    return **impl;
-}
+template <typename T> const T& TreeConstIterator<T>::operator*() const { return **impl; }
 
-template<typename T>
-const T* TreeConstIterator<T>::operator->() const {
-    return &operator*();
-}
+template <typename T> const T* TreeConstIterator<T>::operator->() const { return &operator*(); }
 
-template<typename T>
-TreeConstIterator<T>& TreeConstIterator<T>::operator++() {
+template <typename T> TreeConstIterator<T>& TreeConstIterator<T>::operator++()
+{
     ++(*impl);
     return *this;
 }
 
-template<typename T>
-TreeConstIterator<T> TreeConstIterator<T>::operator++(int) {
+template <typename T> TreeConstIterator<T> TreeConstIterator<T>::operator++(int)
+{
     TreeIterator<T> temp(*this);
     ++(*this);
     return temp;
 }
 
-template<typename T>
-TreeConstIterator<T>& TreeConstIterator<T>::operator--() {
+template <typename T> TreeConstIterator<T>& TreeConstIterator<T>::operator--()
+{
     --(*impl);
     return *this;
 }
 
-template<typename T>
-TreeConstIterator<T> TreeConstIterator<T>::operator--(int) {
+template <typename T> TreeConstIterator<T> TreeConstIterator<T>::operator--(int)
+{
     TreeIterator<T> temp(*this);
     --(*this);
     return temp;
 }
 
-template<typename T>
-typename BinaryTree<T>::BinaryNode* TreeConstIterator<T>::getNode() {
+template <typename T> typename BinaryTree<T>::BinaryNode* TreeConstIterator<T>::getNode()
+{
     return impl->current;
 }
 
-#endif //TREE_ITERATOR_CPP
+#endif // TREE_ITERATOR_CPP

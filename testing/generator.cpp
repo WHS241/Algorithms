@@ -1,8 +1,10 @@
 
 #include "generator.h"
 
-Graph<int> random_graph(std::mt19937_64& gen, bool directed, bool weighted, bool cyclic, GraphType type) {
-    std::uniform_int_distribution<uint32_t> dist(0, 100);
+Graph<int> random_graph(
+    std::mt19937_64& gen, bool directed, bool weighted, bool cyclic, GraphType type)
+{
+    std::uniform_int_distribution<uint32_t> dist(0, 20);
     std::uniform_real_distribution<double> weight(0, 1000);
 
     auto num_vertices = dist(gen);
@@ -29,8 +31,7 @@ Graph<int> random_graph(std::mt19937_64& gen, bool directed, bool weighted, bool
                     graph.setEdge(i, dest);
             }
         }
-    }
-    else {
+    } else {
         for (uint32_t i = 0; i < num_vertices; ++i) {
             uint32_t current_size = graph.addVertex(graph.order());
             if (current_size <= 1)

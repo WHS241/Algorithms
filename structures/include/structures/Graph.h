@@ -8,11 +8,9 @@
 
 #include "GraphImpl.h"
 
-enum GraphType {AdjMatrix, AdjList};
+enum GraphType { AdjMatrix, AdjList };
 
-
-template<typename T>
-class Graph {
+template <typename T> class Graph {
 public:
     Graph(bool directed = false, bool weighted = false, GraphType type = AdjList);
     virtual ~Graph() = default;

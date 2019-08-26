@@ -5,8 +5,8 @@
 #include <iterator>
 #include <typeinfo>
 
-template<typename It>
-Induction::Skyline Induction::generateSkyline(It first, It last) {
+template <typename It> Induction::Skyline Induction::generateSkyline(It first, It last)
+{
     Skyline result;
     if (first == last) {
         return result;
@@ -19,10 +19,10 @@ Induction::Skyline Induction::generateSkyline(It first, It last) {
     }
 
     It mid;
-    if (typeid(typename std::iterator_traits<It>::iterator_category) == typeid(std::random_access_iterator_tag)) {
+    if (typeid(typename std::iterator_traits<It>::iterator_category)
+        == typeid(std::random_access_iterator_tag)) {
         mid = first + (last - first) / 2;
-    }
-    else {
+    } else {
         uint32_t dist = std::distance(first, last);
         mid = first;
         std::advance(mid, dist / 2);
@@ -34,9 +34,8 @@ Induction::Skyline Induction::generateSkyline(It first, It last) {
     if (subproblemB.leftEnd < subproblemA.leftEnd)
         std::swap(subproblemA, subproblemB);
 
-    auto it = std::find_if(subproblemA.section.begin(), subproblemA.section.end(), [&subproblemB](auto section) {
-        return section.second >= subproblemB.leftEnd;
-    });
+    auto it = std::find_if(subproblemA.section.begin(), subproblemA.section.end(),
+        [&subproblemB](auto section) { return section.second >= subproblemB.leftEnd; });
 
     if (it == subproblemA.section.end()) {
         subproblemA.section.push_back(std::make_pair(0, subproblemB.leftEnd));
@@ -45,7 +44,8 @@ Induction::Skyline Induction::generateSkyline(It first, It last) {
     }
 
     result.leftEnd = subproblemA.leftEnd;
-    result.section.splice(result.section.end(), subproblemA.section, subproblemA.section.begin(), it);
+    result.section.splice(
+        result.section.end(), subproblemA.section, subproblemA.section.begin(), it);
     auto it2 = subproblemB.section.begin();
     double currentLeft = subproblemB.leftEnd;
     result.section.push_back(std::make_pair(it->first, currentLeft));
@@ -56,24 +56,21 @@ Induction::Skyline Induction::generateSkyline(It first, It last) {
                 result.section.push_back(std::make_pair(it2->first, it->second));
                 currentLeft = it->second;
                 ++it;
-            }
-            else {
+            } else {
                 auto temp = it2;
                 ++temp;
                 result.section.splice(result.section.end(), subproblemB.section, it2, temp);
                 currentLeft = it2->second;
                 it2 = temp;
             }
-        }
-        else {
+        } else {
             if (it->second < it2->second) {
                 auto temp = it;
                 ++temp;
                 result.section.splice(result.section.end(), subproblemA.section, it, temp);
                 currentLeft = it->second;
                 it = temp;
-            }
-            else {
+            } else {
                 result.section.push_back(std::make_pair(it->first, it2->second));
                 currentLeft = it2->second;
                 ++it2;
@@ -83,8 +80,7 @@ Induction::Skyline Induction::generateSkyline(It first, It last) {
 
     if (it != subproblemA.section.end()) {
         result.section.splice(result.section.end(), subproblemA.section, it);
-    }
-    else if (it2 != subproblemB.section.end()) {
+    } else if (it2 != subproblemB.section.end()) {
         result.section.splice(result.section.end(), subproblemB.section, it2);
     }
 

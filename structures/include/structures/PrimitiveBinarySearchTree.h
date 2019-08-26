@@ -5,13 +5,16 @@
 
 // A basic Binary Search Tree, with no self-balancing techniques
 // Operations may be жи(n)
-template<typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<>>
 class PrimitiveBinarySearchTree : virtual public BinarySearchTree<T, Compare> {
-public :
+public:
     PrimitiveBinarySearchTree() = default;
 
-    template<typename It>
-    PrimitiveBinarySearchTree(It first, It last, Compare comp = Compare()) : BinarySearchTree<T, Compare>(first, last, comp) {}
+    template <typename It>
+    PrimitiveBinarySearchTree(It first, It last, Compare comp = Compare())
+        : BinarySearchTree<T, Compare>(first, last, comp)
+    {
+    }
 
     void insert(const T&) override;
     virtual void remove(typename BinaryTree<T>::iterator it);

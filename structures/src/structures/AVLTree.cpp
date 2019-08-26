@@ -3,8 +3,11 @@
 
 #include <algorithm>
 
-template<typename T, typename Compare>
-typename AVLSearchTree<T, Compare>::AVLNode* AVLSearchTree<T, Compare>::generate(const std::vector<T>& elements, uint32_t first, uint32_t last, typename AVLSearchTree<T, Compare>::AVLNode* parent) {
+template <typename T, typename Compare>
+typename AVLSearchTree<T, Compare>::AVLNode* AVLSearchTree<T, Compare>::generate(
+    const std::vector<T>& elements, uint32_t first, uint32_t last,
+    typename AVLSearchTree<T, Compare>::AVLNode* parent)
+{
     if (first == last) {
         return nullptr;
     }
@@ -20,18 +23,18 @@ typename AVLSearchTree<T, Compare>::AVLNode* AVLSearchTree<T, Compare>::generate
     return root.release();
 }
 
-template<typename T, typename Compare>
-void AVLSearchTree<T, Compare>::insert(const T& item) {
+template <typename T, typename Compare> void AVLSearchTree<T, Compare>::insert(const T& item)
+{
     AVLNode* ptr = dynamic_cast<AVLNode*>(this->root.get());
     if (ptr == nullptr) {
         this->root.reset(new AVLNode(item));
-        
         this->_size = 1;
         return;
     }
 
     bool goLeft = this->compare(item, ptr->_item);
-    AVLNode* next = goLeft ? dynamic_cast<AVLNode*>(ptr->_left) : dynamic_cast<AVLNode*>(ptr->_right);
+    AVLNode* next
+        = goLeft ? dynamic_cast<AVLNode*>(ptr->_left) : dynamic_cast<AVLNode*>(ptr->_right);
     while (next != nullptr) {
         ptr = next;
         goLeft = this->compare(item, ptr->_item);
@@ -41,8 +44,7 @@ void AVLSearchTree<T, Compare>::insert(const T& item) {
     auto add = new AVLNode(item, ptr);
     if (goLeft) {
         ptr->replaceLeft(add);
-    }
-    else {
+    } else {
         ptr->replaceRight(add);
     }
     ++this->_size;
@@ -50,16 +52,20 @@ void AVLSearchTree<T, Compare>::insert(const T& item) {
     balanceTree(add);
 }
 
-template<typename T, typename Compare>
-void AVLSearchTree<T, Compare>::balanceTree(typename AVLSearchTree<T, Compare>::AVLNode* start) noexcept {
-    enum Rotate {Left, Right, None};
+template <typename T, typename Compare>
+void AVLSearchTree<T, Compare>::balanceTree(
+    typename AVLSearchTree<T, Compare>::AVLNode* start) noexcept
+{
+    enum Rotate { Left, Right, None };
 
     while (start != this->root.get() && start != nullptr) {
         auto leftChild = dynamic_cast<AVLNode*>(start->_left);
         auto rightChild = dynamic_cast<AVLNode*>(start->_right);
 
-        start->leftHeight = leftChild ? std::max(leftChild->leftHeight, leftChild->rightHeight) + 1 : 0;
-        start->rightHeight = rightChild ? std::max(rightChild->leftHeight, rightChild->rightHeight) + 1 : 0;
+        start->leftHeight
+            = leftChild ? std::max(leftChild->leftHeight, leftChild->rightHeight) + 1 : 0;
+        start->rightHeight
+            = rightChild ? std::max(rightChild->leftHeight, rightChild->rightHeight) + 1 : 0;
 
         Rotate rotated = None;
         bool doubleRotate = false;
@@ -71,8 +77,7 @@ void AVLSearchTree<T, Compare>::balanceTree(typename AVLSearchTree<T, Compare>::
 
             this->rotate(start, false);
             rotated = Right;
-        }
-        else if (start->leftHeight > start->rightHeight + 1) {
+        } else if (start->leftHeight > start->rightHeight + 1) {
             if (leftChild->leftHeight < leftChild->rightHeight) {
                 this->rotate(leftChild, false);
                 doubleRotate = true;
@@ -84,52 +89,64 @@ void AVLSearchTree<T, Compare>::balanceTree(typename AVLSearchTree<T, Compare>::
         if (rotated == Left) {
             if (doubleRotate) {
                 rightChild = dynamic_cast<AVLNode*>(leftChild->_right);
-                leftChild->rightHeight = rightChild ? std::max(rightChild->leftHeight, rightChild->rightHeight) + 1 : 0;
+                leftChild->rightHeight = rightChild
+                    ? std::max(rightChild->leftHeight, rightChild->rightHeight) + 1
+                    : 0;
             }
             leftChild = dynamic_cast<AVLNode*>(start->_left);
-            start->leftHeight = leftChild ? std::max(leftChild->leftHeight, leftChild->rightHeight) + 1 : 0;
-        }
-        else if (rotated == Right) {
+            start->leftHeight
+                = leftChild ? std::max(leftChild->leftHeight, leftChild->rightHeight) + 1 : 0;
+        } else if (rotated == Right) {
             if (doubleRotate) {
                 leftChild = dynamic_cast<AVLNode*>(rightChild->_left);
-                rightChild->leftHeight = leftChild ? std::max(leftChild->leftHeight, leftChild->rightHeight) + 1 : 0;
+                rightChild->leftHeight
+                    = leftChild ? std::max(leftChild->leftHeight, leftChild->rightHeight) + 1 : 0;
             }
             rightChild = dynamic_cast<AVLNode*>(start->_right);
-            start->rightHeight = rightChild ? std::max(rightChild->leftHeight, rightChild->rightHeight) + 1 : 0;
+            start->rightHeight
+                = rightChild ? std::max(rightChild->leftHeight, rightChild->rightHeight) + 1 : 0;
         }
 
         start = dynamic_cast<AVLNode*>(start->_parent);
     }
 }
 
-template<typename T, typename C>
-typename AVLSearchTree<T, C>::AVLNode* AVLSearchTree<T, C>::AVLNode::changeLeft(typename AVLSearchTree<T, C>::AVLNode* add) noexcept {
+template <typename T, typename C>
+typename AVLSearchTree<T, C>::AVLNode* AVLSearchTree<T, C>::AVLNode::changeLeft(
+    typename AVLSearchTree<T, C>::AVLNode* add) noexcept
+{
     auto ptr = BinaryTree<T>::BinaryNode::changeLeft(add);
     leftHeight = (add != nullptr) ? std::max(add->leftHeight, add->rightHeight) + 1 : 0;
     return dynamic_cast<AVLNode*>(ptr);
 }
 
-template<typename T, typename C>
-typename AVLSearchTree<T, C>::AVLNode* AVLSearchTree<T, C>::AVLNode::changeRight(typename AVLSearchTree<T, C>::AVLNode* add) noexcept {
+template <typename T, typename C>
+typename AVLSearchTree<T, C>::AVLNode* AVLSearchTree<T, C>::AVLNode::changeRight(
+    typename AVLSearchTree<T, C>::AVLNode* add) noexcept
+{
     auto ptr = BinaryTree<T>::BinaryNode::changeRight(add);
     rightHeight = (add != nullptr) ? std::max(add->leftHeight, add->rightHeight) + 1 : 0;
     return dynamic_cast<AVLNode*>(ptr);
 }
 
-template<typename T, typename C>
-void AVLSearchTree<T, C>::AVLNode::replaceLeft(typename AVLSearchTree<T, C>::AVLNode* add) noexcept {
+template <typename T, typename C>
+void AVLSearchTree<T, C>::AVLNode::replaceLeft(typename AVLSearchTree<T, C>::AVLNode* add) noexcept
+{
     auto prev = changeLeft(add);
     delete prev;
 }
 
-template<typename T, typename C>
-void AVLSearchTree<T, C>::AVLNode::replaceRight(typename AVLSearchTree<T, C>::AVLNode* add) noexcept {
+template <typename T, typename C>
+void AVLSearchTree<T, C>::AVLNode::replaceRight(typename AVLSearchTree<T, C>::AVLNode* add) noexcept
+{
     auto prev = changeRight(add);
     delete prev;
 }
 
-template<typename T, typename C>
-void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
+template <typename T, typename C>
+void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it)
+{
+    BinarySearchTree<T, C>::verify(it);
     auto node = BinaryTree<T>::getNode(it);
     if (node == nullptr)
         return;
@@ -143,7 +160,8 @@ void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
     bool isRoot = parent == nullptr;
     bool leftChild = !isRoot && (node == parent->_left);
 
-    // Found node to switch with: pass to lambda to actually perform the switch and delete
+    // Found node to switch with: pass to lambda to actually perform the switch
+    // and delete
     auto swapOut = [&parent, &node, this, leftChild, isRoot](AVLNode* ptr) {
         if (ptr != nullptr) {
             auto nodeParent(dynamic_cast<AVLNode*>(ptr->_parent));
@@ -152,8 +170,7 @@ void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
                 if (ptr == node->_right) {
                     // must be single child: no further action
                     node->_right = nullptr;
-                }
-                else {
+                } else {
                     if (!ptr->_right) {
                         // may be successor (root has two children): move other branch over
                         ptr->replaceRight(dynamic_cast<AVLNode*>(node->_right));
@@ -161,8 +178,7 @@ void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
                     }
                     node->_left = nullptr;
                 }
-            }
-            else {
+            } else {
                 // must be successor to double-child root
                 nodeParent->changeRight(dynamic_cast<AVLNode*>(ptr->_left));
                 ptr->changeLeft(dynamic_cast<AVLNode*>(node->_left));
@@ -176,11 +192,9 @@ void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
             this->root.reset(ptr);
             if (ptr)
                 ptr->_parent = nullptr;
-        }
-        else if (leftChild) {
+        } else if (leftChild) {
             parent->replaceLeft(ptr);
-        }
-        else {
+        } else {
             parent->replaceRight(ptr);
         }
         --this->_size;
@@ -209,13 +223,12 @@ void AVLSearchTree<T, C>::remove(typename BinaryTree<T>::iterator it) {
     swapOut(successor);
     if (!directShift) {
         balanceTree(successorParent);
-    }
-    else {
+    } else {
         balanceTree(successor);
     }
 }
 
-template<typename T, typename C>
+template <typename T, typename C>
 AVLSearchTree<T, C>::AVLNode::AVLNode(const T& item, AVLNode* parent, AVLNode* left, AVLNode* right)
     : BinaryTree<T>::BinaryNode(item, parent, left, right)
     , leftHeight(0)
@@ -229,4 +242,4 @@ AVLSearchTree<T, C>::AVLNode::AVLNode(const T& item, AVLNode* parent, AVLNode* l
     }
 }
 
-#endif //AVL_TREE_CPP
+#endif // AVL_TREE_CPP

@@ -3,12 +3,14 @@
 
 #include <list>
 
-template<typename T>
-std::unordered_set<T> Induction::subsetAutomorphism(const std::unordered_map<T, T>& f) {
+template <typename T>
+std::unordered_set<T> Induction::subsetAutomorphism(const std::unordered_map<T, T>& f)
+{
     std::unordered_map<T, uint32_t> mapOnto; // the number of values mapped to a particular value
     std::unordered_set<T> result, toRemove;
 
-    // load toRemove and result with all the domain values; take out of set as needed
+    // load toRemove and result with all the domain values; take out of set as
+    // needed
     for (auto& rel : f) {
         if (mapOnto.find(rel.first) == mapOnto.end()) {
             mapOnto[rel.first] = 0;
@@ -17,8 +19,7 @@ std::unordered_set<T> Induction::subsetAutomorphism(const std::unordered_map<T, 
 
         if (mapOnto.find(rel.second) == mapOnto.end()) {
             mapOnto[rel.second] = 1;
-        }
-        else {
+        } else {
             if (mapOnto[rel.second] == 0)
                 toRemove.erase(toRemove.find(rel.second));
 
@@ -42,8 +43,8 @@ std::unordered_set<T> Induction::subsetAutomorphism(const std::unordered_map<T, 
     return result;
 }
 
-template<typename T>
-std::unordered_set<T> Induction::subsetAutomorphism(const std::map<T, T>& f) {
+template <typename T> std::unordered_set<T> Induction::subsetAutomorphism(const std::map<T, T>& f)
+{
     return subsetAutomorphism(std::unordered_map<T, T>(f.begin(), f.end()));
 }
 

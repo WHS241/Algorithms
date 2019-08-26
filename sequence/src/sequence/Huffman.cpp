@@ -6,7 +6,8 @@
 #include <memory>
 #include <unordered_map>
 
-BinaryTree<char>::BinaryNode* Sequence::createHuffmanTree(const std::string& message) {
+BinaryTree<char>::BinaryNode* Sequence::createHuffmanTree(const std::string& message)
+{
     if (message.empty())
         return nullptr;
 
@@ -17,16 +18,17 @@ BinaryTree<char>::BinaryNode* Sequence::createHuffmanTree(const std::string& mes
             countMap[c] = 1;
         else
             ++countMap[c];
-    
+
     std::list<std::pair<BinaryTree<char>::BinaryNode*, uint32_t>> values, buffer;
     try {
-        std::transform(countMap.begin(), countMap.end(), std::back_inserter(values), [](const std::pair<char, uint32_t>& count) {
-            return std::make_pair(new BinaryTree<char>::BinaryNode(count.first), count.second);
+        std::transform(countMap.begin(), countMap.end(), std::back_inserter(values),
+            [](const std::pair<char, uint32_t>& count) {
+                return std::make_pair(new BinaryTree<char>::BinaryNode(count.first), count.second);
             });
 
         if (values.size() == 1)
             return values.front().first;
-        values.sort([](auto& x, auto& y) {return x.second < y.second; });
+        values.sort([](auto& x, auto& y) { return x.second < y.second; });
 
         // start creating the tree
         while (!values.empty()) {
@@ -36,20 +38,18 @@ BinaryTree<char>::BinaryNode* Sequence::createHuffmanTree(const std::string& mes
                 node->replaceLeft(values.front().first);
                 count = values.front().second;
                 values.pop_front();
-            }
-            else {
+            } else {
                 node->replaceLeft(buffer.front().first);
                 count = buffer.front().second;
                 buffer.pop_front();
             }
 
-
-            if (!values.empty() && (buffer.empty() || values.front().second < buffer.front().second)) {
+            if (!values.empty()
+                && (buffer.empty() || values.front().second < buffer.front().second)) {
                 node->replaceRight(values.front().first);
                 count += values.front().second;
                 values.pop_front();
-            }
-            else {
+            } else {
                 node->replaceRight(buffer.front().first);
                 count += buffer.front().second;
                 buffer.pop_front();
@@ -72,8 +72,7 @@ BinaryTree<char>::BinaryNode* Sequence::createHuffmanTree(const std::string& mes
         }
 
         return buffer.front().first;
-    }
-    catch (...) {
+    } catch (...) {
         for (auto& tracker : values) {
             delete tracker.first;
         }

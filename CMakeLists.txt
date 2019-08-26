@@ -24,6 +24,7 @@ include(gtest.cmake)
 include(induction.cmake)
 include(sequence.cmake)
 include(structures.cmake)
+include(graph.cmake)
 
 set(SOURCE_FILES
 		testing/generator.cpp
@@ -49,3 +50,6 @@ target_link_libraries(testing induction ${CMAKE_THREAD_LIBS_INIT})
 
 add_dependencies(testing sequence)
 target_link_libraries(testing sequence ${CMAKE_THREAD_LIBS_INIT})
+
+add_dependencies(testing graph)
+target_link_libraries(testing graph ${CMAKE_THREAD_LIBS_INIT})

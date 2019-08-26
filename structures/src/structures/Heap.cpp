@@ -5,27 +5,30 @@
 #include <iterator>
 #include <list>
 
-template<typename T, typename Compare>
+template <typename T, typename Compare>
 Heap<T, Compare>::Heap(Compare comp)
     : compare(comp)
-{}
+{
+}
 
-template<typename T, typename Compare>
+template <typename T, typename Compare>
 BinaryHeap<T, Compare>::BinaryHeap(Compare comp)
     : Heap<T, Compare>(comp)
     , heap()
-{}
+{
+}
 
-template<typename T, typename Compare>
-void BinaryHeap<T, Compare>::combine(const BinaryHeap<T, Compare>& src) {
+template <typename T, typename Compare>
+void BinaryHeap<T, Compare>::combine(const BinaryHeap<T, Compare>& src)
+{
     std::list<T> temp(heap.begin(), heap.end());
     std::copy(src.heap.begin(), src.heap.end(), std::back_inserter(temp));
     BinaryHeap<T, Compare> result(temp.begin(), temp.end(), this->compare);
     std::swap(heap, result.heap);
 }
 
-template<typename T, typename Compare>
-void BinaryHeap<T, Compare>::insert(const T& item) {
+template <typename T, typename Compare> void BinaryHeap<T, Compare>::insert(const T& item)
+{
     uint32_t index(heap.size());
     heap.push_back(item);
 
@@ -34,15 +37,14 @@ void BinaryHeap<T, Compare>::insert(const T& item) {
         if (this->compare(heap[index], heap[parent])) {
             std::swap(heap[index], heap[parent]);
             index = parent;
-        }
-        else {
+        } else {
             break;
         }
     }
 }
 
-template<typename T, typename Compare>
-T BinaryHeap<T, Compare>::removeRoot() {
+template <typename T, typename Compare> T BinaryHeap<T, Compare>::removeRoot()
+{
     T prevRoot = heap.front();
     std::swap(heap.front(), heap.back());
 
@@ -55,8 +57,7 @@ T BinaryHeap<T, Compare>::removeRoot() {
         if (!this->compare(heap[current], heap[child])) {
             std::swap(heap[current], heap[child]);
             current = child;
-        }
-        else {
+        } else {
             break;
         }
     }
@@ -65,13 +66,13 @@ T BinaryHeap<T, Compare>::removeRoot() {
     return prevRoot;
 }
 
-template<typename T, typename Compare>
-T BinaryHeap<T, Compare>::getRoot() const {
+template <typename T, typename Compare> T BinaryHeap<T, Compare>::getRoot() const
+{
     return heap.front();
 }
 
-template<typename T, typename Compare>
-uint32_t BinaryHeap<T, Compare>::size() const {
+template <typename T, typename Compare> uint32_t BinaryHeap<T, Compare>::size() const
+{
     return heap.size();
 }
 

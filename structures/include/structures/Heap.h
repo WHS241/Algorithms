@@ -7,30 +7,30 @@
 #include "BinaryTree.h"
 
 // Base class for heap structures
-template<typename T, typename Compare = std::less<>>
-class Heap {
-public :
+template <typename T, typename Compare = std::less<>> class Heap {
+public:
     Heap(Compare comp = Compare());
     virtual void insert(const T&) = 0;
     virtual T getRoot() const = 0;
     virtual T removeRoot() = 0;
     virtual uint32_t size() const = 0;
 
-protected :
+protected:
     Compare compare;
 };
 
 // Array-based binary heap
-template<typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<>>
 class BinaryHeap : virtual public Heap<T, Compare> {
-public :
+public:
     BinaryHeap(Compare comp = Compare());
 
     // жи(n)
-    template<typename It>
-    BinaryHeap(It first, It last, Compare comp = Compare()) 
+    template <typename It>
+    BinaryHeap(It first, It last, Compare comp = Compare())
         : Heap<T, Compare>(comp)
-        , heap(first, last) {
+        , heap(first, last)
+    {
         for (uint32_t position = heap.size() - 1; position + 1 > 0; --position) {
             uint32_t current(position);
 
@@ -43,8 +43,7 @@ public :
                 if (!this->compare(heap[current], heap[child])) {
                     std::swap(heap[current], heap[child]);
                     current = child;
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -64,7 +63,7 @@ public :
     virtual T getRoot() const;
     virtual uint32_t size() const;
 
-private :
+private:
     std::vector<T> heap;
 };
 

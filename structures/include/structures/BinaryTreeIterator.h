@@ -1,19 +1,18 @@
 #ifndef TREE_ITERATOR_H
 #define TREE_ITERATOR_H
 
-template<typename T> class BinaryTree;
+template <typename T> class BinaryTree;
 
 #include <iterator>
 #include <memory>
 
-enum Traversal {PreOrder, InOrder, PostOrder, LevelOrder};
+enum Traversal { PreOrder, InOrder, PostOrder, LevelOrder };
 
-template<typename T> class TreeIteratorImpl;
+template <typename T> class TreeIteratorImpl;
 
 // The iterator pattern for the BinaryTree
-template<typename T>
-class TreeIterator {
-public :
+template <typename T> class TreeIterator {
+public:
     typedef int difference_type;
     typedef T value_type;
     typedef T* pointer;
@@ -35,7 +34,7 @@ public :
     TreeIterator& operator--();
     TreeIterator operator--(int);
 
-private :
+private:
     TreeIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order);
 
     typename BinaryTree<T>::BinaryNode* getNode();
@@ -45,9 +44,8 @@ private :
     friend class BinaryTree<T>;
 };
 
-template<typename T>
-class TreeConstIterator {
-public :
+template <typename T> class TreeConstIterator {
+public:
     typedef int difference_type;
     typedef T value_type;
     typedef const T* pointer;
@@ -67,7 +65,7 @@ public :
     TreeConstIterator& operator--();
     TreeConstIterator operator--(int);
 
-private :
+private:
     TreeConstIterator(typename BinaryTree<T>::BinaryNode* root, Traversal order);
 
     typename BinaryTree<T>::BinaryNode* getNode();

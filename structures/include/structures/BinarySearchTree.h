@@ -8,14 +8,17 @@
 #include "BinaryTree.h"
 
 // A Binary Search Tree (BST) abstract class
-template<typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<>>
 class BinarySearchTree : public BinaryTree<T> {
 public:
     // initialize empty BST
-    BinarySearchTree() = default;
+    BinarySearchTree(Compare comp = Compare())
+        : BinaryTree<T>()
+        , compare(comp) {};
 
-    // populate with data; [first, last) can be dereferenced to reach data. Need not be sorted.
-    template<typename It>
+    // populate with data; [first, last) can be dereferenced to reach data. Need
+    // not be sorted.
+    template <typename It>
     BinarySearchTree(It first, It last, Compare comp = Compare())
         : BinaryTree<T>()
         , compare(comp)
@@ -31,11 +34,15 @@ public:
 
 protected:
     Compare compare;
-    static typename BinaryTree<T>::BinaryNode* generate(const std::vector<T>&, uint32_t, uint32_t, typename BinaryTree<T>::BinaryNode*);
-    virtual typename BinaryTree<T>::BinaryNode* find(const T&) const noexcept override;
+
+    static typename BinaryTree<T>::BinaryNode* generate(
+        const std::vector<T>&, uint32_t, uint32_t, typename BinaryTree<T>::BinaryNode*);
+    typename BinaryTree<T>::BinaryNode* find(const T&) const noexcept override;
     void rotate(typename BinaryTree<T>::BinaryNode* upper, bool useLeftChild);
+
+    void verify(typename BinaryTree<T>::iterator check);
 };
 
 #include "src/structures/BinarySearchTree.cpp"
 
-#endif //BINARY_SEARCH_TREE_H
+#endif // BINARY_SEARCH_TREE_H

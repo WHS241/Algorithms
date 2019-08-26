@@ -2,8 +2,8 @@
 #define BINARY_SEARCH_CPP
 
 template <typename RandomIt, typename T, typename Compare>
-RandomIt Sequence::binarySearch(RandomIt first, RandomIt last, const T &item,
-                            Compare comp) {
+RandomIt Sequence::binarySearch(RandomIt first, RandomIt last, const T& item, Compare comp)
+{
     if (first == last)
         return first;
 
@@ -23,12 +23,12 @@ RandomIt Sequence::binarySearch(RandomIt first, RandomIt last, const T &item,
 }
 
 template <typename RandomIt, typename Function>
-RandomIt Sequence::findCutoff(RandomIt first, RandomIt last, Function pred) {
+RandomIt Sequence::findCutoff(RandomIt first, RandomIt last, Function pred)
+{
     if (first == last || !pred(*first))
         return first;
     if (pred(*(last - 1)))
         return last;
-
 
     while (last - first > 2) {
         RandomIt mid = first + (last - first) / 2;
@@ -43,8 +43,8 @@ RandomIt Sequence::findCutoff(RandomIt first, RandomIt last, Function pred) {
 }
 
 template <typename RandomIt, typename Compare>
-RandomIt Sequence::cyclicFindMin(RandomIt first, RandomIt last,
-                                     Compare comp) {
+RandomIt Sequence::cyclicFindMin(RandomIt first, RandomIt last, Compare comp)
+{
     if (first == last)
         return first;
 
@@ -59,8 +59,8 @@ RandomIt Sequence::cyclicFindMin(RandomIt first, RandomIt last,
     return comp(*first, *last) ? first : last;
 }
 
-template <typename RandomIt>
-uint32_t Sequence::specialIndex(RandomIt first, RandomIt last) {
+template <typename RandomIt> uint32_t Sequence::specialIndex(RandomIt first, RandomIt last)
+{
     RandomIt noMatch = last, begin = first;
     while (last - first > 1) {
         RandomIt mid = first + (last - first) / 2;

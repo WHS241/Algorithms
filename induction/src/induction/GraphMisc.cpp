@@ -8,8 +8,9 @@
 
 #include <structures/Graph.h>
 
-template<typename T>
-Graph<T> Induction::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit) {
+template <typename T>
+Graph<T> Induction::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit)
+{
     if (src.directed())
         throw std::domain_error("Directed graph");
     Graph<T> temp(src);
@@ -36,8 +37,8 @@ Graph<T> Induction::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit
     return temp;
 }
 
-template<typename T>
-T Induction::celebrity(const Graph<T>& src) {
+template <typename T> T Induction::celebrity(const Graph<T>& src)
+{
     if (!src.directed())
         throw std::domain_error("Undirected graph");
     if (src.order() == 0)
@@ -64,4 +65,4 @@ T Induction::celebrity(const Graph<T>& src) {
     throw std::invalid_argument("No celebrity");
 }
 
-#endif //GRAPH_MISC_CPP
+#endif // GRAPH_MISC_CPP

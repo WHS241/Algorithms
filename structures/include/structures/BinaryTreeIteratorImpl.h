@@ -1,14 +1,13 @@
 #ifndef TREE_ITERATOR_IMPL_H
 #define TREE_ITERATOR_IMPL_H
 
-#include <list>
 #include "BinaryTree.h"
+#include <list>
 
-template<typename T> class TreeIterator;
+template <typename T> class TreeIterator;
 
 // The implementation for the Binary Tree iterator
-template<typename T>
-class TreeIteratorImpl {
+template <typename T> class TreeIteratorImpl {
 public:
     TreeIteratorImpl() = delete;
     TreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
@@ -29,8 +28,7 @@ protected:
     friend class TreeIterator<T>;
 };
 
-template<typename T>
-class PreOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
+template <typename T> class PreOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
     PreOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
@@ -38,11 +36,11 @@ public:
     PreOrderTreeIteratorImpl& operator--() noexcept;
 
 private:
-    static typename BinaryTree<T>::BinaryNode* preOrderEnd(typename BinaryTree<T>::BinaryNode* root) noexcept;
+    static typename BinaryTree<T>::BinaryNode* preOrderEnd(
+        typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
-template<typename T>
-class InOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
+template <typename T> class InOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
     InOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
@@ -50,12 +48,13 @@ public:
     InOrderTreeIteratorImpl& operator--() noexcept;
 
 private:
-    static typename BinaryTree<T>::BinaryNode* leftmostDescendant(typename BinaryTree<T>::BinaryNode* root) noexcept;
-    static typename BinaryTree<T>::BinaryNode* rightmostDescendant(typename BinaryTree<T>::BinaryNode* root) noexcept;
+    static typename BinaryTree<T>::BinaryNode* leftmostDescendant(
+        typename BinaryTree<T>::BinaryNode* root) noexcept;
+    static typename BinaryTree<T>::BinaryNode* rightmostDescendant(
+        typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
-template<typename T>
-class PostOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
+template <typename T> class PostOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
     PostOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
@@ -63,11 +62,11 @@ public:
     PostOrderTreeIteratorImpl& operator--() noexcept;
 
 private:
-    static typename BinaryTree<T>::BinaryNode* postOrderStart(typename BinaryTree<T>::BinaryNode* root) noexcept;
+    static typename BinaryTree<T>::BinaryNode* postOrderStart(
+        typename BinaryTree<T>::BinaryNode* root) noexcept;
 };
 
-template<typename T>
-class LevelOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
+template <typename T> class LevelOrderTreeIteratorImpl : public TreeIteratorImpl<T> {
 public:
     LevelOrderTreeIteratorImpl(typename BinaryTree<T>::BinaryNode* current);
 
@@ -83,4 +82,4 @@ private:
 
 #include "src/structures/BinaryTreeIteratorImpl.cpp"
 
-#endif //TREE_ITERATOR_IMPL_H
+#endif // TREE_ITERATOR_IMPL_H

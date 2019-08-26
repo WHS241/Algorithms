@@ -1,6 +1,8 @@
 #include <induction/algebra.h>
 
-std::complex<double> Induction::polynomialEval(const std::vector<std::complex<double>>& coefficients, std::complex<double> x) {
+std::complex<double> Induction::polynomialEval(
+    const std::vector<std::complex<double>>& coefficients, std::complex<double> x)
+{
     std::complex<double> result = 0;
     for (auto it(coefficients.rbegin()); it != coefficients.rend(); ++it) {
         result *= x;

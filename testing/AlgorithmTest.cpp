@@ -1,18 +1,21 @@
 #include <algorithm>
+#include <iostream>
 #include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
 
-#include <sequence/CompareSort.h>
-#include <sequence/Majority.h>
-#include <sequence/OrderStatistics.h>
-#include <sequence/SequenceComp.h>
-#include <sequence/subsequence.h>
+#include <graph/components.h>
+#include <graph/path.h>
+
+#include <structures/RedBlackTree.h>
+
+#include "generator.h"
 
 class AlgorithmTest : public ::testing::Test {
 protected:
-    void SetUp() override {
+    void SetUp() override
+    {
         std::random_device base;
         engine = std::mt19937_64(base());
     }
@@ -20,171 +23,133 @@ protected:
     std::mt19937_64 engine;
 };
 
-TEST_F(AlgorithmTest, ExtremaTest) {
+TEST_F(AlgorithmTest, ConnectivityTest)
+{
     for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 10000);
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
-
-        auto result = Sequence::extrema(input.begin(), input.end());
-        EXPECT_EQ(result, std::minmax_element(input.begin(), input.end()));
-    }
-}
-
-TEST_F(AlgorithmTest, SelectionTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
-
-        std::uniform_int_distribution<uint32_t> targetDist(0, input.size() - 1);
-        auto target = targetDist(engine);
-        auto result = Sequence::selection(input.begin(), input.end(), target);
-        EXPECT_EQ(target, std::count_if(input.begin(), input.end(), [result](uint32_t x) {return x < result; }));
-        EXPECT_NE(input.end(), std::find(input.begin(), input.end(), result));
-    }
-}
-
-TEST_F(AlgorithmTest, SubstringTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::bernoulli_distribution selector;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        std::string input(sizeDist(engine), 'x');
-        for (auto& c : input)
-            if (selector(engine))
-                c = 'y';
-        
-        std::uniform_int_distribution<uint32_t> targetChoice(0, input.size() - 1);
-        uint32_t beginIndex = targetChoice(engine);
-        targetChoice = std::uniform_int_distribution<uint32_t>(beginIndex, input.size());
-        std::string target(input.begin() + beginIndex, input.begin() + targetChoice(engine));
-
-        auto result = Sequence::findSubstring(input, target);
-        ASSERT_NE(result, input.end());
-        EXPECT_TRUE(std::equal(target.begin(), target.end(), result));
-    }
-}
-
-TEST_F(AlgorithmTest, DistanceTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> selector(0, 2);
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 300);
-        std::string src(sizeDist(engine), 'x'), target(sizeDist(engine), 'x');
-        for (auto& c : src)
-            c += selector(engine);
-        for (auto& c : target)
-            c += selector(engine);
-
-        auto result = Sequence::editDistance(src, target);
-        std::sort(result.begin(), result.end(), [](auto& x, auto& y) {
-            return x.srcIndex < y.srcIndex;
-            });
-
-        std::for_each(result.rbegin(), result.rend(), [&src, &target](const Sequence::Instruction& x) {
-            if (x.directive == Sequence::Instruction::Delete) {
-                src.erase(src.begin() + x.srcIndex);
-            }
-            else if (x.directive == Sequence::Instruction::Replace) {
-                src[x.srcIndex] = target[x.targetIndex];
-            }
-        });
-
-        std::sort(result.begin(), result.end(), [](auto& x, auto& y) {
-            return x.targetIndex < y.targetIndex;
-        });
-        for(auto& x : result) {
-            if(x.directive == Sequence::Instruction::Insert) {
-                src.insert(src.begin() + x.targetIndex, 1, target[x.targetIndex]);
+        Graph<int> input = random_graph(engine, false, false);
+        auto result = GraphAlg::connectedComponents(input);
+        for (auto& set : result) {
+            // verify path
+            auto it2 = set.begin();
+            for (auto it1 = it2++; it2 != set.end(); ++it1, ++it2) {
+                EXPECT_NO_THROW(GraphAlg::leastEdgesPath(input, *it1, *it2));
             }
         }
-
-        EXPECT_EQ(src, target);
     }
 }
 
-TEST_F(AlgorithmTest, MajorityTest) {
+TEST_F(AlgorithmTest, BiconnectivityTest)
+{
     for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        auto majoritySize = sizeDist(engine);
-        auto majorityValue = inputDist(engine);
-        std::vector<uint32_t> input(2 * majoritySize - 1);
+        Graph<int> input = random_graph(engine, false, false);
 
-        for (uint32_t j = 0; j < majoritySize; ++j)
-            input[j] = majorityValue;
-        for (uint32_t j = majoritySize; j < input.size(); ++j)
-            input[j] = inputDist(engine);
+        auto result = GraphAlg::articulationPoints(input);
+        auto numComponents = GraphAlg::connectedComponents(input).size();
+        for (auto& vertex : input.vertices()) {
+            Graph<int> copy(input);
+            copy.remove(vertex);
+            auto newComponents = GraphAlg::connectedComponents(copy).size();
 
-        // shuffle
-        for (uint32_t j = 0; j < input.size(); ++j) {
-            std::uniform_int_distribution<uint32_t> shuffler(j, input.size() - 1);
-            std::swap(input[j], input[shuffler(engine)]);
+            if (input.degree(vertex) == 0) {
+                EXPECT_EQ(result.find(vertex), result.end());
+            } else if (result.find(vertex) == result.end()) {
+                EXPECT_EQ(newComponents, numComponents);
+            } else {
+                EXPECT_GT(newComponents, numComponents);
+            }
+        }
+    }
+}
+
+TEST_F(AlgorithmTest, StronglyConnectedTest)
+{
+    for (uint32_t i = 0; i < 50; ++i) {
+        Graph<int> input = random_graph(engine, true, false);
+
+        auto result = GraphAlg::stronglyConnectedComponents(input);
+        uint32_t j = 0;
+        std::vector<uint32_t> compOf(input.order());
+        for (auto& set : result) {
+            for (auto& member : set) {
+                compOf[member] = j;
+            }
+            ++j;
         }
 
-        ASSERT_GE(std::count(input.begin(), input.end(), majorityValue), majoritySize);
+        auto checkStrongConnect = [&input](int u, int v) {
+            GraphAlg::leastEdgesPath(input, u, v);
+            GraphAlg::leastEdgesPath(input, v, u);
+        };
 
-        EXPECT_EQ(Sequence::findMajority(input.begin(), input.end()), majorityValue);
-
-        if (input.size() != 1) {
-            for (uint32_t j = 0; j < input.size(); ++j)
-                if (input[j] == majorityValue)
-                    input[j] = j;
+        for (uint32_t k = 0; k < compOf.size(); ++k) {
+            for (uint32_t x = k; x < compOf.size(); ++x) {
+                if (compOf[k] == compOf[x])
+                    EXPECT_NO_THROW(checkStrongConnect(k, x));
                 else
-                    input[j] = input.size();
-
-            EXPECT_THROW(Sequence::findMajority(input.begin(), input.end()), std::invalid_argument);
+                    EXPECT_THROW({ checkStrongConnect(k, x); }, std::domain_error);
+            }
         }
     }
 }
 
-TEST_F(AlgorithmTest, LISTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
-
-        auto result = Sequence::longestOrderedSubsequence(input.begin(), input.end());
-        auto it2 = result.begin();
-        auto it1 = it2++;
-        for (; it2 != result.end(); ++it1, ++it2) {
-            EXPECT_GT(*it2 - *it1, 0);
-            EXPECT_GT(**it2, **it1);
-            auto vectIt = *it1;
-            for (++vectIt; vectIt != *it2; ++vectIt)
-                EXPECT_TRUE(*vectIt >= **it2 || *vectIt <= **it1);
+template <typename T, typename C> void verifySearchTree(const BinarySearchTree<T, C>& tree)
+{
+    C tester;
+    for (auto it(tree.begin(InOrder)); it != tree.end(); ++it) {
+        auto it2(it);
+        ++it2;
+        if (it2 != tree.end()) {
+            EXPECT_TRUE(tester(*it, *it2) || *it == *it2);
         }
-
-        auto vectIt = *it1;
-        for (++vectIt; vectIt != input.end(); ++vectIt)
-            EXPECT_LE(*vectIt, **it1);
-        
     }
 }
 
-TEST_F(AlgorithmTest, LISIteratorTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        auto size = sizeDist(engine);
-        std::list<uint32_t> input;
-        std::generate_n(std::back_inserter(input), size, [&inputDist, this]() {return inputDist(engine); });
+static std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine)
+{
+    std::vector<double> result(size);
+    std::uniform_real_distribution<> dist(0, bound);
+    std::generate(result.begin(), result.end(), [&dist, &engine]() { return dist(engine); });
+    return result;
+}
 
-        auto result = Sequence::longestOrderedSubsequence(input.begin(), input.end());
-        auto it2 = result.begin();
-        auto it1 = it2++;
-        for (; it2 != result.end(); ++it1, ++it2) {
-            EXPECT_GT(**it2, **it1);
-            auto vectIt = *it1;
-            for (++vectIt; vectIt != *it2; ++vectIt)
-                EXPECT_TRUE(*vectIt >= **it2 || *vectIt <= **it1);
+TEST_F(AlgorithmTest, RedBlackConstructor)
+{
+    for (uint32_t i = 0; i < 100; ++i) {
+        auto data(generateData(100, 100, engine));
+        RedBlackTree<double> tree(data.begin(), data.end());
+        verifySearchTree(tree);
+        for (auto val : data) {
+            EXPECT_TRUE(tree.contains(val));
+        }
+    }
+}
+
+TEST_F(AlgorithmTest, RedBlackInsertTest)
+{
+    for (uint32_t i = 5; i < 20; ++i) {
+        auto data(generateData(2 * i, i, engine));
+        RedBlackTree<double> tree(data.begin(), data.end());
+
+        std::uniform_real_distribution<> dist(0, i + 1);
+        for (uint32_t j = 0; j < 30; ++j) {
+            double insertVal = dist(engine);
+            tree.insert(insertVal);
+            EXPECT_TRUE(tree.contains(insertVal));
         }
 
-        auto vectIt = *it1;
-        for (++vectIt; vectIt != input.end(); ++vectIt)
-            EXPECT_LE(*vectIt, **it1);
+        verifySearchTree(tree);
+    }
+}
 
+TEST_F(AlgorithmTest, RedBlackRemoveTest)
+{
+    for (uint32_t i = 0; i < 100; ++i) {
+        auto data(generateData(100, 100, engine));
+        std::unique_ptr<BinarySearchTree<double>> tree(
+            new RedBlackTree<double>(data.begin(), data.end()));
+        for (double x : data) {
+            tree->remove(x);
+            verifySearchTree(*tree);
+        }
     }
 }

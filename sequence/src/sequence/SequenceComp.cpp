@@ -2,15 +2,17 @@
 #define STRING_COMP_CPP
 #include <array>
 
-template<typename CharT>
-typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(const std::basic_string<CharT>& input, const std::basic_string<CharT>& target) {
+template <typename CharT>
+typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(
+    const std::basic_string<CharT>& input, const std::basic_string<CharT>& target)
+{
     if (target.empty())
         return input.begin();
 
     // preprocessing
     std::vector<typename std::basic_string<CharT>::size_type> next(target.size());
     next[0] = std::basic_string<CharT>::npos;
-    if(next.size() > 1)
+    if (next.size() > 1)
         next[1] = 0;
     for (auto i = 2; i < next.size(); ++i) {
         auto matchIndex = next[i - 1];
@@ -35,15 +37,19 @@ typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(const 
     return input.end();
 }
 
-template<typename CharT>
-std::vector<Sequence::Instruction> Sequence::editDistance(const std::basic_string<CharT>& src, const std::basic_string<CharT>& target) {
+template <typename CharT>
+std::vector<Sequence::Instruction> Sequence::editDistance(
+    const std::basic_string<CharT>& src, const std::basic_string<CharT>& target)
+{
     struct CompNode {
         Instruction::Category step;
         uint32_t cost;
     };
 
-    // grid[i][j] denotes the edit distance from src.substring(0, i + 1) to target.substring(0, j + 1)
-    std::vector<std::vector<CompNode>> grid(src.size() + 1, std::vector<CompNode>(target.size() + 1));
+    // grid[i][j] denotes the edit distance from src.substring(0, i + 1) to
+    // target.substring(0, j + 1)
+    std::vector<std::vector<CompNode>> grid(
+        src.size() + 1, std::vector<CompNode>(target.size() + 1));
     for (uint32_t i = 0; i < grid.size(); ++i) {
         grid[i][0].step = Instruction::Category::Delete;
         grid[i][0].cost = i;
@@ -65,9 +71,8 @@ std::vector<Sequence::Instruction> Sequence::editDistance(const std::basic_strin
             choice[2].step = Instruction::Category::Insert;
             choice[2].cost = grid[i][j - 1].cost + 1;
 
-            grid[i][j] = *std::min_element(choice.begin(), choice.end(), [](auto& x, auto& y) {
-                return x.cost < y.cost;
-                });
+            grid[i][j] = *std::min_element(
+                choice.begin(), choice.end(), [](auto& x, auto& y) { return x.cost < y.cost; });
         }
     }
 
@@ -76,7 +81,8 @@ std::vector<Sequence::Instruction> Sequence::editDistance(const std::basic_strin
     uint32_t currentX = grid.size() - 1, currentY = grid[0].size() - 1;
     while (currentX != 0 || currentY != 0) {
         auto& node = grid[currentX][currentY];
-        if (node.step != Instruction::Category::Replace || src[currentX - 1] != target[currentY - 1]) {
+        if (node.step != Instruction::Category::Replace
+            || src[currentX - 1] != target[currentY - 1]) {
             Instruction instruction;
             instruction.directive = node.step;
             instruction.srcIndex = currentX - 1;

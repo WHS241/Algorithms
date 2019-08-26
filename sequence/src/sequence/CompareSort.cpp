@@ -8,7 +8,8 @@
 #include <structures/Heap.h>
 
 template <typename ForwardIt, typename Compare>
-void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
+void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
+{
     // base case
     if (first == last)
         return;
@@ -23,9 +24,8 @@ void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
     mergesort(temp, last, compare);
 
     // merge sub-solutions
-    std::list<typename std::iterator_traits<ForwardIt>::value_type> firstHalf(
-            first, temp),
-            secondHalf(temp, last);
+    std::list<typename std::iterator_traits<ForwardIt>::value_type> firstHalf(first, temp),
+        secondHalf(temp, last);
     auto it1 = firstHalf.begin(), it2 = secondHalf.begin();
     while (it1 != firstHalf.end() && it2 != secondHalf.end()) {
         if (compare(*it1, *it2)) {
@@ -43,7 +43,8 @@ void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare) {
 }
 
 template <typename BiDirIt, typename Compare>
-void Sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
+void Sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare)
+{
     // base case
     auto size = std::distance(first, last);
     if (size <= 1)
@@ -61,8 +62,8 @@ void Sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare) {
 }
 
 template <typename BiDirIt, typename Compare>
-BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
-                               Compare compare) {
+BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compare)
+{
     // setup for partition
     std::iter_swap(partition, first);
     auto forwardTemp(first), backwardTemp(last);
@@ -72,12 +73,12 @@ BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
 
     // partition: on each pass, find two values that need to be swapped
     while (true) {
-        while (((processedBack && forwardTemp != backwardTemp) ||
-                (!processedBack && forwardTemp != last)) &&
-               compare(*forwardTemp, *first))
+        while (((processedBack && forwardTemp != backwardTemp)
+                   || (!processedBack && forwardTemp != last))
+            && compare(*forwardTemp, *first))
             ++forwardTemp;
-        if ((processedBack && forwardTemp == backwardTemp) ||
-              (!processedBack && forwardTemp == last)) {
+        if ((processedBack && forwardTemp == backwardTemp)
+            || (!processedBack && forwardTemp == last)) {
             break;
         }
 
@@ -95,15 +96,14 @@ BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition,
     return forwardTemp;
 }
 
-template <typename It, typename Compare>
-void Sequence::heapsort(It first, It last, Compare compare) {
+template <typename It, typename Compare> void Sequence::heapsort(It first, It last, Compare compare)
+{
     if (first == last)
         return;
 
     // Random access: can sort without extra space
-    if constexpr (std::is_same<
-            typename std::iterator_traits<It>::iterator_category,
-            std::random_access_iterator_tag>::value) {
+    if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category,
+                      std::random_access_iterator_tag>::value) {
         auto distance = last - first;
 
         // heapify in opposite direction
@@ -155,7 +155,7 @@ void Sequence::heapsort(It first, It last, Compare compare) {
         }
     } else {
         BinaryHeap<typename std::iterator_traits<It>::value_type, Compare> heap(
-                first, last, compare);
+            first, last, compare);
         std::generate(first, last, [&heap]() { return heap.removeRoot(); });
     }
 }

@@ -5,15 +5,14 @@
 #include <functional>
 #include <unordered_map>
 
-
-template<typename T>
-class UnionFind {
-public :
+template <typename T> class UnionFind {
+public:
     UnionFind();
 
-    template<typename It>
+    template <typename It>
     UnionFind(It first, It last)
-        : sets() {
+        : sets()
+    {
         std::for_each(first, last, [this](const T& item) { insert(item); });
     };
 
@@ -29,7 +28,7 @@ public :
 
     uint32_t size() const noexcept;
 
-private :
+private:
     struct Data {
         T parent;
         uint32_t size;
@@ -40,4 +39,3 @@ private :
 #include "src/structures/UnionFind.cpp"
 
 #endif // !UNION_FIND_H
-
