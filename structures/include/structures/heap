@@ -1,0 +1,10 @@
+#ifndef STRUCTURES_HEAP
+#define STRUCTURES_HEAP
+
+// header for all heaps, should include this instead of any specific heap types
+
+#include "FibonacciHeap.h"
+#include "BinomialHeap.h"
+#include "NodeBinaryHeap.h"
+
+#endif // STRUCTURES_HEAP

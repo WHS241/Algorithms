@@ -11,6 +11,11 @@ Heap<T, Compare>::Heap(Compare comp)
 {
 }
 
+template <typename T, typename Compare> bool Heap<T, Compare>::empty() const noexcept
+{
+    return this->size() == 0;
+}
+
 template <typename T, typename Compare>
 BinaryHeap<T, Compare>::BinaryHeap(Compare comp)
     : Heap<T, Compare>(comp)
@@ -19,7 +24,7 @@ BinaryHeap<T, Compare>::BinaryHeap(Compare comp)
 }
 
 template <typename T, typename Compare>
-void BinaryHeap<T, Compare>::combine(const BinaryHeap<T, Compare>& src)
+void BinaryHeap<T, Compare>::merge(BinaryHeap<T, Compare>&& src)
 {
     std::list<T> temp(heap.begin(), heap.end());
     std::copy(src.heap.begin(), src.heap.end(), std::back_inserter(temp));
@@ -71,7 +76,7 @@ template <typename T, typename Compare> T BinaryHeap<T, Compare>::getRoot() cons
     return heap.front();
 }
 
-template <typename T, typename Compare> uint32_t BinaryHeap<T, Compare>::size() const
+template <typename T, typename Compare> uint32_t BinaryHeap<T, Compare>::size() const noexcept
 {
     return heap.size();
 }

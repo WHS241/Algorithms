@@ -31,6 +31,8 @@ std::unordered_map<T, std::pair<double, T>> allVertShortestPathDAG(
 Single source shortest path
 Non-negative weights
 Dijkstra's algorithm: O(V^2)
+Binary or Binomial heap: O((V+E) log V)
+Fibonacci heap: O(V log V + E)
 */
 template <typename T>
 std::pair<double, std::list<T>> pathDijkstra(const Graph<T>& src, const T& start, const T& dest);

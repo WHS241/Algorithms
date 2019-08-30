@@ -10,12 +10,15 @@
 template <typename T, typename Compare = std::less<>> class Heap {
 public:
     Heap(Compare comp = Compare());
+    
+
     virtual void insert(const T&) = 0;
     virtual T getRoot() const = 0;
     virtual T removeRoot() = 0;
-    virtual uint32_t size() const = 0;
-
-protected:
+    virtual uint32_t size() const noexcept = 0;
+    virtual bool empty() const noexcept;
+        
+protected : 
     Compare compare;
 };
 
@@ -25,7 +28,7 @@ class BinaryHeap : virtual public Heap<T, Compare> {
 public:
     BinaryHeap(Compare comp = Compare());
 
-    // ¦¨(n)
+    // Î˜(n)
     template <typename It>
     BinaryHeap(It first, It last, Compare comp = Compare())
         : Heap<T, Compare>(comp)
@@ -50,18 +53,18 @@ public:
         }
     };
 
-    // ¦¨(log n)
+    // Î˜(log n)
     virtual void insert(const T&);
 
-    // ¦¨(n)
-    void combine(const BinaryHeap<T, Compare>&);
+    // Î˜(n)
+    virtual void merge(BinaryHeap<T, Compare>&&);
 
-    // ¦¨(log n)
+    // Î˜(log n)
     virtual T removeRoot();
 
-    // ¦¨(1)
+    // Î˜(1)
     virtual T getRoot() const;
-    virtual uint32_t size() const;
+    virtual uint32_t size() const noexcept;
 
 private:
     std::vector<T> heap;
