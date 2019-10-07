@@ -90,7 +90,7 @@ template <typename T> std::list<T> Graph<T>::neighbors(const T& start) const
 
 template <typename T> std::list<std::pair<T, double>> Graph<T>::edges(const T& src) const
 {
-    auto representation = impl->edges(src);
+    auto representation = impl->edges(translation.at(src));
     std::list<std::pair<T, double>> result;
     std::transform(representation.begin(), representation.end(), std::back_inserter(result),
         [this](std::pair<uint32_t, double>& edge) {

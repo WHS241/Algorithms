@@ -1,8 +1,10 @@
 #ifndef GRAPH_PATH_H
 #define GRAPH_PATH_H
 #include <functional>
+#include <list>
+#include <unordered_map>
 
-#include <structures/Graph.h>
+template <typename T> class Graph;
 
 /*
 Supplies algorithms for finding the shortest path(s) in a graph

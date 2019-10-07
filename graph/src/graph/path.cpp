@@ -11,6 +11,10 @@ template <typename T>
 std::list<T> GraphAlg::leastEdgesPath(const Graph<T>& src, const T& start, const T& dest)
 {
     std::list<T> result;
+
+    if (start == dest)
+        return result;
+
     std::unordered_map<T, uint32_t> searchNumber;
     uint32_t currentNum = 0;
     bool found = false;
@@ -43,16 +47,20 @@ template <typename T, typename Compare>
 std::pair<double, std::list<T>> GraphAlg::shortestPathDAG(
     const Graph<T>& src, const T& start, const T& dest, Compare comp)
 {
+    std::list<T> result;
+
+    if (start == dest) {
+        return std::make_pair(0., result);
+    }
+
     std::unordered_map<T, std::pair<double, T>> allRes = allVertShortestPathDAG(src, start, comp);
-    std::pair<double, std::list<T>> result;
     if (allRes.find(dest) == allRes.end())
         throw std::domain_error("No path");
 
     for (T current = dest; current != start; current = allRes[current].second) {
-        result.second.push_back(current);
-        result.first += allRes[current].first;
+        result.push_back(current);
     }
-    return result;
+    return std::make_pair(allRes[dest].first, result);
 }
 
 template <typename T, typename Compare>
@@ -120,10 +128,14 @@ std::pair<double, std::list<T>> GraphAlg::pathDijkstra(
     const Graph<T>& src, const T& start, const T& dest)
 {
     std::unordered_map<T, std::pair<double, T>> allPairResult = pathDijkstra(src, start);
+    std::list<T> path;
+
+    if (start == dest) {
+        return std::make_pair(0., path);
+    }
+
     if (allPairResult.at(dest).second == dest)
         throw std::invalid_argument("No path");
-
-    std::list<T> path;
 
     for (T current = dest; current != start; current = allPairResult[current].second) {
         path.push_front(current);
@@ -131,6 +143,7 @@ std::pair<double, std::list<T>> GraphAlg::pathDijkstra(
 
     return std::make_pair(allPairResult[dest].first, path);
 }
+
 template <typename T>
 std::unordered_map<T, std::pair<double, T>> GraphAlg::pathDijkstra(
     const Graph<T>& src, const T& start)
@@ -206,6 +219,26 @@ std::unordered_map<T, std::pair<double, T>> GraphAlg::pathDijkstra(
 }
 
 template <typename T>
+std::pair<double, std::list<T>> GraphAlg::pathBellmanFord(
+    const Graph<T>& src, const T& start, const T& dest)
+{
+    std::unordered_map<T, std::pair<double, T>> allPairResult = pathBellmanFord(src, start);
+
+    std::list<T> path;
+    if (start == dest) {
+        return std::make_pair(0., path);
+    }
+    if (allPairResult.at(dest).second == dest)
+        throw std::invalid_argument("No path");
+
+    for (T current = dest; current != start; current = allPairResult[current].second) {
+        path.push_front(current);
+    }
+
+    return std::make_pair(allPairResult[dest].first, path);
+}
+
+template <typename T>
 std::unordered_map<T, std::pair<double, T>> GraphAlg::pathBellmanFord(
     const Graph<T>& src, const T& start)
 {
@@ -213,7 +246,7 @@ std::unordered_map<T, std::pair<double, T>> GraphAlg::pathBellmanFord(
         throw std::invalid_argument("Unweighted graph");
 
     // If there are any negative weights in an undirected graph, there is a trivial negative
-    // cycle Can use the more efficient Dijkstra algorithm in this case
+    // cycle Can use the more efficient Dijkstra's algorithm in this case
     if (!src.directed())
         return pathDijkstra(src, start);
 
@@ -243,7 +276,7 @@ std::unordered_map<T, std::pair<double, T>> GraphAlg::pathBellmanFord(
 
         // if no edges were updated, another iteration won't help
         // we also know there cannot be a negative cycle accessible to start,
-        // because then we would go through all V-1 iterations, continuously relaxing through the 
+        // because then we would go through all V-1 iterations, continuously relaxing through the
         // cycle
         if (!relaxed)
             return result;
@@ -255,6 +288,48 @@ std::unordered_map<T, std::pair<double, T>> GraphAlg::pathBellmanFord(
             for (auto& edge : src.edges(v))
                 if (result[v].first + edge.second < result[edge.first].first)
                     throw std::domain_error("Negative cycle");
+
+    return result;
+}
+
+template <typename T>
+std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> GraphAlg::allPairs(
+    const Graph<T>& src)
+{
+    std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> result;
+    auto vertices = src.vertices();
+    for (const T& v : vertices) {
+        result[v][v] = std::make_pair(0., v);
+
+        for (const auto& edge : src.edges(v))
+            result[v][edge.first] = std::make_pair(edge.second, v);
+    }
+
+    for (const T& middle : vertices) {
+        if (result.find(middle) != result.end()) {
+            for (const T& start : vertices) {
+                if (start != middle) {
+                    for (const T& dest : vertices) {
+                        if (dest != middle && result.find(start) != result.end()
+                            && result[start].find(middle) != result[start].end()
+                            && result[middle].find(dest) != result[middle].end()
+                            && (result[start].find(dest) == result[start].end()
+                                   || result[start][middle].first + result[middle][dest].first
+                                       < result[start][dest].first)) {
+                            result[start][dest] = std::make_pair(
+                                result[start][middle].first + result[middle][dest].first, middle);
+                        }
+                    }
+                }
+            }
+
+            // check for negative cycle
+            for (const T& v : vertices) {
+                if (result[v][v].first < 0)
+                    throw std::domain_error("Negative cycle");
+            }
+        }
+    }
 
     return result;
 }

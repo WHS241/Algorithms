@@ -89,6 +89,7 @@ BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition, Comp
             break;
 
         std::iter_swap(forwardTemp, backwardTemp);
+        ++forwardTemp;
     }
 
     // move partition value to correct place
