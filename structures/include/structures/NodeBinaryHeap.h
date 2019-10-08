@@ -13,7 +13,8 @@ class NodeBinaryHeap : virtual public NodeHeap<T, Compare> {
 public:
     typedef typename NodeHeap<T, Compare>::Node Node;
 
-    NodeBinaryHeap(Compare comp = Compare());
+    NodeBinaryHeap() = default;
+    explicit NodeBinaryHeap(Compare comp);
 
     // Θ(n)
     template <typename It>

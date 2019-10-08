@@ -38,7 +38,7 @@ template <typename T> const Graph<T>& Graph<T>::operator=(const Graph<T>& rhs)
 }
 
 template <typename T>
-Graph<T>::Graph(Graph<T>&& src)
+Graph<T>::Graph(Graph<T>&& src) noexcept
     : type()
     , impl()
     , translation()
@@ -47,7 +47,7 @@ Graph<T>::Graph(Graph<T>&& src)
     *this = std::move(src);
 }
 
-template <typename T> const Graph<T>& Graph<T>::operator=(Graph<T>&& rhs)
+template <typename T> const Graph<T>& Graph<T>::operator=(Graph<T>&& rhs) noexcept
 {
     if (this != &rhs) {
         impl.reset();
@@ -170,7 +170,7 @@ template <typename T> void Graph<T>::clear() noexcept
     reverse_translation.clear();
 }
 
-template <typename T> void Graph<T>::setType(GraphType type, const GraphImpl* const src)
+template <typename T> void Graph<T>::setType(GraphType type, const GraphImpl* src)
 {
     if (src == this->impl.get()) {
         if (type != this->type) {

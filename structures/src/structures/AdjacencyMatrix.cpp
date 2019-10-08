@@ -13,7 +13,11 @@ AdjacencyMatrix::AdjacencyMatrix(bool directed, bool weighted)
 
 const GraphImpl& AdjacencyMatrix::copyFrom(const GraphImpl& src)
 {
-    if (this != &src) {
+    auto cast = dynamic_cast<const AdjacencyMatrix*>(&src);
+    if (cast) {
+        return (*this = *cast);
+    }
+
         GRAPH_REP temp(src.order(),
             std::vector<double>(src.order(), std::numeric_limits<double>::quiet_NaN()));
         for (uint32_t i = 0; i < src.order(); ++i) {
@@ -25,7 +29,6 @@ const GraphImpl& AdjacencyMatrix::copyFrom(const GraphImpl& src)
         graph = std::move(temp);
         dir = src.directed();
         weight = src.weighted();
-    }
 
     return *this;
 }
@@ -73,7 +76,7 @@ std::list<std::pair<uint32_t, double>> AdjacencyMatrix::edges(const uint32_t& st
     std::list<std::pair<uint32_t, double>> result;
     for (uint32_t i = 0; i < graph.size(); ++i)
         if (!std::isnan(graph[start][i]))
-            result.push_back(std::make_pair(i, graph[start][i]));
+            result.emplace_back(i, graph[start][i]);
 
     return result;
 }
@@ -95,7 +98,7 @@ uint32_t AdjacencyMatrix::addVertex()
     auto temp(graph);
     for (auto& vertex : temp)
         vertex.push_back(std::numeric_limits<double>::quiet_NaN());
-    temp.push_back(std::vector<double>(graph.size() + 1, std::numeric_limits<double>::quiet_NaN()));
+    temp.emplace_back(graph.size() + 1, std::numeric_limits<double>::quiet_NaN());
 
     graph = std::move(temp);
     return graph.size();

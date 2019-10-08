@@ -16,8 +16,8 @@ public:
     virtual ~Graph() = default;
     Graph(const Graph<T>& src);
     const Graph& operator=(const Graph<T>& rhs);
-    Graph(Graph<T>&& src);
-    const Graph& operator=(Graph<T>&& rhs);
+    Graph(Graph<T>&& src) noexcept;
+    const Graph& operator=(Graph<T>&& rhs) noexcept;
 
     // order of graph
     virtual uint32_t order() const noexcept;
@@ -55,7 +55,7 @@ public:
     virtual void clear() noexcept;
 
 private:
-    void setType(GraphType type, const GraphImpl* const src = nullptr);
+    void setType(GraphType type, const GraphImpl* src = nullptr);
     void setEmpty(GraphType type, bool directed, bool weighted);
 
     GraphType type;

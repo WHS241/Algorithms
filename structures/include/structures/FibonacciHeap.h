@@ -6,11 +6,12 @@
 #include <unordered_set>
 
 template <typename T, typename Compare = std::less<>>
-class FibonacciHeap : virtual public NodeHeap<T, Compare> {
+class FibonacciHeap : public NodeHeap<T, Compare> {
 public:
     typedef typename NodeHeap<T, Compare>::Node Node;
 
-    FibonacciHeap(Compare comp = Compare());
+    FibonacciHeap() = default;
+    FibonacciHeap(Compare comp);
 
     template <typename It>
     FibonacciHeap(It first, It last, Compare comp = Compare())
@@ -31,8 +32,8 @@ public:
     virtual ~FibonacciHeap() noexcept;
     FibonacciHeap(const FibonacciHeap<T, Compare>&);
     FibonacciHeap& operator=(const FibonacciHeap<T, Compare>&);
-    FibonacciHeap(FibonacciHeap<T, Compare>&&);
-    FibonacciHeap& operator=(FibonacciHeap<T, Compare>&&);
+    FibonacciHeap(FibonacciHeap<T, Compare>&&) noexcept;
+    FibonacciHeap& operator=(FibonacciHeap<T, Compare>&&) noexcept;
 
     // Θ(1)
     virtual Node* add(const T&);
@@ -52,7 +53,7 @@ public:
 private:
     std::list<Node*> trees;
 
-    Node* min;
+    Node* min = nullptr;
 };
 
 #include <src/structures/FibonacciHeap.cpp>

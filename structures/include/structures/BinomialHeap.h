@@ -4,11 +4,12 @@
 #include "NodeHeap.h"
 
 template <typename T, typename Compare = std::less<>>
-class BinomialHeap : virtual public NodeHeap<T, Compare> {
+class BinomialHeap : public NodeHeap<T, Compare> {
 public:
     typedef typename NodeHeap<T, Compare>::Node Node;
 
-    BinomialHeap(Compare comp = Compare());
+    BinomialHeap() = default;
+    explicit BinomialHeap(Compare comp);
 
     template <typename It>
     BinomialHeap(It first, It last, Compare comp = Compare())

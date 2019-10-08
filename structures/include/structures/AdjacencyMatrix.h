@@ -17,7 +17,7 @@ class AdjacencyMatrix : virtual public GraphImpl {
 public:
     // 输入：dir：该图是不是有向图；weight：图里的边可否标长度
     AdjacencyMatrix(bool directed, bool weighted);
-    ~AdjacencyMatrix() override = default;
+    virtual ~AdjacencyMatrix() = default;
     const GraphImpl& copyFrom(const GraphImpl&) override;
 
     // 输出：图的阶

@@ -13,6 +13,11 @@ AdjacencyList::AdjacencyList(bool directed, bool weighted)
 
 const GraphImpl& AdjacencyList::copyFrom(const GraphImpl& src)
 {
+    auto cast = dynamic_cast<const AdjacencyList*>(&src);
+    if (cast) {
+        return (*this = *cast);
+    }
+
     GRAPH_REP temp(src.order());
     for (uint32_t i = 0; i < src.order(); ++i) {
         temp[i] = src.edges(i);

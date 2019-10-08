@@ -19,7 +19,7 @@ public:
     // O(1)
     void insert(const T& item);
 
-    // O(¦Á(n))
+    // O(Î±(n))
     void setUnion(const T& first, const T& second);
     T find(const T& item);
 

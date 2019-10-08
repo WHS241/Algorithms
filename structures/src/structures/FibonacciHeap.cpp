@@ -9,7 +9,6 @@ template <typename T, typename Compare>
 FibonacciHeap<T, Compare>::FibonacciHeap(Compare comp)
     : NodeHeap<T, Compare>(comp)
     , trees()
-    , min(nullptr)
 {
 }
 
@@ -53,14 +52,14 @@ FibonacciHeap<T, Compare>& FibonacciHeap<T, Compare>::operator=(
 }
 
 template <typename T, typename Compare>
-FibonacciHeap<T, Compare>::FibonacciHeap(FibonacciHeap<T, Compare>&& src)
+FibonacciHeap<T, Compare>::FibonacciHeap(FibonacciHeap<T, Compare>&& src) noexcept
     : FibonacciHeap<T, Compare>(src.comp)
 {
     *this = std::move(src);
 }
 
 template <typename T, typename Compare>
-FibonacciHeap<T, Compare>& FibonacciHeap<T, Compare>::operator=(FibonacciHeap<T, Compare>&& rhs)
+FibonacciHeap<T, Compare>& FibonacciHeap<T, Compare>::operator=(FibonacciHeap<T, Compare>&& rhs) noexcept
 {
     if (this != &rhs) {
         for (Node* root : trees)

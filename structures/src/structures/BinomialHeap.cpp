@@ -52,20 +52,20 @@ BinomialHeap<T, Compare>& BinomialHeap<T, Compare>::operator=(const BinomialHeap
 }
 
 template <typename T, typename Compare>
-BinomialHeap<T, Compare>::BinomialHeap(BinomialHeap<T, Compare>&& src)
+BinomialHeap<T, Compare>::BinomialHeap(BinomialHeap<T, Compare>&& src) noexcept
     : BinomialHeap<T, Compare>(src.compare)
 {
     *this = std::move(src);
 }
 
 template <typename T, typename Compare>
-BinomialHeap<T, Compare>& BinomialHeap<T, Compare>::operator=(BinomialHeap<T, Compare>&& rhs)
+BinomialHeap<T, Compare>& BinomialHeap<T, Compare>::operator=(BinomialHeap<T, Compare>&& rhs) noexcept
 {
     if (this != &rhs) {
-        for (Node*& root : trees) {
+        for (Node* root : trees) {
             delete root;
-            root = nullptr;
         }
+        trees.clear();
         min = nullptr;
         this->_size = 0;
         std::swap(trees, rhs.trees);
@@ -117,30 +117,36 @@ template <typename T, typename Compare> T BinomialHeap<T, Compare>::removeRoot()
         // Because of the way binomial heaps are built, none of these will be nullptr
         subtrees[child->children.size()] = child;
 
-    BinomialHeap<T, Compare> temp;
+    BinomialHeap<T, Compare> temp(this->compare);
     temp.trees = std::move(subtrees);
-    // find the minimum values, since merge() will not compare all roots
-    temp.min = temp.trees.empty()
-        ? nullptr
-        : *std::min_element(temp.trees.begin(), temp.trees.end(),
-              [this](Node* x, Node* y) { return this->compare(**x, **y); });
-
-    // We can now extract the node, updating min
-    auto it = std::find(trees.begin(), trees.end(), min);
-    *it = nullptr;
     auto oldSize = this->_size;
     auto oldMin = min;
-    min = *std::min_element(trees.begin(), trees.end(), [this](Node* x, Node* y) {
-        // here we actually have to account for nullptr
-        return x != nullptr && (y == nullptr || this->compare(**x, **y));
-    });
+    auto it = std::find(trees.begin(), trees.end(), min);
+    try {
+        // find the minimum values, since merge() will not compare all roots
+        temp.min = temp.trees.empty() ? nullptr
+                                      : *std::min_element(temp.trees.begin(), temp.trees.end(),
+                                                          [this](Node *x, Node *y) { return this->compare(**x, **y); });
 
-    // We don't actually need to recalculate the sizes; as long as temp._size reflects emptiness
-    // and the two values add up to new size
-    temp._size = temp.trees.size();
-    this->_size -= (temp._size + 1);
+        // We can now extract the node, updating min
+        *it = nullptr;
+        min = *std::min_element(trees.begin(), trees.end(), [this](Node *x, Node *y) {
+            // here we actually have to account for nullptr
+            return x != nullptr && (y == nullptr || this->compare(**x, **y));
+        });
 
-    merge(temp);
+        // We don't actually need to recalculate the sizes; as long as temp._size reflects emptiness
+        // and the two values add up to new size
+        temp._size = temp.trees.size();
+        this->_size -= (temp._size + 1);
+
+        merge(temp);
+    } catch(...) {
+        min = oldMin;
+        *it = min;
+        this->_size = oldSize;
+        throw;
+    }
 
     // isolate oldMin and delete (merge should have removed oldMin as the parent of the children)
     oldMin->children.clear();
@@ -264,4 +270,4 @@ void BinomialHeap<T, Compare>::merge(BinomialHeap<T, Compare>& src)
     src._size = 0;
     this->_size = newSize;
 }
-#endif // !BINOMIAL_HEAP_CPP
+#endif // BINOMIAL_HEAP_CPP

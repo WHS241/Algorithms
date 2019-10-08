@@ -9,7 +9,8 @@
 // Base class for heap structures
 template <typename T, typename Compare = std::less<>> class Heap {
 public:
-    Heap(Compare comp = Compare());
+    Heap() = default;
+    explicit Heap(Compare comp);
     
 
     virtual void insert(const T&) = 0;
@@ -26,7 +27,8 @@ protected :
 template <typename T, typename Compare = std::less<>>
 class BinaryHeap : virtual public Heap<T, Compare> {
 public:
-    BinaryHeap(Compare comp = Compare());
+    BinaryHeap() = default;
+    explicit BinaryHeap(Compare comp);
 
     // Θ(n)
     template <typename It>

@@ -11,11 +11,11 @@ template <typename T, typename Compare> class FibonacciHeap;
 // adding an element returns a pointer to the added node
 // pointer is valid until element is removed from heap
 template <typename T, typename Compare = std::less<>>
-class NodeHeap : virtual public Heap<T, Compare> {
+class NodeHeap : public Heap<T, Compare> {
 public:
-    NodeHeap(Compare comp = Compare())
+    NodeHeap() = default;
+    explicit NodeHeap(Compare comp)
         : Heap<T, Compare>(comp)
-        , _size(0)
     {
     }
 
@@ -71,7 +71,7 @@ protected:
     
     static Node* makeNode(const T& item);
 
-    uint32_t _size;
+    uint32_t _size = 0;
 };
 
 #include <src/structures/NodeHeap.cpp>

@@ -3,45 +3,45 @@
 #include <list>
 #include <ostream>
 
-// Í¼µÄ´¢´æ±íÊ¾
+// å›¾çš„å‚¨å­˜è¡¨ç¤º
 class GraphImpl {
 public:
-    // ÊäÈë£ºdir£º¸ÃÍ¼ÊÇ²»ÊÇÓĞÏòÍ¼£»weight£ºÍ¼ÀïµÄ±ß¿É·ñ±ê³¤¶È
+    // è¾“å…¥ï¼šdirï¼šè¯¥å›¾æ˜¯ä¸æ˜¯æœ‰å‘å›¾ï¼›weightï¼šå›¾é‡Œçš„è¾¹å¯å¦æ ‡é•¿åº¦
     GraphImpl(bool directed, bool weight)
         : dir(directed)
         , weight(weight) {};
     virtual ~GraphImpl() = default;
     virtual const GraphImpl& copyFrom(const GraphImpl&) = 0;
 
-    // Êä³ö£ºÍ¼µÄ½×
+    // è¾“å‡ºï¼šå›¾çš„é˜¶
     virtual uint32_t order() const noexcept = 0;
-    // Êä³ö£ºÍ¼ÀïÊÇ·ñ´æÔÚ´Óstartµ½endµÄ±ß
+    // è¾“å‡ºï¼šå›¾é‡Œæ˜¯å¦å­˜åœ¨ä»startåˆ°endçš„è¾¹
     virtual bool hasEdge(const uint32_t& start, const uint32_t& dest) const noexcept = 0;
-    // Êä³ö£º´ÓstartµÄendµÄ±ßµÄ³¤¶È¡£²»´æÔÚÊ±Êä³öNaN
+    // è¾“å‡ºï¼šä»startçš„endçš„è¾¹çš„é•¿åº¦ã€‚ä¸å­˜åœ¨æ—¶è¾“å‡ºNaN
     virtual double edgeCost(const uint32_t& start, const uint32_t& dest) const noexcept = 0;
-    // ÊäÈë£º½áµãÊı
-    // Êä³ö£º¸Ã½áµãµÄ£¨³ö£©¶È
+    // è¾“å…¥ï¼šç»“ç‚¹æ•°
+    // è¾“å‡ºï¼šè¯¥ç»“ç‚¹çš„ï¼ˆå‡ºï¼‰åº¦
     virtual uint32_t degree(const uint32_t&) const = 0;
-    // ÊäÈë£º½áµãÊı
-    // Êä³ö£º¸Ã½áµãµÄ£¨³ö£©±ßµÄÁíÒ»¸ö¶¥µã
+    // è¾“å…¥ï¼šç»“ç‚¹æ•°
+    // è¾“å‡ºï¼šè¯¥ç»“ç‚¹çš„ï¼ˆå‡ºï¼‰è¾¹çš„å¦ä¸€ä¸ªé¡¶ç‚¹
     virtual std::list<uint32_t> neighbors(const uint32_t& start) const = 0;
     virtual std::list<std::pair<uint32_t, double>> edges(const uint32_t&) const = 0;
 
-    // ´Óstartµ½dest¼Ó±ß£¬³¤¶ÈÎªcost¡£Èô¸Ã±ßÒÑ´æÔÚ£¬½«±ßµÄ³¤¶ÈÉèÎªcost¡£
+    // ä»startåˆ°deståŠ è¾¹ï¼Œé•¿åº¦ä¸ºcostã€‚è‹¥è¯¥è¾¹å·²å­˜åœ¨ï¼Œå°†è¾¹çš„é•¿åº¦è®¾ä¸ºcostã€‚
     virtual void setEdge(const uint32_t& start, const uint32_t& dest, double cost = 0.0) = 0;
-    // ¼Ó½áµã
-    // Êä³ö£ºÍ¼½×ĞÂÖµ
+    // åŠ ç»“ç‚¹
+    // è¾“å‡ºï¼šå›¾é˜¶æ–°å€¼
     virtual uint32_t addVertex() = 0;
-    // ÊäÈë£º±ßÆğµãÓëÖÕµã
-    // ÔËĞĞ£ºÈç¹û´æÔÚ£¬½«¸Ã±ßÉ¾³ı
+    // è¾“å…¥ï¼šè¾¹èµ·ç‚¹ä¸ç»ˆç‚¹
+    // è¿è¡Œï¼šå¦‚æœå­˜åœ¨ï¼Œå°†è¯¥è¾¹åˆ é™¤
     virtual void removeEdge(const uint32_t& start, const uint32_t& dest) = 0;
-    // ÊäÈë£º½áµã
-    // ÔËĞĞ£ºÉ¾³ı¸Ã½áµãµÄËùÓĞµÄ£¨³ö£©±ß
+    // è¾“å…¥ï¼šç»“ç‚¹
+    // è¿è¡Œï¼šåˆ é™¤è¯¥ç»“ç‚¹çš„æ‰€æœ‰çš„ï¼ˆå‡ºï¼‰è¾¹
     virtual void isolate(const uint32_t& start) = 0;
-    // ÊäÈë£º½áµã
-    // ÔËĞĞ£º½«toRemoveºÍ×îºó½áµãÇĞ»»£¬²¢É¾³ıÒÔÇ°µÄto_remove
+    // è¾“å…¥ï¼šç»“ç‚¹
+    // è¿è¡Œï¼šå°†toRemoveå’Œæœ€åç»“ç‚¹åˆ‡æ¢ï¼Œå¹¶åˆ é™¤ä»¥å‰çš„to_remove
     virtual void remove(const uint32_t& toRemove) = 0;
-    // Çå¿ÕÕû¸öÍ¼
+    // æ¸…ç©ºæ•´ä¸ªå›¾
     virtual void clear() noexcept = 0;
 
     virtual bool directed() const noexcept { return dir; };

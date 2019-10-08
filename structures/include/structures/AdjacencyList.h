@@ -18,7 +18,7 @@ public:
     // 输入：dir：该图是不是有向图；weight：图里的边可否标长度
     AdjacencyList(bool directed, bool weighted);
 
-    ~AdjacencyList() override = default;
+    virtual ~AdjacencyList() = default;
     const GraphImpl& copyFrom(const GraphImpl&) override;
 
     // 输出：图的阶

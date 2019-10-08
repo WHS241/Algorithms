@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include <queue>
 #include <random>
 #include <vector>
 
@@ -14,6 +15,7 @@
 class AlgorithmTest : public ::testing::Test {
 protected:
     std::mt19937_64 engine;
+    std::priority_queue<double> heap;
 
     Graph<uint32_t> input;
 
@@ -92,8 +94,7 @@ TEST_F(AlgorithmTest, PathTests)
                 auto it1 = buildResult.begin();
                 generatedPathFW += input.edgeCost(start, *it1);
                 ++it1;
-                for (auto it2 = buildResult.begin();
-                     it1 != buildResult.end(); ++it1, ++it2) {
+                for (auto it2 = buildResult.begin(); it1 != buildResult.end(); ++it1, ++it2) {
                     generatedPathFW += input.edgeCost(*it2, *it1);
                 }
             }
@@ -102,4 +103,60 @@ TEST_F(AlgorithmTest, PathTests)
             EXPECT_DOUBLE_EQ(generatedPathFW, allPairResult[start][end].first);
         }
     }
+}
+TEST_F(AlgorithmTest, DijkstraAllPairTest)
+{
+    // Due to the complexity of this algorithm/verification, only using a known-answer problem
+    // To an extent, this also serves as a test for decrease() on the heap structure used
+    Graph<char> input(true, true);
+    std::vector<char> vertices({ 's', 'a', 'b', 'c', 'd', 'e', 'f' });
+    for (char& vert : vertices)
+        input.addVertex(vert);
+
+    input.setEdge('s', 'b', 7);
+    input.setEdge('s', 'c', 20);
+    input.setEdge('s', 'd', 2);
+    input.setEdge('s', 'e', 13);
+    input.setEdge('a', 'd', 1);
+    input.setEdge('b', 'a', 7);
+    input.setEdge('b', 'c', 10);
+    input.setEdge('b', 'd', 8);
+    input.setEdge('b', 'f', 8);
+    input.setEdge('d', 'c', 8);
+    input.setEdge('d', 'f', 5);
+    input.setEdge('e', 'f', 12);
+
+    auto result = GraphAlg::pathDijkstra(input, 's');
+    EXPECT_EQ(result['s'].first, 0);
+    EXPECT_EQ(result['a'], std::make_pair(14., 'b'));
+    EXPECT_EQ(result['b'], std::make_pair(7., 's'));
+    EXPECT_EQ(result['c'], std::make_pair(10., 'd'));
+    EXPECT_EQ(result['d'], std::make_pair(2., 's'));
+    EXPECT_EQ(result['e'], std::make_pair(13., 's'));
+    EXPECT_EQ(result['f'], std::make_pair(7., 'd'));
+}
+
+TEST_F(AlgorithmTest, DijkstraSinglePathTest)
+{
+    // Due to the complexity of this algorithm/verification, only using a known-answer problem
+    Graph<int> input(false, true);
+    std::vector<int> vertices({ 1, 2, 3, 4, 5, 6 });
+    for (int& vert : vertices)
+        input.addVertex(vert);
+
+    input.setEdge(1, 2, 7);
+    input.setEdge(1, 3, 9);
+    input.setEdge(1, 6, 14);
+    input.setEdge(2, 3, 10);
+    input.setEdge(2, 4, 15);
+    input.setEdge(3, 4, 11);
+    input.setEdge(3, 6, 2);
+    input.setEdge(4, 5, 6);
+    input.setEdge(5, 6, 9);
+
+    auto result = GraphAlg::pathDijkstra(input, 1, 5);
+    EXPECT_EQ(result.first, 20);
+    std::vector<int> correctPath({3, 6, 5 });
+    EXPECT_EQ(result.second.size(), correctPath.size());
+    EXPECT_TRUE(std::equal(result.second.begin(), result.second.end(), correctPath.begin()));
 }
