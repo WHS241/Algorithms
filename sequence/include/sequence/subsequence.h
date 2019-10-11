@@ -3,7 +3,7 @@
 
 #include <iterator>
 
-namespace Sequence {
+namespace sequence {
 /*
 Verify if [targetFirst, targetLast) is a subsequence of [masterFirst,
 masterLast) Conditions: It1::value_type is equivalent to It2::value_type
@@ -29,7 +29,7 @@ n_x <= (last - first) and compare(first[n_(i-1)], first[n_i]) is true for any 0
 < i <= x O(n log n)
 */
 template <typename It, typename Compare = std::less<>>
-std::list<It> longestOrderedSubsequence(It first, It last, Compare comp = Compare());
+std::list<It> longest_ordered_subsequence(It first, It last, Compare comp = Compare());
 
 namespace {
     /*

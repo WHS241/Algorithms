@@ -6,7 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
-tree::binary_tree<char>::node* Sequence::createHuffmanTree(const std::string& message)
+tree::binary_tree<char>::node* sequence::createHuffmanTree(const std::string& message)
 {
     if (message.empty())
         return nullptr;

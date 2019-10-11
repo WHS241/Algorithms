@@ -15,7 +15,7 @@ graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cy
 
     if (Directed && cyclic) {
         for (uint32_t i = 0; i < num_vertices; ++i)
-            graph.addVertex(graph.order());
+            graph.add_vertex(graph.order());
 
         if (num_vertices <= 1)
             return graph;
@@ -29,14 +29,14 @@ graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cy
                     ++dest;
 
                 if (Weighted)
-                    graph.setEdge(i, dest, weight(gen));
+                    graph.set_edge(i, dest, weight(gen));
                 else
-                    graph.setEdge(i, dest);
+                    graph.set_edge(i, dest);
             }
         }
     } else {
         for (uint32_t i = 0; i < num_vertices; ++i) {
-            uint32_t current_size = graph.addVertex(graph.order());
+            uint32_t current_size = graph.add_vertex(graph.order());
             if (current_size <= 1)
                 continue;
 
@@ -44,9 +44,9 @@ graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cy
             uint32_t edges = low_degree(gen);
             for (uint32_t i = 0; i < edges; ++i)
                 if (Weighted)
-                    graph.setEdge(current_size - 1, low_degree(gen), weight(gen));
+                    graph.set_edge(current_size - 1, low_degree(gen), weight(gen));
                 else
-                    graph.setEdge(current_size - 1, low_degree(gen));
+                    graph.set_edge(current_size - 1, low_degree(gen));
         }
     }
 

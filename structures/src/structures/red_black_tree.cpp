@@ -4,22 +4,22 @@
 namespace tree {
     template<typename T, typename Compare>
     void red_black_tree<T, Compare>::insert(const T &item) {
-        auto *ptr = dynamic_cast<t_node *>(this->root.get());
+        auto *ptr = dynamic_cast<t_node *>(this->_root.get());
         if (ptr == nullptr) {
             auto new_root = new t_node(item, true);
-            this->root.reset(new_root);
+            this->_root.reset(new_root);
             this->_size = 1;
             return;
         }
 
-        bool go_left = this->compare(item, ptr->_item);
-        auto *next = go_left ? dynamic_cast<t_node *>(ptr->_left)
-                             : dynamic_cast<t_node *>(ptr->_right);
+        bool go_left = this->_compare(item, ptr->item);
+        auto *next = go_left ? dynamic_cast<t_node *>(ptr->left)
+                             : dynamic_cast<t_node *>(ptr->right);
         while (next != nullptr) {
             ptr = next;
-            go_left = this->compare(item, ptr->_item);
-            next = go_left ? dynamic_cast<t_node *>(ptr->_left)
-                           : dynamic_cast<t_node *>(ptr->_right);
+            go_left = this->_compare(item, ptr->item);
+            next = go_left ? dynamic_cast<t_node *>(ptr->left)
+                           : dynamic_cast<t_node *>(ptr->right);
         }
 
         auto add = new t_node(item, false, ptr);
@@ -31,15 +31,15 @@ namespace tree {
         ++this->_size;
 
         // now to balance the tree
-        while (add != this->root.get()) {
-            auto parent = dynamic_cast<t_node *>(add->_parent);
+        while (add != this->_root.get()) {
+            auto parent = dynamic_cast<t_node *>(add->parent);
             // Parent is black: no adjustments needed
             if (parent->is_black)
                 return;
 
-            auto grandparent = dynamic_cast<t_node *>(parent->_parent);
+            auto grandparent = dynamic_cast<t_node *>(parent->parent);
             auto uncle = dynamic_cast<t_node *>(
-                    (grandparent->_left == parent) ? grandparent->_right : grandparent->_left);
+                    (grandparent->left == parent) ? grandparent->right : grandparent->left);
 
             if (uncle != nullptr && !uncle->is_black) {
                 // red parent and uncle
@@ -51,24 +51,24 @@ namespace tree {
                 add = grandparent;
             } else {
                 // red parent, black uncle
-                if (parent == grandparent->_left) {
+                if (parent == grandparent->left) {
                     // rotate red node outside
-                    if (add == parent->_right)
-                        binary_search_tree<T, Compare>::rotate(parent, false);
+                    if (add == parent->right)
+                        binary_search_tree<T, Compare>::_rotate(parent, false);
 
                     // rotate grandparent over
-                    binary_search_tree<T, Compare>::rotate(grandparent, true);
+                    binary_search_tree<T, Compare>::_rotate(grandparent, true);
 
                 } else {
                     // mirror version
-                    if (add == parent->_left)
-                        binary_search_tree<T, Compare>::rotate(parent, true);
-                    binary_search_tree<T, Compare>::rotate(grandparent, false);
+                    if (add == parent->left)
+                        binary_search_tree<T, Compare>::_rotate(parent, true);
+                    binary_search_tree<T, Compare>::_rotate(grandparent, false);
                 }
 
                 // recolor, reassign if necessary
                 grandparent->is_black = false;
-                add = dynamic_cast<t_node *>(grandparent->_parent);
+                add = dynamic_cast<t_node *>(grandparent->parent);
                 add->is_black = true;
                 return;
             }
@@ -80,52 +80,52 @@ namespace tree {
 
     template<typename T, typename Compare>
     void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it) {
-        binary_search_tree<T, Compare>::verify(it);
-        auto node = dynamic_cast<t_node *>(binary_tree<T>::getNode(it));
+        binary_search_tree<T, Compare>::_verify(it);
+        auto node = dynamic_cast<t_node *>(binary_tree<T>::_get_node(it));
         if (node == nullptr)
             return;
         if (this->_size == 1) {
-            this->root.reset();
+            this->_root.reset();
             this->_size = 0;
             return;
         }
 
         // if two children, find successor and swap values
-        if (node->_left && node->_right) {
-            auto successor = node->_left;
-            while (successor->_right)
-                successor = successor->_right;
+        if (node->left && node->right) {
+            auto successor = node->left;
+            while (successor->right)
+                successor = successor->right;
 
             // swap values directly, then set node to process as successor
-            std::swap(node->_item, successor->_item);
+            std::swap(node->item, successor->item);
             node = dynamic_cast<t_node *>(successor);
         }
 
-        auto child = dynamic_cast<t_node *>(node->_left ? node->_left : node->_right);
-        bool go_left = (child == node->_left);
-        if (node == this->root.get()) {
+        auto child = dynamic_cast<t_node *>(node->left ? node->left : node->right);
+        bool go_left = (child == node->left);
+        if (node == this->_root.get()) {
             // child must be red, can make that the new root
             if (go_left) {
-                node->_left = nullptr;
+                node->left = nullptr;
             } else {
-                node->_right = nullptr;
+                node->right = nullptr;
             }
-            this->root.reset(child);
-            child->_parent = nullptr;
+            this->_root.reset(child);
+            child->parent = nullptr;
             child->is_black = true;
             --this->_size;
             return;
         }
 
-        auto parent = dynamic_cast<t_node *>(node->_parent);
-        bool is_left_child = (node == parent->_left);
+        auto parent = dynamic_cast<t_node *>(node->parent);
+        bool is_left_child = (node == parent->left);
 
         auto swap_out = [](t_node *new_parent, t_node *new_child, bool change_left) {
-            if (new_child && new_child->_parent) {
-                if (new_child == new_child->_parent->_left)
-                    new_child->_parent->changeLeft(nullptr);
+            if (new_child && new_child->parent) {
+                if (new_child == new_child->parent->left)
+                    new_child->parent->change_left(nullptr);
                 else
-                    new_child->_parent->changeRight(nullptr);
+                    new_child->parent->change_right(nullptr);
             }
 
             if (change_left)
@@ -152,15 +152,15 @@ namespace tree {
             // need to rebalance
             // since parent-node-child has black-height 2, sibling subtree needs at
             // least one level sibling will never be nullptr
-            auto sibling = dynamic_cast<t_node *>(is_left_child ? parent->_right : parent->_left);
-            auto outer_sibling = dynamic_cast<t_node *>(sibling->_left);
-            auto inner_sibling = dynamic_cast<t_node *>(sibling->_right);
+            auto sibling = dynamic_cast<t_node *>(is_left_child ? parent->right : parent->left);
+            auto outer_sibling = dynamic_cast<t_node *>(sibling->left);
+            auto inner_sibling = dynamic_cast<t_node *>(sibling->right);
             if (is_left_child)
                 std::swap(inner_sibling, outer_sibling);
 
             // need to keep looping until at least one of
             // parent/sibling/sibling-children is red
-            while (node != this->root.get()) {
+            while (node != this->_root.get()) {
                 if (!parent->is_black || !sibling->is_black)
                     break;
                 if ((!inner_sibling || inner_sibling->is_black)
@@ -170,12 +170,12 @@ namespace tree {
                     // balanced up to parent, but parent black-height is shorter than its sibling's
                     // need to rebalance starting at parent
                     node = parent;
-                    parent = dynamic_cast<t_node *>(node->_parent);
+                    parent = dynamic_cast<t_node *>(node->parent);
                     if (parent) {
-                        is_left_child = (node == parent->_left);
-                        sibling = dynamic_cast<t_node *>(is_left_child ? parent->_right : parent->_left);
-                        outer_sibling = dynamic_cast<t_node *>(sibling->_left);
-                        inner_sibling = dynamic_cast<t_node *>(sibling->_right);
+                        is_left_child = (node == parent->left);
+                        sibling = dynamic_cast<t_node *>(is_left_child ? parent->right : parent->left);
+                        outer_sibling = dynamic_cast<t_node *>(sibling->left);
+                        inner_sibling = dynamic_cast<t_node *>(sibling->right);
                         if (is_left_child) {
                             std::swap(inner_sibling, outer_sibling);
                         }
@@ -184,20 +184,20 @@ namespace tree {
                     break;
                 }
             }
-            if (node == this->root.get())
+            if (node == this->_root.get())
                 return;
 
             // red sibling: parent must have been black; rotate and swap
             if (!sibling->is_black) {
-                binary_search_tree<T, Compare>::rotate(parent, !is_left_child);
+                binary_search_tree<T, Compare>::_rotate(parent, !is_left_child);
                 parent->is_black = false;
                 sibling->is_black = true;
 
                 // not fully balanced yet: relabel pointers, then move on to red parent
                 // scenarios
                 sibling = inner_sibling;
-                outer_sibling = dynamic_cast<t_node *>(sibling->_left);
-                inner_sibling = dynamic_cast<t_node *>(sibling->_right);
+                outer_sibling = dynamic_cast<t_node *>(sibling->left);
+                inner_sibling = dynamic_cast<t_node *>(sibling->right);
                 if (is_left_child) {
                     std::swap(inner_sibling, outer_sibling);
                 }
@@ -212,7 +212,7 @@ namespace tree {
                 // we need red on the outside, regardless of the inside color
                 if ((!outer_sibling || outer_sibling->is_black)) {
                     // inner must be red if we reach here
-                    binary_search_tree<T, Compare>::rotate(sibling, is_left_child);
+                    binary_search_tree<T, Compare>::_rotate(sibling, is_left_child);
                     sibling->is_black = false;
                     inner_sibling->is_black = true;
 
@@ -220,11 +220,11 @@ namespace tree {
                     outer_sibling = sibling;
                     sibling = inner_sibling;
                     inner_sibling = dynamic_cast<t_node *>(
-                            is_left_child ? inner_sibling->_left : inner_sibling->_right);
+                            is_left_child ? inner_sibling->left : inner_sibling->right);
                 }
 
                 // outer_sibling now must be red, sibling is black
-                binary_search_tree<T, Compare>::rotate(parent, !is_left_child);
+                binary_search_tree<T, Compare>::_rotate(parent, !is_left_child);
                 sibling->is_black = parent->is_black;
                 parent->is_black = true;
                 outer_sibling->is_black = true;
@@ -241,14 +241,14 @@ namespace tree {
     template<typename T, typename Compare>
     typename red_black_tree<T, Compare>::t_node *red_black_tree<T, Compare>::t_node::change_left(
             red_black_tree<T, Compare>::t_node *to_add) noexcept {
-        return dynamic_cast<t_node *>(binary_tree<T>::node::changeLeft(to_add));
+        return dynamic_cast<t_node *>(binary_tree<T>::node::change_left(to_add));
     }
 
     template<typename T, typename Compare>
     typename red_black_tree<T, Compare>::t_node *
     red_black_tree<T, Compare>::t_node::change_right(
             red_black_tree<T, Compare>::t_node *to_add) noexcept {
-        return dynamic_cast<t_node *>(binary_tree<T>::node::changeRight(to_add));
+        return dynamic_cast<t_node *>(binary_tree<T>::node::change_right(to_add));
     }
 
     template<typename T, typename Compare>

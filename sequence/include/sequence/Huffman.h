@@ -4,7 +4,7 @@
 
 #include <structures/binary_tree_base.h>
 
-namespace Sequence {
+namespace sequence {
 /*
 Generate the Huffman encoding
 O(n log n)

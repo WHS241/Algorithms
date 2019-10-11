@@ -18,7 +18,8 @@ namespace heap {
         explicit binary_heap(Compare comp);
 
         // Θ(n)
-        template<typename It, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+        template<typename It, typename _Compare = Compare, typename _Requires = typename
+        std::enable_if_t<std::is_default_constructible_v<_Compare>>>
         binary_heap(It first, It last) : binary_heap(first, last, Compare()) {};
         template<typename It>
         binary_heap(It first, It last, Compare comp)

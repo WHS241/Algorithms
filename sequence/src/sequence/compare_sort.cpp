@@ -4,11 +4,12 @@
 #include <iterator>
 #include <list>
 #include <type_traits>
+#include <thread>
 
 #include <structures/heap_base.h>
 
 template <typename ForwardIt, typename Compare>
-void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
+void sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
 {
     // base case
     if (first == last)
@@ -20,14 +21,17 @@ void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
     // recursive step
     temp = first;
     std::advance(temp, std::distance(first, last) / 2);
-    mergesort(first, temp, compare);
-    mergesort(temp, last, compare);
+
+    std::thread subproblem_A(mergesort, first, temp, compare);
+    std::thread subproblem_B(mergesort, temp, last, compare);
+    subproblem_A.join();
+    subproblem_B.join();
 
     // merge sub-solutions
-    std::list<typename std::iterator_traits<ForwardIt>::value_type> firstHalf(first, temp),
-        secondHalf(temp, last);
-    auto it1 = firstHalf.begin(), it2 = secondHalf.begin();
-    while (it1 != firstHalf.end() && it2 != secondHalf.end()) {
+    std::list<typename std::iterator_traits<ForwardIt>::value_type> first_half(first, temp),
+        second_half(temp, last);
+    auto it1 = first_half.begin(), it2 = second_half.begin();
+    while (it1 != first_half.end() && it2 != second_half.end()) {
         if (compare(*it1, *it2)) {
             *first++ = std::move(*it1);
             ++it1;
@@ -38,12 +42,12 @@ void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
     }
 
     // one of these is empty
-    std::copy(it1, firstHalf.end(), first);
-    std::copy(it2, secondHalf.end(), first);
+    std::copy(it1, first_half.end(), first);
+    std::copy(it2, second_half.end(), first);
 }
 
 template <typename BiDirIt, typename Compare>
-void Sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare)
+void sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare)
 {
     // base case
     auto size = std::distance(first, last);
@@ -51,18 +55,18 @@ void Sequence::quicksort(BiDirIt first, BiDirIt last, Compare compare)
         return;
 
     // random pivot, swap with first element
-    auto forwardTemp(first);
-    std::uniform_int_distribution<uint32_t> indexGen(0, size - 1);
-    std::advance(forwardTemp, indexGen(engine));
+    auto forward_temp(first);
+    std::uniform_int_distribution<uint32_t> index_generator(0, size - 1);
+    std::advance(forward_temp, index_generator(engine));
 
-    auto partitionIt = partition(first, last, forwardTemp, compare);
+    auto partition_index = partition(first, last, forward_temp, compare);
 
-    quicksort(first, partitionIt, compare);
-    quicksort(++partitionIt, last, compare);
+    quicksort(first, partition_index, compare);
+    quicksort(++partition_index, last, compare);
 }
 
 template <typename BiDirIt, typename Compare>
-BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compare)
+BiDirIt sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compare)
 {
     // setup for partition
     std::iter_swap(partition, first);
@@ -97,7 +101,7 @@ BiDirIt Sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition, Comp
     return forwardTemp;
 }
 
-template <typename It, typename Compare> void Sequence::heapsort(It first, It last, Compare compare)
+template <typename It, typename Compare> void sequence::heapsort(It first, It last, Compare compare)
 {
     if (first == last)
         return;

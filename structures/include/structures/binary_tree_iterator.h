@@ -10,7 +10,7 @@ namespace tree {
     class binary_tree;
 
     enum traversal {
-        PreOrder, InOrder, PostOrder, LevelOrder
+        pre_order, in_order, post_order, level_order
     };
 
     template<typename T>

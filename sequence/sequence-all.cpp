@@ -1,5 +1,5 @@
-#include <sequence/BinarySearch.h>
-#include <sequence/CompareSort.h>
+#include <sequence/binary_search.h>
+#include <sequence/compare_sort.h>
 #include <sequence/NonCompareSort.h>
-#include <sequence/OrderStatistics.h>
+#include <sequence/order_stats.h>
 #include <sequence/subsequence.h>

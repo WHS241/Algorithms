@@ -26,7 +26,7 @@ namespace tree {
         virtual tree_iterator_impl &operator--() noexcept = 0;
 
     protected:
-        typename binary_tree<T>::BinaryNode *_current;
+        typename binary_tree<T>::node *_current;
 
         friend class tree_iterator<T>;
     };

@@ -3,7 +3,7 @@
 #include <array>
 
 template <typename CharT>
-typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(
+typename std::basic_string<CharT>::const_iterator sequence::find_substring(
     const std::basic_string<CharT>& input, const std::basic_string<CharT>& target)
 {
     if (target.empty())
@@ -15,11 +15,11 @@ typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(
     if (next.size() > 1)
         next[1] = 0;
     for (auto i = 2; i < next.size(); ++i) {
-        auto matchIndex = next[i - 1];
-        while (matchIndex != next[0] && target[i - 1] != target[matchIndex])
-            matchIndex = next[matchIndex];
+        auto match_index = next[i - 1];
+        while (match_index != next[0] && target[i - 1] != target[match_index])
+            match_index = next[match_index];
 
-        next[i] = matchIndex + 1;
+        next[i] = match_index + 1;
     }
 
     // find string
@@ -38,24 +38,24 @@ typename std::basic_string<CharT>::const_iterator Sequence::findSubstring(
 }
 
 template <typename CharT>
-std::vector<Sequence::Instruction> Sequence::editDistance(
+std::vector<sequence::instruction> sequence::edit_distance(
     const std::basic_string<CharT>& src, const std::basic_string<CharT>& target)
 {
-    struct CompNode {
-        Instruction::Category step;
+    struct helper_node {
+        instruction::category step;
         uint32_t cost;
     };
 
     // grid[i][j] denotes the edit distance from src.substring(0, i + 1) to
     // target.substring(0, j + 1)
-    std::vector<std::vector<CompNode>> grid(
-        src.size() + 1, std::vector<CompNode>(target.size() + 1));
+    std::vector<std::vector<helper_node>> grid(
+        src.size() + 1, std::vector<helper_node>(target.size() + 1));
     for (uint32_t i = 0; i < grid.size(); ++i) {
-        grid[i][0].step = Instruction::Category::Delete;
+        grid[i][0].step = instruction::category::delete_char;
         grid[i][0].cost = i;
     }
     for (uint32_t i = 0; i < grid[0].size(); ++i) {
-        grid[0][i].step = Instruction::Category::Insert;
+        grid[0][i].step = instruction::category::insert_char;
         grid[0][i].cost = i;
     }
 
@@ -63,12 +63,12 @@ std::vector<Sequence::Instruction> Sequence::editDistance(
     for (uint32_t i = 1; i < grid.size(); ++i) {
         for (uint32_t j = 1; j < grid[i].size(); ++j) {
             // the three possible steps to reach this node
-            std::array<CompNode, 3> choice;
-            choice[0].step = Instruction::Category::Replace;
+            std::array<helper_node, 3> choice;
+            choice[0].step = instruction::category::replace_char;
             choice[0].cost = grid[i - 1][j - 1].cost + (src[i - 1] == target[j - 1] ? 0 : 1);
-            choice[1].step = Instruction::Category::Delete;
+            choice[1].step = instruction::category::delete_char;
             choice[1].cost = grid[i - 1][j].cost + 1;
-            choice[2].step = Instruction::Category::Insert;
+            choice[2].step = instruction::category::insert_char;
             choice[2].cost = grid[i][j - 1].cost + 1;
 
             grid[i][j] = *std::min_element(
@@ -77,23 +77,23 @@ std::vector<Sequence::Instruction> Sequence::editDistance(
     }
 
     // backtrack from final node to first
-    std::vector<Instruction> result;
+    std::vector<instruction> result;
     uint32_t currentX = grid.size() - 1, currentY = grid[0].size() - 1;
     while (currentX != 0 || currentY != 0) {
         auto& node = grid[currentX][currentY];
-        if (node.step != Instruction::Category::Replace
+        if (node.step != instruction::category::replace_char
             || src[currentX - 1] != target[currentY - 1]) {
-            Instruction instruction;
-            instruction.directive = node.step;
-            instruction.srcIndex = currentX - 1;
-            instruction.targetIndex = currentY - 1;
-            result.push_back(instruction);
+            instruction step;
+            step.directive = node.step;
+            step.src_index = currentX - 1;
+            step.target_index = currentY - 1;
+            result.push_back(step);
         }
 
         // recalibrate currentX and currentY
-        if (node.step != Instruction::Category::Delete)
+        if (node.step != instruction::category::delete_char)
             --currentY;
-        if (node.step != Instruction::Category::Insert)
+        if (node.step != instruction::category::insert_char)
             --currentX;
     }
 

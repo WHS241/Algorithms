@@ -2,12 +2,12 @@
 #define BINARY_SEARCH_CPP
 
 template <typename RandomIt, typename T, typename Compare>
-RandomIt Sequence::binarySearch(RandomIt first, RandomIt last, const T& item, Compare comp)
+RandomIt sequence::binary_search(RandomIt first, RandomIt last, const T& item, Compare comp)
 {
     if (first == last)
         return first;
 
-    RandomIt noMatch = last;
+    RandomIt no_match = last;
     while (last - first > 1) {
         RandomIt mid = first + (last - first) / 2;
         if (*mid == item)
@@ -19,11 +19,11 @@ RandomIt Sequence::binarySearch(RandomIt first, RandomIt last, const T& item, Co
             first = mid;
     }
 
-    return (*first == item) ? first : noMatch;
+    return (*first == item) ? first : no_match;
 }
 
 template <typename RandomIt, typename Function>
-RandomIt Sequence::findCutoff(RandomIt first, RandomIt last, Function pred)
+RandomIt sequence::find_cutoff(RandomIt first, RandomIt last, Function pred)
 {
     if (first == last || !pred(*first))
         return first;
@@ -43,7 +43,7 @@ RandomIt Sequence::findCutoff(RandomIt first, RandomIt last, Function pred)
 }
 
 template <typename RandomIt, typename Compare>
-RandomIt Sequence::cyclicFindMin(RandomIt first, RandomIt last, Compare comp)
+RandomIt sequence::find_min_in_cyclic(RandomIt first, RandomIt last, Compare comp)
 {
     if (first == last)
         return first;
@@ -59,15 +59,15 @@ RandomIt Sequence::cyclicFindMin(RandomIt first, RandomIt last, Compare comp)
     return comp(*first, *last) ? first : last;
 }
 
-template <typename RandomIt> uint32_t Sequence::specialIndex(RandomIt first, RandomIt last)
+template <typename RandomIt> uint32_t sequence::special_index(RandomIt first, RandomIt last)
 {
     RandomIt noMatch = last, begin = first;
     while (last - first > 1) {
         RandomIt mid = first + (last - first) / 2;
-        int midValue = mid - begin;
-        if (*mid == midValue)
-            return midValue;
-        if (*mid < midValue) {
+        int mid_value = mid - begin;
+        if (*mid == mid_value)
+            return mid_value;
+        if (*mid < mid_value) {
             first = mid + 1;
         } else {
             last = mid;

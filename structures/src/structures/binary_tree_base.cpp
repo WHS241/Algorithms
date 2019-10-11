@@ -18,7 +18,7 @@ namespace tree {
 
     template<typename T>
     typename binary_tree<T>::iterator binary_tree<T>::end() {
-        return iterator(nullptr, PreOrder);
+        return iterator(nullptr, pre_order);
     }
 
     template<typename T>
@@ -28,12 +28,12 @@ namespace tree {
 
     template<typename T>
     typename binary_tree<T>::const_iterator binary_tree<T>::end() const {
-        return const_iterator(nullptr, PreOrder);
+        return const_iterator(nullptr, pre_order);
     }
 
     template<typename T>
     void binary_tree<T>::remove(const T &item) {
-        iterator toRemove(_find(item), PreOrder);
+        iterator toRemove(_find(item), pre_order);
         if (toRemove == end())
             throw std::invalid_argument("Not found in tree");
 

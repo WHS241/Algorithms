@@ -7,7 +7,7 @@
 /*
 Comparison sorts (compatible with all data types, including objects)
 */
-namespace Sequence {
+namespace sequence {
 /*
  Mergesort
  Forward iterators are sufficient
@@ -51,6 +51,6 @@ namespace {
 } // namespace
 } // namespace Sequence
 
-#include "../../src/sequence/CompareSort.cpp"
+#include "src/sequence/compare_sort.cpp"
 
 #endif // !COMPARE_SORT_H

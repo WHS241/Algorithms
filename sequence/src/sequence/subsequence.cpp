@@ -7,10 +7,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include <sequence/BinarySearch.h>
+#include <sequence/binary_search.h>
 
 template <typename It1, typename It2>
-bool Sequence::isSubsequence(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast)
+bool sequence::isSubsequence(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast)
 {
     for (; targetFirst != targetLast; ++targetFirst, ++masterFirst) {
         masterFirst = std::find(masterFirst, masterLast, *targetFirst);
@@ -21,7 +21,7 @@ bool Sequence::isSubsequence(It1 targetFirst, It1 targetLast, It2 masterFirst, I
 }
 
 template <typename It1, typename It2>
-uint32_t Sequence::maxStutter(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast)
+uint32_t sequence::maxStutter(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast)
 {
     uint32_t lower = 0,
              upper
@@ -40,7 +40,7 @@ uint32_t Sequence::maxStutter(It1 targetFirst, It1 targetLast, It2 masterFirst, 
 }
 
 template <typename It, typename Compare>
-std::list<It> Sequence::longestOrderedSubsequence(It first, It last, Compare comp)
+std::list<It> sequence::longest_ordered_subsequence(It first, It last, Compare comp)
 {
     if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category,
                       std::random_access_iterator_tag>::value) {
@@ -51,18 +51,18 @@ std::list<It> Sequence::longestOrderedSubsequence(It first, It last, Compare com
         // populate vectors
         uint32_t index = 0;
         for (auto temp(first); temp != last; ++temp, ++index) {
-            auto replaceIt = findCutoff(tail.begin(), tail.begin() + index,
-                [&temp, &last, &comp](const It& it) { return it != last && comp(*it, *temp); });
+            auto replace_iterator = find_cutoff(tail.begin(), tail.begin() + index,
+                                                [&temp, &last, &comp](const It &it) { return it != last && comp(*it, *temp); });
 
-            if (replaceIt != tail.begin())
-                predecessor[index] = *(replaceIt - 1);
-            *replaceIt = temp;
+            if (replace_iterator != tail.begin())
+                predecessor[index] = *(replace_iterator - 1);
+            *replace_iterator = temp;
         }
 
         // backtrack through predecessor starting with last element of tail
         std::list<It> result;
         for (auto temp
-             = *(findCutoff(tail.begin(), tail.end(), [&last](const It& it) { return it != last; })
+             = *(find_cutoff(tail.begin(), tail.end(), [&last](const It &it) { return it != last; })
                  - 1);
              temp != last; temp = predecessor[temp - first]) {
             result.push_front(temp);
@@ -71,7 +71,7 @@ std::list<It> Sequence::longestOrderedSubsequence(It first, It last, Compare com
     } else {
         // transfer something with random access iterators
         std::vector<typename std::iterator_traits<It>::value_type> buffer(first, last);
-        auto tempResult = longestOrderedSubsequence(buffer.begin(), buffer.end(), comp);
+        auto tempResult = longest_ordered_subsequence(buffer.begin(), buffer.end(), comp);
 
         // convert to input iterators
         std::list<It> result;

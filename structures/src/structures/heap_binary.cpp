@@ -188,10 +188,10 @@ namespace heap {
         parent->_children.swap(to_swap->_children);
         if (use_left_child) {
             to_swap->_children.front() = parent;
-            to_swap->_children.back()->parent = to_swap;
+            to_swap->_children.back()->_parent = to_swap;
         } else {
             to_swap->_children.back() = parent;
-            to_swap->_children.front()->parent = to_swap;
+            to_swap->_children.front()->_parent = to_swap;
         }
         for (node *child : parent->_children)
             child->_parent = parent;

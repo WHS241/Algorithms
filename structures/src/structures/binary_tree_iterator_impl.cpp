@@ -17,7 +17,7 @@ namespace tree {
 
     template<typename T>
     const T &tree_iterator_impl<T>::operator*() const noexcept {
-        return _current->_item;
+        return _current->item;
     }
 
     template<typename T>
@@ -27,7 +27,7 @@ namespace tree {
 
     template<typename T>
     const T *tree_iterator_impl<T>::operator->() const noexcept {
-        return &(_current->_item);
+        return &(_current->item);
     }
 
     template<typename T>
@@ -41,8 +41,8 @@ namespace tree {
         if (!root)
             return root;
 
-        for (typename binary_tree<T>::node *left(root->_left), *right(root->_right); left || right;
-             left = root->_left, right = root->_right)
+        for (typename binary_tree<T>::node *left(root->left), *right(root->right); left || right;
+             left = root->left, right = root->right)
             root = right ? right : left;
 
         return root;
@@ -54,7 +54,7 @@ namespace tree {
         if (!root)
             return root;
 
-        for (typename binary_tree<T>::node *left(root->_left); left; left = root->_left)
+        for (typename binary_tree<T>::node *left(root->left); left; left = root->left)
             root = left;
 
         return root;
@@ -66,7 +66,7 @@ namespace tree {
         if (!root)
             return root;
 
-        for (typename binary_tree<T>::node *right(root->_right); right; right = root->_right)
+        for (typename binary_tree<T>::node *right(root->right); right; right = root->right)
             root = right;
 
         return root;
@@ -78,8 +78,8 @@ namespace tree {
         if (!root)
             return root;
 
-        for (typename binary_tree<T>::node *left(root->_left), *right(root->_right); left || right;
-             left = root->_left, right = root->_right)
+        for (typename binary_tree<T>::node *left(root->left), *right(root->right); left || right;
+             left = root->left, right = root->right)
             root = left ? left : right;
 
         return root;
@@ -97,20 +97,20 @@ namespace tree {
 
     template<typename T>
     pre_order_iterator_impl <T> &pre_order_iterator_impl<T>::operator++() noexcept {
-        if (this->_current->_left) {
-            this->_current = this->_current->_left;
-        } else if (this->_current->_right) {
-            this->_current = this->_current->_right;
+        if (this->_current->left) {
+            this->_current = this->_current->left;
+        } else if (this->_current->right) {
+            this->_current = this->_current->right;
         } else {
-            typename binary_tree<T>::node *parent = this->_current->_parent;
-            while (parent && ((!parent->_right && parent->_left) || this->_current == parent->_right)) {
+            typename binary_tree<T>::node *parent = this->_current->parent;
+            while (parent && ((!parent->right && parent->left) || this->_current == parent->right)) {
                 this->_current = parent;
-                parent = this->_current->_parent;
+                parent = this->_current->parent;
             }
             if (!parent) {
                 this->_current = parent;
             } else {
-                this->_current = parent->_right;
+                this->_current = parent->right;
             }
         }
         return *this;
@@ -118,9 +118,9 @@ namespace tree {
 
     template<typename T>
     pre_order_iterator_impl <T> &pre_order_iterator_impl<T>::operator--() noexcept {
-        typename binary_tree<T>::node *parent = this->_current->_parent;
-        this->_current = (parent && (parent->_right == this->_current) && parent->_left)
-                        ? s_pre_order_end(parent->_left)
+        typename binary_tree<T>::node *parent = this->_current->parent;
+        this->_current = (parent && (parent->right == this->_current) && parent->left)
+                        ? s_pre_order_end(parent->left)
                         : parent;
 
         return *this;
@@ -133,13 +133,13 @@ namespace tree {
 
     template<typename T>
     in_order_iterator_impl <T> &in_order_iterator_impl<T>::operator++() noexcept {
-        if (this->_current->_right) {
-            this->_current = s_leftmost_descendant(this->_current->_right);
+        if (this->_current->right) {
+            this->_current = s_leftmost_descendant(this->_current->right);
         } else {
-            typename binary_tree<T>::node *parent = this->_current->_parent;
-            while (parent && parent->_right == this->_current) {
+            typename binary_tree<T>::node *parent = this->_current->parent;
+            while (parent && parent->right == this->_current) {
                 this->_current = parent;
-                parent = this->_current->_parent;
+                parent = this->_current->parent;
             }
             this->_current = parent;
         }
@@ -148,13 +148,13 @@ namespace tree {
 
     template<typename T>
     in_order_iterator_impl <T> &in_order_iterator_impl<T>::operator--() noexcept {
-        if (this->_current->_left) {
-            this->_current = s_rightmost_descendant(this->_current->_left);
+        if (this->_current->left) {
+            this->_current = s_rightmost_descendant(this->_current->left);
         } else {
-            typename binary_tree<T>::node *parent = this->_current->_parent;
-            while (parent && parent->_left == this->_current) {
+            typename binary_tree<T>::node *parent = this->_current->parent;
+            while (parent && parent->left == this->_current) {
                 this->_current = parent;
-                parent = this->_current->_parent;
+                parent = this->_current->parent;
             }
             this->_current = parent;
         }
@@ -168,9 +168,9 @@ namespace tree {
 
     template<typename T>
     post_order_iterator_impl <T> &post_order_iterator_impl<T>::operator++() noexcept {
-        typename binary_tree<T>::node *parent = this->_current->_parent;
-        this->_current = (parent && (parent->_left == this->_current) && parent->_right)
-                        ? s_post_order_start(parent->_right)
+        typename binary_tree<T>::node *parent = this->_current->parent;
+        this->_current = (parent && (parent->left == this->_current) && parent->right)
+                        ? s_post_order_start(parent->right)
                         : parent;
 
         return *this;
@@ -178,20 +178,20 @@ namespace tree {
 
     template<typename T>
     post_order_iterator_impl <T> &post_order_iterator_impl<T>::operator--() noexcept {
-        if (this->_current->_right) {
-            this->_current = this->_current->_right;
-        } else if (this->_current->_left) {
-            this->_current = this->_current->_left;
+        if (this->_current->right) {
+            this->_current = this->_current->right;
+        } else if (this->_current->left) {
+            this->_current = this->_current->left;
         } else {
-            typename binary_tree<T>::node *parent = this->_current->_parent;
-            while (parent && ((!parent->_left && parent->_right) || this->_current == parent->_left)) {
+            typename binary_tree<T>::node *parent = this->_current->parent;
+            while (parent && ((!parent->left && parent->right) || this->_current == parent->left)) {
                 this->_current = parent;
-                parent = this->_current->_parent;
+                parent = this->_current->parent;
             }
             if (!parent) {
                 this->_current = parent;
             } else {
-                this->_current = parent->_left;
+                this->_current = parent->left;
             }
         }
         return *this;
@@ -202,10 +202,10 @@ namespace tree {
             : tree_iterator_impl<T>(ptr), _buffer() {
         _buffer.push_back(ptr);
         for (auto node : _buffer) {
-            if (node->_left)
-                _buffer.push_back(node->_left);
-            if (node->_right)
-                _buffer.push_back(node->_right);
+            if (node->left)
+                _buffer.push_back(node->left);
+            if (node->right)
+                _buffer.push_back(node->right);
         }
 
         t_pos = _buffer.begin();

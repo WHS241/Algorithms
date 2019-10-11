@@ -32,9 +32,9 @@ namespace heap {
     typename node_base<T, Compare>::node *node_base<T, Compare>::node::_deep_clone() const {
         std::unique_ptr<node> clone(new node(_value));
         for (auto child : _children) {
-            std::unique_ptr<node> child_node = std::unique_ptr<node>(child->deepClone());
-            clone->children.push_back(child_node.get());
-            child_node->parent = clone.get();
+            std::unique_ptr<node> child_node = std::unique_ptr<node>(child->_deep_clone());
+            clone->_children.push_back(child_node.get());
+            child_node->_parent = clone.get();
             child_node.release();
         }
         return clone.release();

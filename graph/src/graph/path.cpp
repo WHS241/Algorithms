@@ -165,6 +165,7 @@ namespace graph_alg {
 
         // the heap structure used here determines the runtime of the algorithm
         // must be a node_base
+        // Peculiarities with binomial heap make it incompatible.
         auto compare = [](const data& x, const data& y){return x.cost < y.cost;};
         typedef typename heap::node_base<data, decltype(compare)>::node node;
         heap::Fibonacci<data, decltype(compare)> heap(compare);

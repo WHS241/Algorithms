@@ -8,19 +8,19 @@ namespace tree {
     template<typename T>
     tree_iterator<T>::tree_iterator(typename binary_tree<T>::node *root, traversal order) {
         switch (order) {
-            case PreOrder:
+            case pre_order:
                 _impl.reset(new pre_order_iterator_impl<T>(root));
                 break;
 
-            case InOrder:
+            case in_order:
                 _impl.reset(new in_order_iterator_impl<T>(root));
                 break;
 
-            case PostOrder:
+            case post_order:
                 _impl.reset(new post_order_iterator_impl<T>(root));
                 break;
 
-            case LevelOrder:
+            case level_order:
                 _impl.reset(new level_order_iterator_impl<T>(root));
 
             default:
@@ -100,25 +100,25 @@ namespace tree {
 
     template<typename T>
     typename binary_tree<T>::node *tree_iterator<T>::_get_node() {
-        return _impl->current;
+        return _impl->_current;
     }
 
     template<typename T>
     tree_const_iterator<T>::tree_const_iterator(typename binary_tree<T>::node *root, traversal order) {
         switch (order) {
-            case PreOrder:
+            case pre_order:
                 _impl.reset(new pre_order_iterator_impl<T>(root));
                 break;
 
-            case InOrder:
+            case in_order:
                 _impl.reset(new in_order_iterator_impl<T>(root));
                 break;
 
-            case PostOrder:
+            case post_order:
                 _impl.reset(new post_order_iterator_impl<T>(root));
                 break;
 
-            case LevelOrder:
+            case level_order:
                 _impl.reset(new level_order_iterator_impl<T>(root));
 
             default:
@@ -192,7 +192,7 @@ namespace tree {
 
     template<typename T>
     typename binary_tree<T>::node *tree_const_iterator<T>::_get_node() {
-        return _impl->current;
+        return _impl->_current;
     }
 }
 

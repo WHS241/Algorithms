@@ -15,16 +15,16 @@ namespace heap {
         Fibonacci(Compare comp);
 
         template<typename It, typename _Compare = Compare, typename _Requires = typename
-        std::enable_if<std::is_default_constructible<_Compare>::value>::type>
+        std::enable_if_t<std::is_default_constructible_v<_Compare>>>
         Fibonacci(It first, It last) : Fibonacci(first, last, Compare()){};
         template<typename It>
         Fibonacci(It first, It last, Compare comp)
-                : node_base<T, Compare>(comp), trees(), min(nullptr) {
+                : node_base<T, Compare>(comp), _trees(), _min(nullptr) {
             try {
                 for (; first != last; ++first)
                     add(*first);
             } catch (...) {
-                for (node *root : trees)
+                for (node *root : _trees)
                     delete root;
                 throw;
             }
@@ -34,7 +34,23 @@ namespace heap {
         Fibonacci(const Fibonacci<T, Compare> &);
         Fibonacci &operator=(const Fibonacci<T, Compare> &);
         Fibonacci(Fibonacci<T, Compare> &&) noexcept;
-        Fibonacci &operator=(Fibonacci<T, Compare> &&) noexcept;
+
+        template<typename _Compare = Compare, typename _Requires = typename
+        std::enable_if_t<std::is_move_assignable_v<_Compare>>>
+        Fibonacci &operator=(Fibonacci<T, Compare> && rhs) noexcept {
+            if (this != &rhs) {
+                for (node *root : _trees)
+                    delete root;
+                _min = nullptr;
+                this->_size = 0;
+
+                std::swap(_trees, rhs._trees);
+                std::swap(_min, rhs._min);
+                std::swap(this->_size, rhs._size);
+                std::swap(this->_compare, rhs._compare);
+            }
+            return *this;
+        }
 
         // Θ(1)
         virtual node *add(const T &);
@@ -52,9 +68,9 @@ namespace heap {
         void merge(Fibonacci<T, Compare> &);
 
     private:
-        std::list<node *> trees;
+        std::list<node *> _trees;
 
-        node *min = nullptr;
+        node *_min = nullptr;
     };
 }
 

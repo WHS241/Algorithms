@@ -8,29 +8,29 @@
 namespace heap {
     template<typename T, typename Compare>
     Fibonacci<T, Compare>::Fibonacci(Compare comp)
-            : node_base<T, Compare>(comp), trees(), min(nullptr) {
+            : node_base<T, Compare>(comp), _trees(), _min(nullptr) {
     }
 
     template<typename T, typename Compare>
     Fibonacci<T, Compare>::~Fibonacci() noexcept {
-        for (node *root : trees)
+        for (node *root : _trees)
             delete root;
     }
 
     template<typename T, typename Compare>
     Fibonacci<T, Compare>::Fibonacci(const Fibonacci <T, Compare> &src)
-            : node_base<T, Compare>(src), trees(), min(nullptr) {
+            : node_base<T, Compare>(src), _trees(), _min(nullptr) {
         try {
-            std::transform(src.trees.begin(), src.trees.end(), std::back_inserter(trees),
+            std::transform(src._trees.begin(), src._trees.end(), std::back_inserter(_trees),
                            [this, &src](const node *root) {
-                               std::unique_ptr<node> new_tree(root->deepClone());
+                               std::unique_ptr<node> new_tree(root->_deep_clone());
                                new_tree->_flag = root->_flag;
-                               if (root == src.min)
-                                   min = new_tree.get();
+                               if (root == src._min)
+                                   _min = new_tree.get();
                                return new_tree.release();
                            });
         } catch (...) {
-            for (node *root : trees)
+            for (node *root : _trees)
                 delete root;
             throw;
         }
@@ -53,27 +53,11 @@ namespace heap {
     }
 
     template<typename T, typename Compare>
-    Fibonacci <T, Compare> &Fibonacci<T, Compare>::operator=(Fibonacci <T, Compare> &&rhs) noexcept {
-        if (this != &rhs) {
-            for (node *root : trees)
-                delete root;
-            min = nullptr;
-            this->_size = 0;
-
-            std::swap(trees, rhs.trees);
-            std::swap(min, rhs.min);
-            std::swap(this->_size, rhs._size);
-            std::swap(this->_compare, rhs._compare);
-        }
-        return *this;
-    }
-
-    template<typename T, typename Compare>
     typename Fibonacci<T, Compare>::node *Fibonacci<T, Compare>::add(const T &item) {
         std::unique_ptr<node> new_node(this->s_make_node(item));
-        trees.push_back(new_node.get());
-        if (min == nullptr || this->_compare(item, **min))
-            min = new_node.get();
+        _trees.push_back(new_node.get());
+        if (_min == nullptr || this->_compare(item, **_min))
+            _min = new_node.get();
 
         ++this->_size;
         return new_node.release();
@@ -83,7 +67,7 @@ namespace heap {
     T Fibonacci<T, Compare>::get_root() const {
         if (this->empty())
             throw std::underflow_error("Empty heap");
-        return **min;
+        return **_min;
     }
 
     template<typename T, typename Compare>
@@ -91,10 +75,10 @@ namespace heap {
         if (this->empty())
             throw std::underflow_error("Empty heap");
 
-        T old_root = **min;
+        T old_root = **_min;
         if (this->_size == 1) {
-            delete min;
-            trees.clear();
+            delete _min;
+            _trees.clear();
             this->_size = 0;
         } else {
 
@@ -103,36 +87,36 @@ namespace heap {
             uint32_t num_trees = 1;
             for (uint32_t i = this->_size - 1; i > 1; i /= 2)
                 num_trees += 2;
-            std::vector<typename std::list<node *>::iterator> new_roots(num_trees, trees.end());
+            std::vector<typename std::list<node *>::iterator> new_roots(num_trees, _trees.end());
 
             // detach all children
-            for (node *child : min->_children)
+            for (node *child : _min->_children)
                 child->_parent = nullptr;
-            trees.splice(trees.end(), min->_children);
+            _trees.splice(_trees.end(), _min->_children);
 
             // remove min
-            auto found = std::find(trees.begin(), trees.end(), min);
+            auto found = std::find(_trees.begin(), _trees.end(), _min);
             auto after_found = found;
             ++after_found;
-            trees.erase(found, after_found);
-            delete min;
-            min = nullptr;
+            _trees.erase(found, after_found);
+            delete _min;
+            _min = nullptr;
             --this->_size;
 
 
             // consolidate
-            for (auto it = trees.begin(); it != trees.end(); ++it) {
+            for (auto it = _trees.begin(); it != _trees.end(); ++it) {
                 uint32_t tree_size = (*it)->_children.size();
 
-                while (new_roots[tree_size] != trees.end()) {
+                while (new_roots[tree_size] != _trees.end()) {
                     auto compare_candidate = new_roots[tree_size];
                     if (this->_compare(***compare_candidate, ***it))
                         std::iter_swap(it, compare_candidate);
                     auto merge_bound = compare_candidate;
                     ++merge_bound;
-                    (*it)->_children.splice((*it)->_children.end(), trees, compare_candidate, merge_bound);
+                    (*it)->_children.splice((*it)->_children.end(), _trees, compare_candidate, merge_bound);
                     (*compare_candidate)->_parent = *it;
-                    new_roots[tree_size] = trees.end();
+                    new_roots[tree_size] = _trees.end();
                     ++tree_size;
                 }
 
@@ -140,10 +124,10 @@ namespace heap {
             }
 
             // unmark any roots and find new min
-            for (node *root : trees) {
+            for (node *root : _trees) {
                 root->_flag = false;
-                if (min == nullptr || this->_compare(**root, **min))
-                    min = root;
+                if (_min == nullptr || this->_compare(**root, **_min))
+                    _min = root;
             }
         }
         return old_root;
@@ -153,8 +137,8 @@ namespace heap {
     void Fibonacci<T, Compare>::decrease(
             typename Fibonacci<T, Compare>::node *target, const T &new_val) {
         **target = new_val;
-        if (this->_compare(new_val, **min))
-            min = target;
+        if (this->_compare(new_val, **_min))
+            _min = target;
 
         // cut and mark, repeat until root or unmarked
         if (target->_parent != nullptr && this->_compare(**target, **target->_parent)) {
@@ -166,7 +150,7 @@ namespace heap {
                         = std::find(old_parent->_children.begin(), old_parent->_children.end(), target);
                 auto to_remove_next = to_remove;
                 ++to_remove_next;
-                trees.splice(trees.end(), old_parent->_children, to_remove, to_remove_next);
+                _trees.splice(_trees.end(), old_parent->_children, to_remove, to_remove_next);
                 target = old_parent;
             } while (target->_flag);
 
@@ -177,12 +161,12 @@ namespace heap {
 
     template<typename T, typename Compare>
     void Fibonacci<T, Compare>::merge(Fibonacci <T, Compare> &src) {
-        if (min == nullptr || (src.min != nullptr && this->_compare(**src.min, **min)))
-            min = src.min;
-        trees.splice(trees.end(), src.trees);
+        if (_min == nullptr || (src._min != nullptr && this->_compare(**src._min, **_min)))
+            _min = src._min;
+        _trees.splice(_trees.end(), src._trees);
         this->_size += src._size;
         src._size = 0;
-        src.min = nullptr;
+        src._min = nullptr;
     }
 }
 

@@ -3,7 +3,7 @@
 
 #include <functional>
 
-namespace Sequence {
+namespace sequence {
 /*
  Radix sort, customizable base
  Herman Hollerth (1887)

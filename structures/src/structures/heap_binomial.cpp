@@ -1,46 +1,54 @@
 #ifndef BINOMIAL_HEAP_CPP
 #define BINOMIAL_HEAP_CPP
 
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 
 namespace heap {
     template<typename T, typename Compare>
     binomial<T, Compare>::binomial(Compare comp)
-            : node_base<T, Compare>(comp), trees(), min(nullptr) {
+            : node_base<T, Compare>(comp), _trees(), _min(nullptr) {
     }
 
     template<typename T, typename Compare>
     binomial<T, Compare>::~binomial() noexcept {
-        for (node *root : trees)
+        for (node *root : _trees)
             delete root;
     }
 
     template<typename T, typename Compare>
     binomial<T, Compare>::binomial(const binomial <T, Compare> &src)
-            : node_base<T, Compare>(src), trees(src.trees.size(), nullptr), min(nullptr) {
+            : node_base<T, Compare>(src), _trees(src._trees.size(), nullptr), _min(nullptr) {
         this->_size = src._size;
         try {
-            std::transform(src.trees.begin(), src.trees.end(), trees.begin(), [this, &src](node *root) {
+            std::transform(src._trees.begin(), src._trees.end(), _trees.begin(), [this, &src](node *root) {
                 if (root == nullptr)
                     return root;
 
                 std::unique_ptr<node> clone(root->_deep_clone());
-                if (root == src.min)
-                    this->min == clone.get();
+                if (root == src._min)
+                    this->_min == clone.get();
                 return clone.release();
             });
         } catch (...) {
-            for (node *root : trees)
+            for (node *root : _trees)
                 delete root;
         }
     }
 
     template<typename T, typename Compare>
-    binomial <T, Compare> &binomial<T, Compare>::operator=(const binomial <T, Compare> &rhs) {
+    binomial <T, Compare> &binomial<T, Compare>::operator=(const binomial<T, Compare> &rhs) {
         if (this != &rhs) {
             binomial<T, Compare> temp(rhs);
-            *this = std::move(temp);
+            if constexpr(std::is_move_assignable_v<Compare>) {
+                *this = std::move(temp);
+            } else {
+                std::swap(this->_trees, temp._trees);
+                std::swap(_min, temp._min);
+                std::swap(this->_size, temp._size);
+                this->_compare = rhs._compare;
+            }
         }
         return *this;
     }
@@ -52,29 +60,12 @@ namespace heap {
     }
 
     template<typename T, typename Compare>
-    binomial <T, Compare> &binomial<T, Compare>::operator=(binomial <T, Compare> &&rhs) noexcept {
-        if (this != &rhs) {
-            for (node *root : trees) {
-                delete root;
-            }
-            trees.clear();
-            min = nullptr;
-            this->_size = 0;
-            std::swap(trees, rhs.trees);
-            std::swap(min, rhs.min);
-            std::swap(this->_size, rhs._size);
-            std::swap(this->_compare, rhs._compare);
-        }
-        return *this;
-    }
-
-    template<typename T, typename Compare>
     typename binomial<T, Compare>::node *binomial<T, Compare>::add(const T &item) {
         binomial<T, Compare> temp(this->_compare);
         std::unique_ptr<node> add_node(this->s_make_node(item));
         temp._size = 1;
-        temp.trees.push_back(add_node.get());
-        temp.min = add_node.get();
+        temp._trees.push_back(add_node.get());
+        temp._min = add_node.get();
         merge(temp);
         return add_node.release();
     }
@@ -83,7 +74,7 @@ namespace heap {
     T binomial<T, Compare>::get_root() const {
         if (this->empty())
             throw std::underflow_error("Empty heap");
-        return **min;
+        return **_min;
     }
 
     template<typename T, typename Compare>
@@ -92,57 +83,57 @@ namespace heap {
             throw std::underflow_error("Empty heap");
 
         if (this->_size == 1) {
-            T old_root = **min;
-            delete min;
+            T old_root = **_min;
+            delete _min;
             this->_size = 0;
-            trees.clear();
-            min = nullptr;
+            _trees.clear();
+            _min = nullptr;
             return old_root;
         }
 
-        T oldRoot = **min;
+        T oldRoot = **_min;
 
         // break into two heaps and merge
-        std::vector<node *> subtrees(min->_children.size());
-        for (node *child : min->_children)
+        std::vector<node *> subtrees(_min->_children.size());
+        for (node *child : _min->_children)
             // the number of children determines the size of the tree: size = 2^num children
             // Because of the way binomial heaps are built, none of these will be nullptr
             subtrees[child->_children.size()] = child;
 
         binomial<T, Compare> temp(this->_compare);
-        temp.trees = std::move(subtrees);
+        temp._trees = std::move(subtrees);
         auto old_size = this->_size;
-        auto old_min = min;
-        auto it = std::find(trees.begin(), trees.end(), min);
+        auto old_min = _min;
+        auto it = std::find(_trees.begin(), _trees.end(), _min);
         try {
             // find the minimum values, since merge() will not compare all roots
-            temp.min = temp.trees.empty() ? nullptr
-                                          : *std::min_element(temp.trees.begin(), temp.trees.end(),
-                                                              [this](node *x, node *y) {
+            temp._min = temp._trees.empty() ? nullptr
+                                            : *std::min_element(temp._trees.begin(), temp._trees.end(),
+                                                               [this](node *x, node *y) {
                                                                   return this->_compare(**x, **y);
                                                               });
 
             // We can now extract the node, updating min
             *it = nullptr;
-            min = *std::min_element(trees.begin(), trees.end(), [this](node *x, node *y) {
+            _min = *std::min_element(_trees.begin(), _trees.end(), [this](node *x, node *y) {
                 // here we actually have to account for nullptr
                 return x != nullptr && (y == nullptr || this->_compare(**x, **y));
             });
 
             // We don't actually need to recalculate the sizes; as long as temp._size reflects emptiness
             // and the two values add up to new size
-            temp._size = temp.trees.size();
+            temp._size = temp._trees.size();
             this->_size -= (temp._size + 1);
 
             merge(temp);
         } catch (...) {
-            min = old_min;
-            *it = min;
+            _min = old_min;
+            *it = _min;
             this->_size = old_size;
             throw;
         }
 
-        // isolate old_min and delete (merge should have removed old_min as the parent of the children)
+        // isolate old_min and delete (merge should have removed old_min as the _parent of the children)
         old_min->_children.clear();
         delete old_min;
         old_min = nullptr;
@@ -157,8 +148,8 @@ namespace heap {
 
         // use same bubble-up strategy as binary heap
         **target = new_value;
-        if (this->_compare(new_value, **min))
-            min = target;
+        if (this->_compare(new_value, **_min))
+            _min = target;
 
         while (target->_parent != nullptr) {
             if (this->_compare(**target, **target->_parent)) {
@@ -181,7 +172,7 @@ namespace heap {
                             target->_parent->_children.begin(), target->_parent->_children.end(), to_swap);
                     *it = target;
                 } else {
-                    auto tree_it = std::find(trees.begin(), trees.end(), to_swap);
+                    auto tree_it = std::find(_trees.begin(), _trees.end(), to_swap);
                     *tree_it = target;
                 }
             } else {
@@ -195,7 +186,10 @@ namespace heap {
         if (this == &src || src.empty())
             return;
         if (this->empty()) {
+            if constexpr (std::is_move_assignable_v<Compare>)
             *this = std::move(src);
+            else
+                *this = src;
             return;
         }
 
@@ -204,34 +198,34 @@ namespace heap {
         for (uint32_t i = new_size; i != 0; i /= 2)
             ++vector_size;
 
-        trees.resize(vector_size, nullptr);
+        _trees.resize(vector_size, nullptr);
         node *carry = nullptr;
 
         // can "add" like normal arithmetic
         // Comment notation: 0 = nullptr, 1 = not nullptr
         // abc = carry is a, *it1 is b, *it2 is c
-        for (auto it1 = trees.begin(), it2 = src.trees.begin(); it1 != trees.end(); ++it1) {
+        for (auto it1 = _trees.begin(), it2 = src._trees.begin(); it1 != _trees.end(); ++it1) {
             // Of the 8 possibilities, 000 and 010 can be no-ops
-            if (!(carry == nullptr && (it2 == src.trees.end() || *it2 == nullptr))) {
+            if (!(carry == nullptr && (it2 == src._trees.end() || *it2 == nullptr))) {
                 if (carry == nullptr) {
                     if (*it1 == nullptr) { // 001
                         *it1 = *it2;
-                        (*it2)->parent = nullptr;
+                        (*it2)->_parent = nullptr;
                     } else { // 011
                         if (this->_compare(***it1, ***it2)) {
                             std::iter_swap(it1, it2);
                         }
 
-                        (*it2)->children.push_back(*it1);
-                        (*it1)->parent = *it2;
+                        (*it2)->_children.push_back(*it1);
+                        (*it1)->_parent = *it2;
                         carry = *it2;
                         *it1 = nullptr;
                     }
-                } else if (*it1 == nullptr && (it2 == src.trees.end() || *it2 == nullptr)) { // 100
+                } else if (*it1 == nullptr && (it2 == src._trees.end() || *it2 == nullptr)) { // 100
                     *it1 = carry;
                     carry->_parent = nullptr;
                     carry = nullptr;
-                } else if (*it1 == nullptr || it2 == src.trees.end() || *it2 == nullptr) {
+                } else if (*it1 == nullptr || it2 == src._trees.end() || *it2 == nullptr) {
                     if (*it1 == nullptr) // 101
                         std::iter_swap(it1, it2);
 
@@ -240,7 +234,7 @@ namespace heap {
                         std::swap(carry, *it1);
 
                     carry->_children.push_back(*it1);
-                    (*it1)->parent = carry;
+                    (*it1)->_parent = carry;
                     *it1 = nullptr;
                 } else { // 111
                     // we'll keep it1 and merge it2 into carry
@@ -248,17 +242,17 @@ namespace heap {
                         std::swap(*it2, carry);
 
                     carry->_children.push_back(*it2);
-                    (*it2)->parent = carry;
+                    (*it2)->_parent = carry;
                 }
             }
 
-            if (it2 != src.trees.end())
+            if (it2 != src._trees.end())
                 ++it2;
         }
 
-        min = (min != nullptr && this->_compare(**min, **src.min)) ? min : src.min;
-        src.min = nullptr;
-        src.trees.clear();
+        _min = (_min != nullptr && this->_compare(**_min, **src._min)) ? _min : src._min;
+        src._min = nullptr;
+        src._trees.clear();
         src._size = 0;
         this->_size = new_size;
     }

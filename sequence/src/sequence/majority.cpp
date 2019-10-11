@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 template <typename It>
-typename std::iterator_traits<It>::value_type Sequence::findMajority(It first, It last)
+typename std::iterator_traits<It>::value_type sequence::find_majority(It first, It last)
 {
     if (first == last)
         throw std::invalid_argument("Empty container");

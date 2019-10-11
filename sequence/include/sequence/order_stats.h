@@ -2,7 +2,7 @@
 #define ORDER_STATISTICS_H
 #include <functional>
 
-namespace Sequence {
+namespace sequence {
 /*
 Find both min and max elements
 result.first is min, result.second is max
@@ -21,9 +21,9 @@ std::pair<It, It> extrema(It first, It last, Compare compare = Compare());
  */
 template <typename It, typename Compare = std::less<>>
 typename std::iterator_traits<It>::value_type selection(
-    It first, It last, uint32_t rank, Compare compare = Compare(), uint32_t partitionSize = 5);
+    It first, It last, uint32_t rank, Compare compare = Compare(), uint32_t partition_size = 5);
 } // namespace Sequence
 
-#include "../../src/sequence/OrderStatistics.cpp"
+#include "src/sequence/order_stats.cpp"
 
 #endif // !ORDER_STATISTICS_H
