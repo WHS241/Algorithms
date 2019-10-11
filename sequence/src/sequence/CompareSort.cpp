@@ -5,7 +5,7 @@
 #include <list>
 #include <type_traits>
 
-#include <structures/Heap.h>
+#include <structures/heap_base.h>
 
 template <typename ForwardIt, typename Compare>
 void Sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
@@ -155,7 +155,7 @@ template <typename It, typename Compare> void Sequence::heapsort(It first, It la
             }
         }
     } else {
-        BinaryHeap<typename std::iterator_traits<It>::value_type, Compare> heap(
+        heap::priority_queue<typename std::iterator_traits<It>::value_type, Compare> heap(
             first, last, compare);
         std::generate(first, last, [&heap]() { return heap.removeRoot(); });
     }

@@ -4,7 +4,7 @@
 #include <list>
 #include <utility>
 
-namespace Induction {
+namespace induction {
 struct Silhouette {
     int leftIndex;
     int rightIndex;

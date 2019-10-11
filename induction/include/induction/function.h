@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace Induction {
+namespace induction {
 // input: endomorphism (range is contained in domain) (f[x] = y instead of f(x)
 // = y) output: largest subset of domain s.t. function is automorphic (bijective
 // endomorphic)

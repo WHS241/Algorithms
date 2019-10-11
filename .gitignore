@@ -1,6 +1,7 @@
 .vs/*
 .idea/*
 bin/
+build/
 cmake-build-debug/
 lib/googletest/*
 out/*

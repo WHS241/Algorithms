@@ -3,26 +3,26 @@
 #include <list>
 #include <unordered_set>
 
-#include <structures/Graph.h>
+#include <structures/graph.h>
 
-namespace GraphAlg {
+namespace graph_alg {
 /*
 Determine the connected components using DFS
 */
-template <typename T> std::list<std::unordered_set<T>> connectedComponents(const Graph<T>& src);
+template <typename T, bool Weighted> std::list<std::unordered_set<T>> connected_components(const graph::graph<T, false, Weighted>& src);
 
 /*
 Find all articulation points of a graph
 John Hopcroft, Robert Tarjan: O(V+E)
 */
-template <typename T> std::unordered_set<T> articulationPoints(const Graph<T>& src);
+    template <typename T, bool Weighted> std::unordered_set<T> articulation_points(const graph::graph<T, false, Weighted>& src);
 
 /*
 Find all strongly connected components
 Tarjan: O(V+E)
 */
-template <typename T>
-std::list<std::unordered_set<T>> stronglyConnectedComponents(const Graph<T>& src);
+    template <typename T, bool Weighted>
+    std::list<std::unordered_set<T>> strongly_connected_components(const graph::graph<T, true, Weighted>& src);
 } // namespace GraphAlg
 
 #include <src/graph/components.cpp>

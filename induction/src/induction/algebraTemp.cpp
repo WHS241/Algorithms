@@ -5,7 +5,7 @@
 #include <iterator>
 
 template <typename It, typename Compare, typename Function>
-std::pair<It, It> Induction::maximumConsecutiveSum(
+std::pair<It, It> induction::maximumConsecutiveSum(
     It first, It last, Compare compare, Function func)
 {
     if (first == last)

@@ -27,7 +27,6 @@ include(structures.cmake)
 include(graph.cmake)
 
 set(SOURCE_FILES
-		testing/generator.cpp
         testing/main.cpp
 		testing/AlgorithmTest.cpp
         )

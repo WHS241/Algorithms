@@ -7,8 +7,6 @@ include_directories(SYSTEM
 
 set(DATA_STRUCTURES_SOURCES
 	${DATA_STRUCTURES_ROOT}/structures-all.cpp
-	${DATA_STRUCTURES_ROOT}/src/structures/AdjacencyList.cpp
-	${DATA_STRUCTURES_ROOT}/src/structures/AdjacencyMatrix.cpp
 )
 
 add_library(structures ${DATA_STRUCTURES_SOURCES})

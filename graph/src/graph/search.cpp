@@ -6,8 +6,8 @@
 #include <unordered_map>
 
 // Recursive helper for DFS
-template <typename T, typename F1, typename F2>
-static void depthFirstHelper(const Graph<T>& src, const T& current, F1& preFunc, F2& postFunc,
+template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
+static void depthFirstHelper(const graph::graph<T, Directed, Weighted>& src, const T& current, F1& preFunc, F2& postFunc,
     std::unordered_map<T, bool>& visited)
 {
     visited[current] = true;
@@ -20,8 +20,9 @@ static void depthFirstHelper(const Graph<T>& src, const T& current, F1& preFunc,
     }
 }
 
-template <typename T, typename F1, typename F2>
-void GraphAlg::depthFirst(const Graph<T>& src, const T& startVertex, F1 preFunc, F2 postFunc)
+template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
+void graph_alg::depthFirst(
+        const graph::graph<T, Directed, Weighted>& src, const T& startVertex, F1 preFunc, F2 postFunc)
 {
     std::unordered_map<T, bool> visited;
     auto vertices = src.vertices();
@@ -37,9 +38,9 @@ void GraphAlg::depthFirst(const Graph<T>& src, const T& startVertex, F1 preFunc,
     depthFirstHelper(src, startVertex, preFunc, postFunc, visited);
 }
 
-template <typename T, typename F1, typename F2, typename F3>
-void GraphAlg::depthFirstForest(
-    const Graph<T>& src, const T& startVertex, F1 preFunc, F2 postFunc, F3 postRoot)
+template <typename T, bool Directed, bool Weighted, typename F1, typename F2, typename F3>
+void graph_alg::depthFirstForest(
+        const graph::graph<T, Directed, Weighted>& src, const T& startVertex, F1 preFunc, F2 postFunc, F3 postRoot)
 {
     std::unordered_map<T, bool> visited;
     auto vertices = src.vertices();
@@ -64,8 +65,9 @@ void GraphAlg::depthFirstForest(
     }
 }
 
-template <typename T, typename F>
-void GraphAlg::breadthFirst(const Graph<T>& src, const T& startVertex, F function)
+template <typename T, bool Directed, bool Weighted, typename F>
+void graph_alg::breadthFirst(
+        const graph::graph<T, Directed, Weighted>& src, const T& startVertex, F function)
 {
     std::unordered_map<T, bool> visited;
     auto vertices = src.vertices();

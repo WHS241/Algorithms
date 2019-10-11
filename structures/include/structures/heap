@@ -3,8 +3,8 @@
 
 // header for all heaps, should include this instead of any specific heap types
 
-#include "FibonacciHeap.h"
-#include "BinomialHeap.h"
-#include "NodeBinaryHeap.h"
+#include "heap_Fibonacci.h"
+#include "heap_binomial.h"
+#include "heap_binary.h"
 
 #endif // STRUCTURES_HEAP

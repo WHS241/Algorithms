@@ -5,7 +5,7 @@
 #include <iterator>
 #include <typeinfo>
 
-template <typename It> Induction::Skyline Induction::generateSkyline(It first, It last)
+template <typename It> induction::Skyline induction::generateSkyline(It first, It last)
 {
     Skyline result;
     if (first == last) {

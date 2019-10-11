@@ -1,11 +1,12 @@
-#include "structures/AdjacencyList.h"
-#include "structures/AdjacencyMatrix.h"
+#include "structures/graph_adjacency_list.h"
+#include "structures/graph_adjacency_matrix.h"
 
-#include "structures/Graph.h"
+#include "structures/graph.h"
 
-#include "structures/AVLTree.h"
-#include "structures/PrimitiveBinarySearchTree.h"
+#include "structures/AVL_tree.h"
+#include "structures/binary_search_tree_naive.h"
+#include "structures/red_black_tree.h"
 
-#include "structures/Heap.h"
+#include "structures/heap_base.h"
 
-#include "structures/UnionFind.h"
+#include "structures/disjoint_set.h"

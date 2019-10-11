@@ -8,7 +8,7 @@
 
 #include <graph/path.h>
 
-#include <structures/Graph.h>
+#include <structures/graph.h>
 
 #include "generator.h"
 
@@ -17,30 +17,29 @@ protected:
     std::mt19937_64 engine;
     std::priority_queue<double> heap;
 
-    Graph<uint32_t> input;
+    graph::graph<uint32_t, true, true> input;
 
     void SetUp() override
     {
         std::random_device base;
         engine = std::mt19937_64(base());
 
-        input = Graph<uint32_t>(true, true);
         for (uint32_t i = 1; i <= 6; ++i) {
-            input.addVertex(i);
+            input.add_vertex(i);
         }
 
-        input.setEdge(1, 2, -6);
-        input.setEdge(1, 4, 1);
-        input.setEdge(2, 1, 11);
-        input.setEdge(2, 3, -4);
-        input.setEdge(3, 6, 20);
-        input.setEdge(4, 3, -11);
-        input.setEdge(4, 5, 2);
-        input.setEdge(5, 2, 3);
-        input.setEdge(5, 4, -1);
-        input.setEdge(5, 6, 7);
-        input.setEdge(6, 1, 5);
-        input.setEdge(6, 5, -3);
+        input.set_edge(1, 2, -6);
+        input.set_edge(1, 4, 1);
+        input.set_edge(2, 1, 11);
+        input.set_edge(2, 3, -4);
+        input.set_edge(3, 6, 20);
+        input.set_edge(4, 3, -11);
+        input.set_edge(4, 5, 2);
+        input.set_edge(5, 2, 3);
+        input.set_edge(5, 4, -1);
+        input.set_edge(5, 6, 7);
+        input.set_edge(6, 1, 5);
+        input.set_edge(6, 5, -3);
     }
 };
 
@@ -65,11 +64,11 @@ static std::list<uint32_t> buildPath(
 
 TEST_F(AlgorithmTest, PathTests)
 {
-    auto allPairResult = GraphAlg::allPairs(input);
+    auto allPairResult = graph_alg::Floyd_Warshall_all_pairs(input);
 
     for (uint32_t start : input.vertices()) {
         for (uint32_t end : input.vertices()) {
-            auto resultBellmanFord = GraphAlg::pathBellmanFord(input, start, end);
+            auto resultBellmanFord = graph_alg::Bellman_Ford_single_target(input, start, end);
             EXPECT_DOUBLE_EQ(resultBellmanFord.first, allPairResult[start][end].first);
 
             // build path from Floyd-Warshall
@@ -82,20 +81,20 @@ TEST_F(AlgorithmTest, PathTests)
 
             if (!resultBellmanFord.second.empty()) {
                 auto it1 = resultBellmanFord.second.begin();
-                generatedPathBF += input.edgeCost(start, *it1);
+                generatedPathBF += input.edge_cost(start, *it1);
                 ++it1;
                 for (auto it2 = resultBellmanFord.second.begin();
                      it1 != resultBellmanFord.second.end(); ++it1, ++it2) {
-                    generatedPathBF += input.edgeCost(*it2, *it1);
+                    generatedPathBF += input.edge_cost(*it2, *it1);
                 }
             }
 
             if (!buildResult.empty()) {
                 auto it1 = buildResult.begin();
-                generatedPathFW += input.edgeCost(start, *it1);
+                generatedPathFW += input.edge_cost(start, *it1);
                 ++it1;
                 for (auto it2 = buildResult.begin(); it1 != buildResult.end(); ++it1, ++it2) {
-                    generatedPathFW += input.edgeCost(*it2, *it1);
+                    generatedPathFW += input.edge_cost(*it2, *it1);
                 }
             }
 
@@ -108,25 +107,25 @@ TEST_F(AlgorithmTest, DijkstraAllPairTest)
 {
     // Due to the complexity of this algorithm/verification, only using a known-answer problem
     // To an extent, this also serves as a test for decrease() on the heap structure used
-    Graph<char> input(true, true);
+    graph::graph<char, true, true> input;
     std::vector<char> vertices({ 's', 'a', 'b', 'c', 'd', 'e', 'f' });
     for (char& vert : vertices)
-        input.addVertex(vert);
+        input.add_vertex(vert);
 
-    input.setEdge('s', 'b', 7);
-    input.setEdge('s', 'c', 20);
-    input.setEdge('s', 'd', 2);
-    input.setEdge('s', 'e', 13);
-    input.setEdge('a', 'd', 1);
-    input.setEdge('b', 'a', 7);
-    input.setEdge('b', 'c', 10);
-    input.setEdge('b', 'd', 8);
-    input.setEdge('b', 'f', 8);
-    input.setEdge('d', 'c', 8);
-    input.setEdge('d', 'f', 5);
-    input.setEdge('e', 'f', 12);
+    input.set_edge('s', 'b', 7);
+    input.set_edge('s', 'c', 20);
+    input.set_edge('s', 'd', 2);
+    input.set_edge('s', 'e', 13);
+    input.set_edge('a', 'd', 1);
+    input.set_edge('b', 'a', 7);
+    input.set_edge('b', 'c', 10);
+    input.set_edge('b', 'd', 8);
+    input.set_edge('b', 'f', 8);
+    input.set_edge('d', 'c', 8);
+    input.set_edge('d', 'f', 5);
+    input.set_edge('e', 'f', 12);
 
-    auto result = GraphAlg::pathDijkstra(input, 's');
+    auto result = graph_alg::Dijkstra_all_targets(input, 's');
     EXPECT_EQ(result['s'].first, 0);
     EXPECT_EQ(result['a'], std::make_pair(14., 'b'));
     EXPECT_EQ(result['b'], std::make_pair(7., 's'));
@@ -139,22 +138,22 @@ TEST_F(AlgorithmTest, DijkstraAllPairTest)
 TEST_F(AlgorithmTest, DijkstraSinglePathTest)
 {
     // Due to the complexity of this algorithm/verification, only using a known-answer problem
-    Graph<int> input(false, true);
+    graph::graph<int, false, true> input;
     std::vector<int> vertices({ 1, 2, 3, 4, 5, 6 });
     for (int& vert : vertices)
-        input.addVertex(vert);
+        input.add_vertex(vert);
 
-    input.setEdge(1, 2, 7);
-    input.setEdge(1, 3, 9);
-    input.setEdge(1, 6, 14);
-    input.setEdge(2, 3, 10);
-    input.setEdge(2, 4, 15);
-    input.setEdge(3, 4, 11);
-    input.setEdge(3, 6, 2);
-    input.setEdge(4, 5, 6);
-    input.setEdge(5, 6, 9);
+    input.set_edge(1, 2, 7);
+    input.set_edge(1, 3, 9);
+    input.set_edge(1, 6, 14);
+    input.set_edge(2, 3, 10);
+    input.set_edge(2, 4, 15);
+    input.set_edge(3, 4, 11);
+    input.set_edge(3, 6, 2);
+    input.set_edge(4, 5, 6);
+    input.set_edge(5, 6, 9);
 
-    auto result = GraphAlg::pathDijkstra(input, 1, 5);
+    auto result = graph_alg::Dijkstra_single_target(input, 1, 5);
     EXPECT_EQ(result.first, 20);
     std::vector<int> correctPath({3, 6, 5 });
     EXPECT_EQ(result.second.size(), correctPath.size());

@@ -6,14 +6,11 @@
 #include <unordered_set>
 #include <vector>
 
-#include <structures/Graph.h>
+#include <structures/graph.h>
 
-template <typename T>
-Graph<T> Induction::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit)
+template <typename T, bool Weighted> graph::graph<T, false, Weighted> induction::minDegreeInducedSubgraph(const graph::graph<T, false, Weighted>& src, uint32_t limit)
 {
-    if (src.directed())
-        throw std::domain_error("Directed graph");
-    Graph<T> temp(src);
+    graph::graph<T, false, Weighted> temp(src);
 
     std::unordered_map<T, uint32_t> degree;
     std::unordered_set<T> toRemove;
@@ -37,10 +34,8 @@ Graph<T> Induction::minDegreeInducedSubgraph(const Graph<T>& src, uint32_t limit
     return temp;
 }
 
-template <typename T> T Induction::celebrity(const Graph<T>& src)
+template <typename T, bool Weighted> T induction::celebrity(const graph::graph<T, true, Weighted>& src)
 {
-    if (!src.directed())
-        throw std::domain_error("Undirected graph");
     if (src.order() == 0)
         throw std::invalid_argument("Empty");
 

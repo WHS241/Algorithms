@@ -6,12 +6,9 @@
 
 #include <graph/search.h>
 
-template <typename T>
-std::list<std::unordered_set<T>> GraphAlg::connectedComponents(const Graph<T>& src)
+template <typename T, bool Weighted>
+std::list<std::unordered_set<T>> graph_alg::connected_components(const graph::graph<T, false, Weighted>& src)
 {
-    if (src.directed())
-        throw std::invalid_argument("Directed graph");
-
     std::list<std::unordered_set<T>> result;
     if (src.order() == 0)
         return result;
@@ -28,14 +25,11 @@ std::list<std::unordered_set<T>> GraphAlg::connectedComponents(const Graph<T>& s
     return result;
 }
 
-template <typename T> std::unordered_set<T> GraphAlg::articulationPoints(const Graph<T>& src)
+template <typename T, bool Weighted> std::unordered_set<T> graph_alg::articulation_points(const graph::graph<T, false, Weighted>& src)
 {
-    if (src.directed())
-        throw std::invalid_argument("Directed graph");
-
     std::unordered_map<T, bool> visited;
-    std::unordered_map<T, uint32_t> searchNumber, low;
-    uint32_t currentNum = 0;
+    std::unordered_map<T, uint32_t> search_number, low;
+    uint32_t current_dfs_num = 0;
     std::unordered_set<T> result;
 
     if (src.order() == 0)
@@ -48,29 +42,29 @@ template <typename T> std::unordered_set<T> GraphAlg::articulationPoints(const G
     for (auto it = visited.begin(); it != visited.end();
          it = std::find_if(it, visited.end(), [](auto val) { return !val.second; })) {
         const T& start = it->first;
-        uint32_t numRootChildren = 0;
+        uint32_t num_children_of_root = 0;
 
         depthFirst(
             src, start,
-            [&currentNum, &searchNumber, &low, &visited](const T& curr) {
-                searchNumber[curr] = low[curr] = currentNum++;
+            [&current_dfs_num, &search_number, &low, &visited](const T& curr) {
+                search_number[curr] = low[curr] = current_dfs_num++;
                 visited[curr] = true;
             },
-            [&src, &searchNumber, &low, &result, &numRootChildren, &start](
+            [&src, &search_number, &low, &result, &num_children_of_root, &start](
                 const T& parent, const T& child) {
                 if (parent == start) {
-                    ++numRootChildren;
+                    ++num_children_of_root;
                 } else {
                     // calculate low value of DFS for child (min low of children
                     // currently stored)
                     std::list<T> neighbors = src.neighbors(child);
                     for (const T& v : neighbors) {
-                        if (low[child] > searchNumber[v])
-                            low[child] = searchNumber[v];
+                        if (low[child] > search_number[v])
+                            low[child] = search_number[v];
                     }
 
                     // condition for biconnectivity
-                    if (low[child] == searchNumber[parent]) {
+                    if (low[child] == search_number[parent]) {
                         result.insert(parent);
                     }
 
@@ -80,7 +74,7 @@ template <typename T> std::unordered_set<T> GraphAlg::articulationPoints(const G
                 }
             });
 
-        if (numRootChildren > 1) {
+        if (num_children_of_root > 1) {
             result.insert(start);
         }
     }
@@ -88,15 +82,12 @@ template <typename T> std::unordered_set<T> GraphAlg::articulationPoints(const G
     return result;
 }
 
-template <typename T>
-std::list<std::unordered_set<T>> GraphAlg::stronglyConnectedComponents(const Graph<T>& src)
+template <typename T, bool Weighted>
+std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(const graph::graph<T, true, Weighted>& src)
 {
-    if (!src.directed())
-        throw std::invalid_argument("Undirected graph");
-
     std::unordered_map<T, bool> finished;
-    std::unordered_map<T, uint32_t> searchNumber, low;
-    uint32_t currentNum = 0;
+    std::unordered_map<T, uint32_t> search_number, low;
+    uint32_t current_num = 0;
     std::list<std::unordered_set<T>> result;
     std::unordered_map<T, std::unordered_set<T>> component;
 
@@ -107,27 +98,25 @@ std::list<std::unordered_set<T>> GraphAlg::stronglyConnectedComponents(const Gra
     for (T& v : vertices)
         finished[v] = false;
 
-    uint32_t numRootChildren = 0;
-
     depthFirstForest(
         src, src.vertices().front(),
-        [&currentNum, &searchNumber, &low, &component](const T& curr) {
-            searchNumber[curr] = low[curr] = currentNum++;
+        [&current_num, &search_number, &low, &component](const T& curr) {
+            search_number[curr] = low[curr] = current_num++;
             std::unordered_set<T> currComp;
             currComp.insert(curr);
             component[curr] = std::move(currComp);
         },
-        [&component, &finished, &low, &result, &searchNumber, &src](
+        [&component, &finished, &low, &result, &search_number, &src](
             const T& parent, const T& child) {
             // calculate low value for child (stored min low value of children)
             std::list<T> neighbors = src.neighbors(child);
             for (const T& v : neighbors) {
-                if (!finished[v] && (low[child] > searchNumber[v]))
-                    low[child] = searchNumber[v];
+                if (!finished[v] && (low[child] > search_number[v]))
+                    low[child] = search_number[v];
             }
 
             // break off SCC if found
-            if (low[child] == searchNumber[child]) {
+            if (low[child] == search_number[child]) {
                 auto& toAdd = component[child];
                 for (const T& member : toAdd)
                     finished[member] = true;
