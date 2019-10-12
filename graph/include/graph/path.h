@@ -72,6 +72,18 @@ j is (shortest path from i to k) + (shortest path from k to j)
 template <typename T>
 std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshall_all_pairs(
     const graph::graph<T, true, true>& src);
+
+/*
+All-pairs shortest path
+Johnson: O(V^2 log V + VE)
+result[i][j] gives vertex k in middle of path, such that shortest path from i to
+j is (shortest path from i to k) + (shortest path from k to j)
+
+ This algorithm requires a vertex name for a temporary additional vertex
+*/
+template <typename T>
+std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_pairs(
+    const graph::graph<T, true, true>& src, const T& new_vertex);
 } // namespace graph_alg
 
 #include <src/graph/path.cpp>

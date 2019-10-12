@@ -4,14 +4,16 @@
 #include <algorithm>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 
 template <typename T> class disjoint_set {
 public:
-    disjoint_set();
+    disjoint_set() = default;
 
     template <typename It>
     disjoint_set(It first, It last)
         : _sets()
+        , _roots()
     {
         std::for_each(first, last, [this](const T& item) { insert(item); });
     };
@@ -27,6 +29,7 @@ public:
     void clear() noexcept;
 
     uint32_t size() const noexcept;
+    uint32_t num_sets() const noexcept;
 
 private:
     struct t_data {
@@ -34,8 +37,9 @@ private:
         uint32_t size;
     };
     std::unordered_map<T, t_data> _sets;
+    std::unordered_set<T> _roots;
 };
 
 #include "src/structures/disjoint_set.cpp"
 
-#endif // !UNION_FIND_H
+#endif // UNION_FIND_H

@@ -166,8 +166,6 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
         T current;
         T from;
         double cost;
-
-        bool operator<(const data& rhs) const { return cost < rhs.cost; };
     };
 
     std::vector<T> vertices = src.vertices();
@@ -201,8 +199,10 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
         data to_add = heap.remove_root();
         tracker.erase(to_add.current);
         result[to_add.current] = std::make_pair(to_add.cost, to_add.from);
-        // if we are trying to optimize single-destination algorithm, can add break here
-        // once dest is found
+
+        // break here once found
+        if (function(to_add.current))
+            return result;
 
         // don't want to deal with potential overflow case if no path is found
         if (to_add.current == start || to_add.from != to_add.current) {
@@ -322,14 +322,15 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
                 if (start
                     != middle) { // worthless to check if current middle is one of the endpoints
                     for (const T& dest : vertices) {
-                        if (dest != middle && result.find(start) != result.end()
-                            && result[start].find(middle)
-                                != result[start].end() // can't get from start to middle
-                            && result[middle].find(dest)
-                                != result[middle].end() // can't get from middle to end
-                            && (result[start].find(dest)
-                                    == result[start].end() // must update if no other path
-                                                           // the actual comparison between paths
+                        if (dest != middle
+                            && result.find(start) != result.end()
+                            // no path start -> middle
+                            && result[start].find(middle) != result[start].end()
+                            // no path middle -> end
+                            && result[middle].find(dest) != result[middle].end()
+                            // update if no other path
+                            && (result[start].find(dest) == result[start].end()
+                                // finally, we can compare
                                 || result[start][middle].first + result[middle][dest].first
                                     < result[start][dest].first)) {
                             result[start][dest] = std::make_pair(
@@ -345,6 +346,56 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
                     throw std::domain_error("Negative cycle");
             }
         }
+    }
+
+    return result;
+}
+
+template <typename T>
+std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_pairs(
+    const graph::graph<T, true, true>& src, const T& new_vertex)
+{
+    graph::graph<T, true, true> temp(src);
+    std::vector<T> vertices = src.vertices();
+    if (std::find(vertices.begin(), vertices.end(), new_vertex) != vertices.end())
+        throw std::invalid_argument("Vertex already exists");
+
+    temp.add_vertex(new_vertex);
+    for (const T& original_vertex : vertices)
+        temp.set_edge(new_vertex, original_vertex, 0);
+
+    // O(VE)
+    auto shortest_path_tree
+        = Bellman_Ford_all_targets(temp, new_vertex); // where we find negative cycles
+
+    // O(E)
+    temp.remove(new_vertex);
+
+    // re-weight edges based on Bellman-Ford result:
+    // edge from u to v is weighted by tree_path(u) - tree_path(v)
+    for (const T& start : vertices)
+        for (const auto& edge : src.edges(start))
+            temp.set_edge(start, edge.first,
+                edge.second + shortest_path_tree[start].first
+                    - shortest_path_tree[edge.first].first);
+
+    std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> result;
+
+    // Use Dijkstra's algorithm to find the rest
+    for (const T& start : vertices) {
+        auto subresult = Dijkstra_all_targets(temp, start);
+        for (auto& endpoint : subresult) {
+            if (endpoint.first != endpoint.second.second) {
+                // unweight
+                result[start][endpoint.first] = std::make_pair(endpoint.second.first
+                        + shortest_path_tree[endpoint.first].first
+                        - shortest_path_tree[start].first,
+                    endpoint.second.second);
+            }
+        }
+
+        // for sake of completion
+        result[start][start] = std::make_pair(0., start);
     }
 
     return result;

@@ -2,12 +2,7 @@
 #define UNION_FIND_CPP
 
 #include <stdexcept>
-
-template <typename T>
-disjoint_set<T>::disjoint_set()
-    : _sets()
-{
-}
+#include <unordered_set>
 
 template <typename T> void disjoint_set<T>::insert(const T& item)
 {
@@ -19,21 +14,26 @@ template <typename T> void disjoint_set<T>::insert(const T& item)
     start_value.size = 1;
 
     _sets.insert(std::make_pair(item, start_value));
+    _roots.insert(item);
 }
 
 template <typename T> void disjoint_set<T>::union_(const T& first, const T& second)
 {
     T first_parent = find(first);
     T second_parent = find(second);
+    if (first_parent == second_parent)
+        return;
     t_data& first_data = _sets[first_parent];
     t_data& second_data = _sets[second_parent];
 
     if (first_data.size < second_data.size) {
         first_data.parent = second_parent;
         second_data.size += first_data.size;
+        _roots.erase(first_parent);
     } else {
         second_data.parent = first_parent;
         first_data.size += second_data.size;
+        _roots.erase(second_parent);
     }
 }
 
@@ -57,10 +57,17 @@ template <typename T> void disjoint_set<T>::remove_set(const T& member)
         else
             ++it;
     }
+    _roots.erase(to_remove);
 }
 
-template <typename T> void disjoint_set<T>::clear() noexcept { _sets.clear(); }
+template <typename T> void disjoint_set<T>::clear() noexcept
+{
+    _sets.clear();
+    _roots.clear();
+}
 
 template <typename T> uint32_t disjoint_set<T>::size() const noexcept { return _sets.size(); }
+
+template <typename T> uint32_t disjoint_set<T>::num_sets() const noexcept { return _roots.size(); }
 
 #endif // !UNION_FIND_CPP
