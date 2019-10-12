@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <unordered_map>
 
-// Recursive helper for DFS
+// Recursive helpers for DFS
 template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
 static bool depth_first_helper(const graph::graph<T, Directed, Weighted>& src, const T& current,
     F1& on_visit, F2& on_backtrack, std::unordered_map<T, bool>& visited)
@@ -22,6 +22,22 @@ static bool depth_first_helper(const graph::graph<T, Directed, Weighted>& src, c
             depth_first_helper(src, neighbor, on_visit, on_backtrack, visited);
             on_backtrack(current, neighbor);
         }
+    }
+    return false;
+}
+template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
+static bool depth_first_tree_helper(const graph::graph<T, Directed, Weighted>& src,
+    const T& current, F1& on_visit, F2& on_backtrack)
+{
+    if constexpr (std::is_convertible_v<std::result_of_t<F1(T)>, bool>) {
+        if (on_visit(current))
+            return true;
+    } else {
+        on_visit(current);
+    }
+    for (const T& neighbor : src.neighbors(current)) {
+        depth_first_tree_helper(src, neighbor, on_visit, on_backtrack);
+        on_backtrack(current, neighbor);
     }
     return false;
 }
@@ -77,6 +93,22 @@ void graph_alg::depth_first_forest(const graph::graph<T, Directed, Weighted>& sr
             return;
         on_finish_root(it->first);
     }
+}
+
+template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
+void graph_alg::depth_first_tree(
+    const graph::graph<T, Directed, Weighted>& src, const T& start, F1 on_arrival, F2 on_backtrack)
+{
+    static_assert(
+        std::is_invocable_v<F1, T> && std::is_invocable_v<F2, T, T>, "incompatible functions");
+    auto vertices = src.vertices();
+    if (vertices.empty())
+        return;
+
+    if (std::find(vertices.begin(), vertices.end(), start) == vertices.end())
+        throw std::out_of_range("Vertex does not exist");
+
+    depth_first_tree_helper(src, start, on_arrival, on_backtrack);
 }
 
 template <typename T, bool Directed, bool Weighted, typename F>

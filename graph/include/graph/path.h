@@ -13,6 +13,12 @@ All functions throw std::domain_error if no path exists
 */
 namespace graph_alg {
 
+class no_path_exception : public std::domain_error {
+public:
+    no_path_exception()
+        : std::domain_error("No path") {};
+};
+
 /*
 Use BFS to find path with fewest edges
 */

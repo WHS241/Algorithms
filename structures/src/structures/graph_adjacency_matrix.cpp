@@ -130,7 +130,7 @@ void graph_adjacency_matrix<Directed, Weighted>::isolate(const uint32_t& target)
         throw std::out_of_range("Degree number");
     _graph[target] = std::vector<double>(_graph.size(), std::numeric_limits<double>::quiet_NaN());
 
-    if (!Directed)
+    if constexpr (!Directed)
         for (auto& edgeList : _graph)
             edgeList[target] = std::numeric_limits<double>::quiet_NaN();
 }

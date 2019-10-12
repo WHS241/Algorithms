@@ -38,7 +38,7 @@ std::list<T> least_edges_path(
         });
 
     if (!found)
-        throw std::domain_error("No path");
+        throw no_path_exception();
 
     for (T current = dest; current != start; current = parent[current])
         result.push_front(current);
@@ -59,7 +59,7 @@ std::pair<double, std::list<T>> shortest_path_DAG(
     std::unordered_map<T, std::pair<double, T>> all_destinations
         = shortest_path_DAG_all(src, start, compare);
     if (all_destinations.find(dest) == all_destinations.end())
-        throw std::domain_error("No path");
+        throw no_path_exception();
 
     for (T current = dest; current != start; current = all_destinations[current].second) {
         result.push_back(current);
@@ -71,8 +71,6 @@ template <typename T, typename Compare>
 std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
     const graph::graph<T, true, true>& src, const T& start, Compare compare)
 {
-    if (!src.directed())
-        throw std::invalid_argument("Undirected graph");
     std::unordered_map<T, uint32_t> in_degree;
     std::list<T> candidates; // vertices with in-degree 0
     std::vector<T> topological_order; // stores topological sort
@@ -140,7 +138,7 @@ std::pair<double, std::list<T>> Dijkstra_single_target(
     }
 
     if (all_destinations.at(dest).second == dest)
-        throw std::invalid_argument("No path");
+        throw no_path_exception();
 
     for (T current = dest; current != start; current = all_destinations[current].second) {
         path.push_front(current);
@@ -243,7 +241,7 @@ std::pair<double, std::list<T>> Bellman_Ford_single_target(
         return std::make_pair(0., path);
     }
     if (all_destinations.at(dest).second == dest)
-        throw std::invalid_argument("No path");
+        throw no_path_exception();
 
     for (T current = dest; current != start; current = all_destinations[current].second) {
         path.push_front(current);

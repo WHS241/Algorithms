@@ -25,7 +25,8 @@ public:
     virtual uint32_t order() const noexcept;
     // returns true if start and dest have edge between them
     virtual bool has_edge(const T& start, const T& dest) const noexcept;
-    // returns cost of edge between start and dest
+    // returns cost of edge between start and dest if exists, or NaN if has_edge(start, dest) is
+    // false
     virtual double edge_cost(const T& start, const T& dest) const;
     // returns degree of vertex
     virtual uint32_t degree(const T&) const;

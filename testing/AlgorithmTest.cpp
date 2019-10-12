@@ -8,6 +8,7 @@
 #include <structures/graph.h>
 
 #include <graph/components.h>
+#include <graph/min_flow_max_cut.h>
 #include <graph/path.h>
 #include <graph/spanning_tree.h>
 
@@ -16,231 +17,109 @@
 class AlgorithmTest : public ::testing::Test {
 protected:
     std::mt19937_64 engine;
-    graph::graph<uint32_t, true, true> input;
 
     void SetUp() override
     {
         std::random_device base;
         engine = std::mt19937_64(base());
-
-        for (uint32_t i = 1; i <= 6; ++i) {
-            input.add_vertex(i);
-        }
-
-        input.set_edge(1, 2, -6);
-        input.set_edge(1, 4, 1);
-        input.set_edge(2, 1, 11);
-        input.set_edge(2, 3, -4);
-        input.set_edge(3, 6, 20);
-        input.set_edge(4, 3, -11);
-        input.set_edge(4, 5, 2);
-        input.set_edge(5, 2, 3);
-        input.set_edge(5, 4, -1);
-        input.set_edge(5, 6, 7);
-        input.set_edge(6, 1, 5);
-        input.set_edge(6, 5, -3);
     }
 };
 
-static std::list<uint32_t> buildPath(
-    const std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::pair<double, uint32_t>>>&
-        data,
-    uint32_t start, uint32_t dest)
+/*
+ * For testing the max flow algorithms
+ */
+template <typename F> void test_case_one(F target_algorithm)
 {
-    std::list<uint32_t> result;
-    if (start == dest)
-        return result;
+    graph::graph<char, true, true> input;
+    input.add_vertex('A');
+    input.add_vertex('B');
+    input.add_vertex('C');
+    input.add_vertex('D');
+    input.add_vertex('E');
+    input.add_vertex('F');
+    input.add_vertex('G');
 
-    uint32_t mid = data.at(start).at(dest).second;
-    if (mid == start) {
-        result.push_back(dest);
-        return result;
-    }
-    result = buildPath(data, start, mid);
-    result.splice(result.end(), buildPath(data, mid, dest));
-    return result;
+    input.set_edge('A', 'B', 3);
+    input.set_edge('A', 'D', 3);
+    input.set_edge('B', 'C', 4);
+    input.set_edge('C', 'A', 3);
+    input.set_edge('C', 'D', 1);
+    input.set_edge('C', 'E', 2);
+    input.set_edge('D', 'E', 2);
+    input.set_edge('D', 'F', 6);
+    input.set_edge('E', 'B', 1);
+    input.set_edge('E', 'G', 1);
+    input.set_edge('F', 'G', 9);
+
+    graph::graph<char, true, true> result = target_algorithm(input, 'A', 'G');
+    EXPECT_DOUBLE_EQ(result.edge_cost('A', 'B'), 2);
+    EXPECT_DOUBLE_EQ(result.edge_cost('A', 'D'), 3);
+    EXPECT_DOUBLE_EQ(result.edge_cost('B', 'C'), 2);
+    EXPECT_DOUBLE_EQ(result.edge_cost('C', 'D'), 1);
+    EXPECT_DOUBLE_EQ(result.edge_cost('C', 'E'), 1);
+    EXPECT_DOUBLE_EQ(result.edge_cost('D', 'F'), 4);
+    EXPECT_DOUBLE_EQ(result.edge_cost('E', 'G'), 1);
+    EXPECT_DOUBLE_EQ(result.edge_cost('F', 'G'), 4);
+
+    EXPECT_EQ(result.degree('A'), 2);
+    EXPECT_EQ(result.degree('B'), 1);
+    EXPECT_EQ(result.degree('C'), 2);
+    EXPECT_EQ(result.degree('D'), 1);
+    EXPECT_EQ(result.degree('E'), 1);
+    EXPECT_EQ(result.degree('F'), 1);
+}
+template <typename F> void test_case_two(F target_algorithm)
+{
+    graph::graph<char, true, true> input;
+    input.add_vertex('s');
+    input.add_vertex('1');
+    input.add_vertex('2');
+    input.add_vertex('3');
+    input.add_vertex('4');
+    input.add_vertex('t');
+
+    input.set_edge('s', '1', 10);
+    input.set_edge('s', '2', 10);
+    input.set_edge('1', '2', 2);
+    input.set_edge('1', '3', 4);
+    input.set_edge('1', '4', 8);
+    input.set_edge('2', '4', 9);
+    input.set_edge('3', 't', 10);
+    input.set_edge('4', '3', 6);
+    input.set_edge('4', 't', 10);
+
+    graph::graph<char, true, true> result = target_algorithm(input, 's', 't');
+    EXPECT_DOUBLE_EQ(result.edge_cost('s', '1'), 10);
+    EXPECT_DOUBLE_EQ(result.edge_cost('s', '2'), 9);
+    EXPECT_DOUBLE_EQ(result.edge_cost('1', '3'), 4);
+    EXPECT_DOUBLE_EQ(result.edge_cost('1', '4'), 6);
+    EXPECT_DOUBLE_EQ(result.edge_cost('2', '4'), 9);
+    EXPECT_DOUBLE_EQ(result.edge_cost('3', 't'), 9);
+    EXPECT_DOUBLE_EQ(result.edge_cost('4', '3'), 5);
+    EXPECT_DOUBLE_EQ(result.edge_cost('4', 't'), 10);
+
+    EXPECT_EQ(result.degree('s'), 2);
+    EXPECT_EQ(result.degree('1'), 2);
+    EXPECT_EQ(result.degree('2'), 1);
+    EXPECT_EQ(result.degree('3'), 1);
+    EXPECT_EQ(result.degree('4'), 2);
+    EXPECT_EQ(result.degree('t'), 0);
 }
 
-TEST_F(AlgorithmTest, PathTests)
+TEST_F(AlgorithmTest, Min_Flow_Edmonds_Karp)
 {
-    auto Floyd_result = graph_alg::Floyd_Warshall_all_pairs(input);
-    auto Johnson_result = graph_alg::Johnson_all_pairs(input, 0U);
-
-    for (uint32_t start : input.vertices()) {
-        for (uint32_t end : input.vertices()) {
-            EXPECT_DOUBLE_EQ(Johnson_result[start][end].first, Floyd_result[start][end].first);
-
-            // build path from Floyd-Warshall
-            auto Floyd_build_result = buildPath(Floyd_result, start, end);
-            auto Johnson_build_result = buildPath(Johnson_result, start, end);
-
-            // possibility of the two algorithms getting different paths of equal lengths
-            // verify independently
-            double generated_path_Johnson = 0;
-            double generated_path_Floyd = 0;
-
-            if (!Johnson_build_result.empty()) {
-                auto it1 = Johnson_build_result.begin();
-                generated_path_Johnson += input.edge_cost(start, *it1);
-                ++it1;
-                for (auto it2 = Johnson_build_result.begin(); it1 != Johnson_build_result.end();
-                     ++it1, ++it2) {
-                    generated_path_Johnson += input.edge_cost(*it2, *it1);
-                }
-            }
-
-            if (!Floyd_build_result.empty()) {
-                auto it1 = Floyd_build_result.begin();
-                generated_path_Floyd += input.edge_cost(start, *it1);
-                ++it1;
-                for (auto it2 = Floyd_build_result.begin(); it1 != Floyd_build_result.end();
-                     ++it1, ++it2) {
-                    generated_path_Floyd += input.edge_cost(*it2, *it1);
-                }
-            }
-
-            EXPECT_DOUBLE_EQ(generated_path_Johnson, Johnson_result[start][end].first);
-            EXPECT_DOUBLE_EQ(generated_path_Floyd, Floyd_result[start][end].first);
-        }
-    }
+    test_case_one([](const auto& a, const auto& b, const auto& c) {
+        return graph_alg::Edmonds_Karp(a, b, c);
+    });
+    test_case_two([](const auto& a, const auto& b, const auto& c) {
+        return graph_alg::Edmonds_Karp(a, b, c);
+    });
 }
 
-TEST_F(AlgorithmTest, Boruvka_Spanning_Tree)
+TEST_F(AlgorithmTest, Min_Flow_Dinitz)
 {
-    for (uint32_t i = 0; i < 100; ++i) {
-        graph::graph<int, false, true> input = random_graph<false, true>(engine);
-        auto result = graph_alg::minimum_spanning_Boruvka(input);
-
-        auto connected = graph_alg::connected_components(input);
-        EXPECT_EQ(connected.size(), graph_alg::connected_components(result).size());
-
-        auto mst_vertices = result.vertices();
-        auto mst_edge_count = std::accumulate(mst_vertices.begin(), mst_vertices.end(), 0U,
-            [&result](uint32_t i, int j) { return i + result.degree(j); });
-        EXPECT_EQ(mst_edge_count / 2 + connected.size(), input.order());
-
-        for (const int& start : input.vertices()) {
-            for (const auto& edge : input.edges(start)) {
-                if (result.has_edge(start, edge.first)) {
-                    EXPECT_EQ(result.edge_cost(start, edge.first), edge.second);
-                } else {
-                    auto mst_path = graph_alg::least_edges_path(result, start, edge.first);
-                    for (auto it = mst_path.begin(); it != mst_path.end(); ++it) {
-                        if (it == mst_path.begin()) {
-                            EXPECT_LE(result.edge_cost(start, *it), edge.second);
-                        } else {
-                            auto temp(it);
-                            --temp;
-                            EXPECT_LE(result.edge_cost(*temp, *it), edge.second);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-TEST_F(AlgorithmTest, Prim_Spanning_Tree)
-{
-    for (uint32_t i = 0; i < 100; ++i) {
-        graph::graph<int, false, true> input = random_graph<false, true>(engine);
-        auto result = graph_alg::minimum_spanning_Prim(input);
-
-        auto connected = graph_alg::connected_components(input);
-        EXPECT_EQ(connected.size(), graph_alg::connected_components(result).size());
-
-        auto mst_vertices = result.vertices();
-        auto mst_edge_count = std::accumulate(mst_vertices.begin(), mst_vertices.end(), 0U,
-            [&result](uint32_t i, int j) { return i + result.degree(j); });
-        EXPECT_EQ(mst_edge_count / 2 + connected.size(), input.order());
-
-        for (const int& start : input.vertices()) {
-            for (const auto& edge : input.edges(start)) {
-                if (result.has_edge(start, edge.first)) {
-                    EXPECT_EQ(result.edge_cost(start, edge.first), edge.second);
-                } else {
-                    auto mst_path = graph_alg::least_edges_path(result, start, edge.first);
-                    for (auto it = mst_path.begin(); it != mst_path.end(); ++it) {
-                        if (it == mst_path.begin()) {
-                            EXPECT_LE(result.edge_cost(start, *it), edge.second);
-                        } else {
-                            auto temp(it);
-                            --temp;
-                            EXPECT_LE(result.edge_cost(*temp, *it), edge.second);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-TEST_F(AlgorithmTest, Kruskal_Spanning_Tree)
-{
-    for (uint32_t i = 0; i < 100; ++i) {
-        graph::graph<int, false, true> input = random_graph<false, true>(engine);
-        auto result = graph_alg::minimum_spanning_Kruskal(input);
-
-        auto connected = graph_alg::connected_components(input);
-        EXPECT_EQ(connected.size(), graph_alg::connected_components(result).size());
-
-        auto mst_vertices = result.vertices();
-        auto mst_edge_count = std::accumulate(mst_vertices.begin(), mst_vertices.end(), 0U,
-            [&result](uint32_t i, int j) { return i + result.degree(j); });
-        EXPECT_EQ(mst_edge_count / 2 + connected.size(), input.order());
-
-        for (const int& start : input.vertices()) {
-            for (const auto& edge : input.edges(start)) {
-                if (result.has_edge(start, edge.first)) {
-                    EXPECT_EQ(result.edge_cost(start, edge.first), edge.second);
-                } else {
-                    auto mst_path = graph_alg::least_edges_path(result, start, edge.first);
-                    for (auto it = mst_path.begin(); it != mst_path.end(); ++it) {
-                        if (it == mst_path.begin()) {
-                            EXPECT_LE(result.edge_cost(start, *it), edge.second);
-                        } else {
-                            auto temp(it);
-                            --temp;
-                            EXPECT_LE(result.edge_cost(*temp, *it), edge.second);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-TEST_F(AlgorithmTest, Spanning_Tree_Comparison)
-{
-    for (uint32_t i = 0; i < 100; ++i) {
-        graph::graph<int, false, true> input = random_graph<false, true>(engine);
-        auto Boruvka_result = graph_alg::minimum_spanning_Boruvka(input);
-        auto Prim_result = graph_alg::minimum_spanning_Prim(input);
-        auto Kruskal_result = graph_alg::minimum_spanning_Kruskal(input);
-
-        auto vertices = input.vertices();
-        double Boruvka_total = std::accumulate(
-            vertices.begin(), vertices.end(), 0., [&Boruvka_result](double prev, int curr_vertex) {
-                auto edges = Boruvka_result.edges(curr_vertex);
-                return std::accumulate(edges.begin(), edges.end(), prev,
-                    [](double current, auto x) { return current + x.second; });
-            });
-
-        double Prim_total = std::accumulate(
-            vertices.begin(), vertices.end(), 0., [&Prim_result](double prev, int curr_vertex) {
-                auto edges = Prim_result.edges(curr_vertex);
-                return std::accumulate(edges.begin(), edges.end(), prev,
-                    [](double current, auto x) { return current + x.second; });
-            });
-
-        double Kruskal_total = std::accumulate(
-            vertices.begin(), vertices.end(), 0., [&Kruskal_result](double prev, int curr_vertex) {
-                auto edges = Kruskal_result.edges(curr_vertex);
-                return std::accumulate(edges.begin(), edges.end(), prev,
-                    [](double current, auto x) { return current + x.second; });
-            });
-
-        EXPECT_DOUBLE_EQ(Boruvka_total, Prim_total);
-        EXPECT_DOUBLE_EQ(Prim_total, Kruskal_total);
-    }
+    test_case_one(
+        [](const auto& a, const auto& b, const auto& c) { return graph_alg::Dinitz(a, b, c); });
+    test_case_two(
+        [](const auto& a, const auto& b, const auto& c) { return graph_alg::Dinitz(a, b, c); });
 }
