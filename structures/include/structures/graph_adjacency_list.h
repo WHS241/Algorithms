@@ -14,71 +14,70 @@ namespace graph {
 图的邻接表储存表示
 空间：O(V+E)
 */
-    template<bool Directed, bool Weighted>
-    class adjacency_list : public impl<Directed, Weighted> {
-    public:
-        virtual ~adjacency_list() = default;
+template <bool Directed, bool Weighted> class adjacency_list : public impl<Directed, Weighted> {
+public:
+    virtual ~adjacency_list() = default;
 
-        const impl <Directed, Weighted> &copy_from(const impl <Directed, Weighted> &) override;
+    const impl<Directed, Weighted>& copy_from(const impl<Directed, Weighted>&) override;
 
-        // 输出：图的阶
-        // O(1)
-        uint32_t order() const noexcept override;
+    // 输出：图的阶
+    // O(1)
+    uint32_t order() const noexcept override;
 
-        // 输出：图里是否存在从start到end的边
-        // O(deg(V))
-        bool has_edge(const uint32_t &start, const uint32_t &dest) const noexcept override;
+    // 输出：图里是否存在从start到end的边
+    // O(deg(V))
+    bool has_edge(const uint32_t& start, const uint32_t& dest) const noexcept override;
 
-        // 输出：从start的end的边的长度。不存在时输出NaN
-        // O(deg(V))
-        double edge_cost(const uint32_t &start, const uint32_t &dest) const noexcept override;
+    // 输出：从start的end的边的长度。不存在时输出NaN
+    // O(deg(V))
+    double edge_cost(const uint32_t& start, const uint32_t& dest) const noexcept override;
 
-        // 输入：结点数
-        // 输出：该结点的（出）度
-        // O(1)
-        uint32_t degree(const uint32_t &) const override;
+    // 输入：结点数
+    // 输出：该结点的（出）度
+    // O(1)
+    uint32_t degree(const uint32_t&) const override;
 
-        // 输入：结点数
-        // 输出：该结点的（出）边的另一个顶点
-        // O(1) (找）+ O(deg(V))（复制）
-        std::list<uint32_t> neighbors(const uint32_t &start) const override;
+    // 输入：结点数
+    // 输出：该结点的（出）边的另一个顶点
+    // O(1) (找）+ O(deg(V))（复制）
+    std::list<uint32_t> neighbors(const uint32_t& start) const override;
 
-        std::list<std::pair<uint32_t, double>> edges(const uint32_t &) const override;
+    std::list<std::pair<uint32_t, double>> edges(const uint32_t&) const override;
 
-        // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
-        // O(deg(V))
-        void set_edge(const uint32_t &start, const uint32_t &dest, double cost = 0) override;
+    // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
+    // O(deg(V))
+    void set_edge(const uint32_t& start, const uint32_t& dest, double cost = 0) override;
 
-        // 加结点
-        // 输出：图阶新值
-        // O(1)
-        uint32_t add_vertex() override;
+    // 加结点
+    // 输出：图阶新值
+    // O(1)
+    uint32_t add_vertex() override;
 
-        // 输入：边起点与终点
-        // 运行：如果存在，将该边删除
-        // O(deg(V))
-        void remove_edge(const uint32_t &start, const uint32_t &dest) override;
+    // 输入：边起点与终点
+    // 运行：如果存在，将该边删除
+    // O(deg(V))
+    void remove_edge(const uint32_t& start, const uint32_t& dest) override;
 
-        // 输入：结点
-        // 运行：删除该结点的所有的（出）边
-        // 有向图：O(deg(V))；无向图：O(E)
-        void isolate(const uint32_t &start) override;
+    // 输入：结点
+    // 运行：删除该结点的所有的（出）边
+    // 有向图：O(deg(V))；无向图：O(E)
+    void isolate(const uint32_t& start) override;
 
-        // 输入：结点
-        // 运行：将to_remove和最后结点切换，并删除以前的to_remove
-        // O(E)
-        void remove(const uint32_t &to_remove) override;
+    // 输入：结点
+    // 运行：将to_remove和最后结点切换，并删除以前的to_remove
+    // O(E)
+    void remove(const uint32_t& to_remove) override;
 
-        // 清空整个图
-        // O(1)
-        void clear() noexcept override;
+    // 清空整个图
+    // O(1)
+    void clear() noexcept override;
 
-    private:
-        typedef std::pair<uint32_t, double> _t_edge;
-        typedef std::vector<std::list<_t_edge>> _t_graph_rep;
+private:
+    typedef std::pair<uint32_t, double> _t_edge;
+    typedef std::vector<std::list<_t_edge>> _t_graph_rep;
 
-        _t_graph_rep _graph;
-    };
+    _t_graph_rep _graph;
+};
 }
 
 #include <src/structures/graph_adjacency_list.cpp>

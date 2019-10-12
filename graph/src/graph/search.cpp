@@ -7,23 +7,31 @@
 
 // Recursive helper for DFS
 template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
-static void depthFirstHelper(const graph::graph<T, Directed, Weighted>& src, const T& current, F1& preFunc, F2& postFunc,
-    std::unordered_map<T, bool>& visited)
+static bool depth_first_helper(const graph::graph<T, Directed, Weighted>& src, const T& current,
+    F1& on_visit, F2& on_backtrack, std::unordered_map<T, bool>& visited)
 {
     visited[current] = true;
-    preFunc(current);
+    if constexpr (std::is_convertible_v<std::result_of_t<F1(T)>, bool>) {
+        if (on_visit(current))
+            return true;
+    } else {
+        on_visit(current);
+    }
     for (const T& neighbor : src.neighbors(current)) {
         if (!visited[neighbor]) {
-            depthFirstHelper(src, neighbor, preFunc, postFunc, visited);
-            postFunc(current, neighbor);
+            depth_first_helper(src, neighbor, on_visit, on_backtrack, visited);
+            on_backtrack(current, neighbor);
         }
     }
+    return false;
 }
 
 template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
-void graph_alg::depthFirst(
-        const graph::graph<T, Directed, Weighted>& src, const T& startVertex, F1 preFunc, F2 postFunc)
+void graph_alg::depth_first(
+    const graph::graph<T, Directed, Weighted>& src, const T& start, F1 on_arrival, F2 on_backtrack)
 {
+    static_assert(
+        std::is_invocable_v<F1, T> && std::is_invocable_v<F2, T, T>, "incompatible functions");
     std::unordered_map<T, bool> visited;
     auto vertices = src.vertices();
     if (vertices.empty())
@@ -32,16 +40,19 @@ void graph_alg::depthFirst(
     for (const T& vertex : vertices)
         visited[vertex] = false;
 
-    if (visited.find(startVertex) == visited.end())
+    if (visited.find(start) == visited.end())
         throw std::out_of_range("Vertex does not exist");
 
-    depthFirstHelper(src, startVertex, preFunc, postFunc, visited);
+    depth_first_helper(src, start, on_arrival, on_backtrack, visited);
 }
 
 template <typename T, bool Directed, bool Weighted, typename F1, typename F2, typename F3>
-void graph_alg::depthFirstForest(
-        const graph::graph<T, Directed, Weighted>& src, const T& startVertex, F1 preFunc, F2 postFunc, F3 postRoot)
+void graph_alg::depth_first_forest(const graph::graph<T, Directed, Weighted>& src, const T& start,
+    F1 on_arrival, F2 on_backtrack, F3 on_finish_root)
 {
+    static_assert(
+        std::is_invocable_v<F1, T> && std::is_invocable_v<F2, T, T> && std::is_invocable_v<F3, T>,
+        "incompatible functions");
     std::unordered_map<T, bool> visited;
     auto vertices = src.vertices();
     if (vertices.empty())
@@ -50,25 +61,29 @@ void graph_alg::depthFirstForest(
     for (const T& vertex : vertices)
         visited[vertex] = false;
 
-    if (visited.find(startVertex) == visited.end())
+    if (visited.find(start) == visited.end())
         throw std::out_of_range("Vertex does not exist");
 
-    depthFirstHelper(src, startVertex, preFunc, postFunc, visited);
-    postRoot(startVertex);
+    if (depth_first_helper(src, start, on_arrival, on_backtrack, visited))
+        return;
+
+    on_finish_root(start);
 
     auto findUnvisited = [](const std::pair<T, bool>& x) { return !x.second; };
 
     for (auto it = std::find_if(visited.begin(), visited.end(), findUnvisited); it != visited.end();
          it = std::find_if(visited.begin(), visited.end(), findUnvisited)) {
-        depthFirstHelper(src, it->first, preFunc, postFunc, visited);
-        postRoot(it->first);
+        if (depth_first_helper(src, it->first, on_arrival, on_backtrack, visited))
+            return;
+        on_finish_root(it->first);
     }
 }
 
 template <typename T, bool Directed, bool Weighted, typename F>
-void graph_alg::breadthFirst(
-        const graph::graph<T, Directed, Weighted>& src, const T& startVertex, F function)
+void graph_alg::breadth_first(
+    const graph::graph<T, Directed, Weighted>& src, const T& start, F on_visit)
 {
+    static_assert(std::is_invocable_v<F, T>, "incompatible functions");
     std::unordered_map<T, bool> visited;
     auto vertices = src.vertices();
     if (vertices.empty())
@@ -77,16 +92,21 @@ void graph_alg::breadthFirst(
     for (const T& vertex : vertices)
         visited[vertex] = false;
 
-    if (visited.find(startVertex) == visited.end())
+    if (visited.find(start) == visited.end())
         throw std::out_of_range("Vertex does not exist");
 
     std::queue<T, std::list<T>> toVisit;
-    toVisit.push(startVertex);
+    toVisit.push(start);
     while (!toVisit.empty()) {
         T current = toVisit.front();
         toVisit.pop();
         if (!visited[current]) {
-            function(current);
+            if constexpr (std::is_convertible_v<std::result_of_t<F(T)>, bool>) {
+                if (on_visit(current))
+                    return;
+            } else {
+                on_visit(current);
+            }
             visited[current] = true;
 
             for (const T& neighbor : src.neighbors(current)) {

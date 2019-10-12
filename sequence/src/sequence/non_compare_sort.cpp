@@ -7,7 +7,7 @@
 #include <typeinfo>
 #include <vector>
 
-template <typename It> void sequence::radixSort(It first, It last, uint32_t base)
+template <typename It> void sequence::radix_sort(It first, It last, uint32_t base)
 {
     std::list<uint32_t> processor(first, last);
     std::vector<std::list<uint32_t>> bins(base);

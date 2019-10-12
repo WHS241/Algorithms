@@ -80,8 +80,8 @@ typename std::iterator_traits<It>::value_type sequence::selection(
         }
 
         // median of medians, then partition
-        auto pivot_value
-            = selection(medians.begin(), medians.end(), medians.size() / 2, compare, partition_size);
+        auto pivot_value = selection(
+            medians.begin(), medians.end(), medians.size() / 2, compare, partition_size);
         auto partition_iterator = std::find(buffer.begin(), buffer.end(), pivot_value);
         partition_iterator = partition(buffer.begin(), buffer.end(), partition_iterator, compare);
 

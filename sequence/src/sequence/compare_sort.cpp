@@ -4,7 +4,6 @@
 #include <iterator>
 #include <list>
 #include <type_traits>
-#include <thread>
 
 #include <structures/heap_base.h>
 
@@ -22,10 +21,8 @@ void sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
     temp = first;
     std::advance(temp, std::distance(first, last) / 2);
 
-    std::thread subproblem_A(mergesort, first, temp, compare);
-    std::thread subproblem_B(mergesort, temp, last, compare);
-    subproblem_A.join();
-    subproblem_B.join();
+    mergesort(first, temp, compare);
+    mergesort(temp, last, compare);
 
     // merge sub-solutions
     std::list<typename std::iterator_traits<ForwardIt>::value_type> first_half(first, temp),
@@ -70,35 +67,35 @@ BiDirIt sequence::partition(BiDirIt first, BiDirIt last, BiDirIt partition, Comp
 {
     // setup for partition
     std::iter_swap(partition, first);
-    auto forwardTemp(first), backwardTemp(last);
-    ++forwardTemp;
-    --backwardTemp;
-    bool processedBack = false; // we have not yet considered backwardTemp
+    auto forward_it(first), backward_it(last);
+    ++forward_it;
+    --backward_it;
+    bool processed_last = false; // we have not yet considered backward_it
 
     // partition: on each pass, find two values that need to be swapped
     while (true) {
-        while (((processedBack && forwardTemp != backwardTemp)
-                   || (!processedBack && forwardTemp != last))
-            && compare(*forwardTemp, *first))
-            ++forwardTemp;
-        if ((processedBack && forwardTemp == backwardTemp)
-            || (!processedBack && forwardTemp == last)) {
+        while (((processed_last && forward_it != backward_it)
+                   || (!processed_last && forward_it != last))
+            && compare(*forward_it, *first))
+            ++forward_it;
+        if ((processed_last && forward_it == backward_it)
+            || (!processed_last && forward_it == last)) {
             break;
         }
 
-        processedBack = true;
-        while (forwardTemp != backwardTemp && compare(*first, *backwardTemp))
-            --backwardTemp;
-        if (forwardTemp == backwardTemp)
+        processed_last = true;
+        while (forward_it != backward_it && compare(*first, *backward_it))
+            --backward_it;
+        if (forward_it == backward_it)
             break;
 
-        std::iter_swap(forwardTemp, backwardTemp);
-        ++forwardTemp;
+        std::iter_swap(forward_it, backward_it);
+        ++forward_it;
     }
 
     // move partition value to correct place
-    std::iter_swap(first, --forwardTemp);
-    return forwardTemp;
+    std::iter_swap(first, --forward_it);
+    return forward_it;
 }
 
 template <typename It, typename Compare> void sequence::heapsort(It first, It last, Compare compare)
@@ -107,27 +104,27 @@ template <typename It, typename Compare> void sequence::heapsort(It first, It la
         return;
 
     // Random access: can sort without extra space
-    if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category,
-                      std::random_access_iterator_tag>::value) {
+    if constexpr (std::is_same_v<typename std::iterator_traits<It>::iterator_category,
+                      std::random_access_iterator_tag>) {
         auto distance = last - first;
 
         // heapify in opposite direction
         for (auto position = distance - 1; position + 1 > 0; --position) {
             auto current(position);
-            It currentIt = first + current;
+            It current_it = first + current;
 
             while (2 * current + 1 < distance) {
                 auto child(2 * current + 1);
-                It childIt = first + child;
-                if (2 * current + 2 < distance && compare(childIt[0], childIt[1])) {
+                It child_iterator = first + child;
+                if (2 * current + 2 < distance && compare(child_iterator[0], child_iterator[1])) {
                     ++child;
-                    ++childIt;
+                    ++child_iterator;
                 }
 
-                if (compare(*currentIt, *childIt)) {
-                    std::iter_swap(currentIt, childIt);
+                if (compare(*current_it, *child_iterator)) {
+                    std::iter_swap(current_it, child_iterator);
                     current = child;
-                    currentIt = childIt;
+                    current_it = child_iterator;
                 } else {
                     break;
                 }
@@ -140,19 +137,19 @@ template <typename It, typename Compare> void sequence::heapsort(It first, It la
             --distance;
 
             typename std::iterator_traits<It>::difference_type current = 0;
-            It currentIt = first;
+            It current_it = first;
             while (2 * current + 1 < distance) {
                 auto child(2 * current + 1);
-                It childIt = first + child;
-                if (2 * current + 2 < distance && compare(*childIt, childIt[1])) {
+                It child_it = first + child;
+                if (2 * current + 2 < distance && compare(*child_it, child_it[1])) {
                     ++child;
-                    ++childIt;
+                    ++child_it;
                 }
 
-                if (compare(*currentIt, *childIt)) {
-                    std::iter_swap(currentIt, childIt);
+                if (compare(*current_it, *child_it)) {
+                    std::iter_swap(current_it, child_it);
                     current = child;
-                    currentIt = childIt;
+                    current_it = child_it;
                 } else {
                     break;
                 }
@@ -161,7 +158,7 @@ template <typename It, typename Compare> void sequence::heapsort(It first, It la
     } else {
         heap::priority_queue<typename std::iterator_traits<It>::value_type, Compare> heap(
             first, last, compare);
-        std::generate(first, last, [&heap]() { return heap.removeRoot(); });
+        std::generate(first, last, [&heap]() { return heap.remove_root(); });
     }
 }
 

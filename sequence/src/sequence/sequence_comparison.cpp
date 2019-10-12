@@ -78,23 +78,23 @@ std::vector<sequence::instruction> sequence::edit_distance(
 
     // backtrack from final node to first
     std::vector<instruction> result;
-    uint32_t currentX = grid.size() - 1, currentY = grid[0].size() - 1;
-    while (currentX != 0 || currentY != 0) {
-        auto& node = grid[currentX][currentY];
+    uint32_t current_X = grid.size() - 1, current_Y = grid[0].size() - 1;
+    while (current_X != 0 || current_Y != 0) {
+        auto& node = grid[current_X][current_Y];
         if (node.step != instruction::category::replace_char
-            || src[currentX - 1] != target[currentY - 1]) {
+            || src[current_X - 1] != target[current_Y - 1]) {
             instruction step;
             step.directive = node.step;
-            step.src_index = currentX - 1;
-            step.target_index = currentY - 1;
+            step.src_index = current_X - 1;
+            step.target_index = current_Y - 1;
             result.push_back(step);
         }
 
-        // recalibrate currentX and currentY
+        // recalibrate current_X and current_Y
         if (node.step != instruction::category::delete_char)
-            --currentY;
+            --current_Y;
         if (node.step != instruction::category::insert_char)
-            --currentX;
+            --current_X;
     }
 
     return result;

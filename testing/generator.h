@@ -4,9 +4,10 @@
 
 #include <structures/graph.h>
 
-template<bool Directed, bool Weighted>
-graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cyclic = true,
-    graph::graph_type type = graph::adj_list) {
+template <bool Directed, bool Weighted>
+graph::graph<int, Directed, Weighted> random_graph(
+    std::mt19937_64& gen, bool cyclic = true, graph::graph_type type = graph::adj_list)
+{
     std::uniform_int_distribution<uint32_t> dist(0, 20);
     std::uniform_real_distribution<double> weight(0, 1000);
 
@@ -50,7 +51,8 @@ graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cy
         }
     }
 
-    return graph;}
+    return graph;
+}
 
 std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine)
 {

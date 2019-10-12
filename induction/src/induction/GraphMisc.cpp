@@ -8,7 +8,9 @@
 
 #include <structures/graph.h>
 
-template <typename T, bool Weighted> graph::graph<T, false, Weighted> induction::minDegreeInducedSubgraph(const graph::graph<T, false, Weighted>& src, uint32_t limit)
+template <typename T, bool Weighted>
+graph::graph<T, false, Weighted> induction::minDegreeInducedSubgraph(
+    const graph::graph<T, false, Weighted>& src, uint32_t limit)
 {
     graph::graph<T, false, Weighted> temp(src);
 
@@ -34,7 +36,8 @@ template <typename T, bool Weighted> graph::graph<T, false, Weighted> induction:
     return temp;
 }
 
-template <typename T, bool Weighted> T induction::celebrity(const graph::graph<T, true, Weighted>& src)
+template <typename T, bool Weighted>
+T induction::celebrity(const graph::graph<T, true, Weighted>& src)
 {
     if (src.order() == 0)
         throw std::invalid_argument("Empty");

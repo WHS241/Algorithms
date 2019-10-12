@@ -1,190 +1,159 @@
 #include <algorithm>
+
+#include <queue>
 #include <random>
 #include <vector>
 
 #include <gtest/gtest.h>
 
-#include <sequence/CompareSort.h>
-#include <sequence/Majority.h>
-#include <sequence/OrderStatistics.h>
-#include <sequence/SequenceComp.h>
-#include <sequence/subsequence.h>
+#include <graph/path.h>
+
+#include <structures/graph.h>
+
+#include "generator.h"
 
 class AlgorithmTest : public ::testing::Test {
 protected:
-    void SetUp() override {
+    std::mt19937_64 engine;
+    graph::graph<uint32_t, true, true> input;
+
+    void SetUp() override
+    {
         std::random_device base;
         engine = std::mt19937_64(base());
-    }
 
-    std::mt19937_64 engine;
+        for (uint32_t i = 1; i <= 6; ++i) {
+            input.add_vertex(i);
+        }
+
+        input.set_edge(1, 2, -6);
+        input.set_edge(1, 4, 1);
+        input.set_edge(2, 1, 11);
+        input.set_edge(2, 3, -4);
+        input.set_edge(3, 6, 20);
+        input.set_edge(4, 3, -11);
+        input.set_edge(4, 5, 2);
+        input.set_edge(5, 2, 3);
+        input.set_edge(5, 4, -1);
+        input.set_edge(5, 6, 7);
+        input.set_edge(6, 1, 5);
+        input.set_edge(6, 5, -3);
+    }
 };
 
-TEST_F(AlgorithmTest, ExtremaTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 10000);
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
+static std::list<uint32_t> buildPath(
+    const std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::pair<double, uint32_t>>>&
+        data,
+    uint32_t start, uint32_t dest)
+{
+    std::list<uint32_t> result;
+    if (start == dest)
+        return result;
 
-        auto result = Sequence::extrema(input.begin(), input.end());
-        EXPECT_EQ(result, std::minmax_element(input.begin(), input.end()));
+    uint32_t mid = data.at(start).at(dest).second;
+    if (mid == start) {
+        result.push_back(dest);
+        return result;
     }
+    result = buildPath(data, start, mid);
+    result.splice(result.end(), buildPath(data, mid, dest));
+    return result;
 }
 
-TEST_F(AlgorithmTest, SelectionTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
+TEST_F(AlgorithmTest, PathTests)
+{
+    auto allPairResult = graph_alg::Floyd_Warshall_all_pairs(input);
 
-        std::uniform_int_distribution<uint32_t> targetDist(0, input.size() - 1);
-        auto target = targetDist(engine);
-        auto result = Sequence::selection(input.begin(), input.end(), target);
-        EXPECT_EQ(target, std::count_if(input.begin(), input.end(), [result](uint32_t x) {return x < result; }));
-        EXPECT_NE(input.end(), std::find(input.begin(), input.end(), result));
-    }
-}
+    for (uint32_t start : input.vertices()) {
+        for (uint32_t end : input.vertices()) {
+            auto resultBellmanFord = graph_alg::Bellman_Ford_single_target(input, start, end);
+            EXPECT_DOUBLE_EQ(resultBellmanFord.first, allPairResult[start][end].first);
 
-TEST_F(AlgorithmTest, SubstringTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::bernoulli_distribution selector;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        std::string input(sizeDist(engine), 'x');
-        for (auto& c : input)
-            if (selector(engine))
-                c = 'y';
-        
-        std::uniform_int_distribution<uint32_t> targetChoice(0, input.size() - 1);
-        uint32_t beginIndex = targetChoice(engine);
-        targetChoice = std::uniform_int_distribution<uint32_t>(beginIndex, input.size());
-        std::string target(input.begin() + beginIndex, input.begin() + targetChoice(engine));
+            // build path from Floyd-Warshall
+            auto buildResult = buildPath(allPairResult, start, end);
 
-        auto result = Sequence::findSubstring(input, target);
-        ASSERT_NE(result, input.end());
-        EXPECT_TRUE(std::equal(target.begin(), target.end(), result));
-    }
-}
+            // possibility of the two algorithms getting different paths of equal lengths
+            // verify independently
+            double generatedPathBF = 0;
+            double generatedPathFW = 0;
 
-TEST_F(AlgorithmTest, DistanceTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> selector(0, 2);
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 300);
-        std::string src(sizeDist(engine), 'x'), target(sizeDist(engine), 'x');
-        for (auto& c : src)
-            c += selector(engine);
-        for (auto& c : target)
-            c += selector(engine);
-
-        auto result = Sequence::editDistance(src, target);
-        std::sort(result.begin(), result.end(), [](auto& x, auto& y) {
-            return x.srcIndex < y.srcIndex;
-            });
-
-        std::for_each(result.rbegin(), result.rend(), [&src, &target](const Sequence::Instruction& x) {
-            if (x.directive == Sequence::Instruction::Delete) {
-                src.erase(src.begin() + x.srcIndex);
+            if (!resultBellmanFord.second.empty()) {
+                auto it1 = resultBellmanFord.second.begin();
+                generatedPathBF += input.edge_cost(start, *it1);
+                ++it1;
+                for (auto it2 = resultBellmanFord.second.begin();
+                     it1 != resultBellmanFord.second.end(); ++it1, ++it2) {
+                    generatedPathBF += input.edge_cost(*it2, *it1);
+                }
             }
-            else if (x.directive == Sequence::Instruction::Replace) {
-                src[x.srcIndex] = target[x.targetIndex];
+
+            if (!buildResult.empty()) {
+                auto it1 = buildResult.begin();
+                generatedPathFW += input.edge_cost(start, *it1);
+                ++it1;
+                for (auto it2 = buildResult.begin(); it1 != buildResult.end(); ++it1, ++it2) {
+                    generatedPathFW += input.edge_cost(*it2, *it1);
+                }
             }
-        });
 
-        std::sort(result.begin(), result.end(), [](auto& x, auto& y) {
-            return x.targetIndex < y.targetIndex;
-        });
-        for(auto& x : result) {
-            if(x.directive == Sequence::Instruction::Insert) {
-                src.insert(src.begin() + x.targetIndex, 1, target[x.targetIndex]);
-            }
-        }
-
-        EXPECT_EQ(src, target);
-    }
-}
-
-TEST_F(AlgorithmTest, MajorityTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        auto majoritySize = sizeDist(engine);
-        auto majorityValue = inputDist(engine);
-        std::vector<uint32_t> input(2 * majoritySize - 1);
-
-        for (uint32_t j = 0; j < majoritySize; ++j)
-            input[j] = majorityValue;
-        for (uint32_t j = majoritySize; j < input.size(); ++j)
-            input[j] = inputDist(engine);
-
-        // shuffle
-        for (uint32_t j = 0; j < input.size(); ++j) {
-            std::uniform_int_distribution<uint32_t> shuffler(j, input.size() - 1);
-            std::swap(input[j], input[shuffler(engine)]);
-        }
-
-        ASSERT_GE(std::count(input.begin(), input.end(), majorityValue), majoritySize);
-
-        EXPECT_EQ(Sequence::findMajority(input.begin(), input.end()), majorityValue);
-
-        if (input.size() != 1) {
-            for (uint32_t j = 0; j < input.size(); ++j)
-                if (input[j] == majorityValue)
-                    input[j] = j;
-                else
-                    input[j] = input.size();
-
-            EXPECT_THROW(Sequence::findMajority(input.begin(), input.end()), std::invalid_argument);
+            EXPECT_DOUBLE_EQ(generatedPathBF, resultBellmanFord.first);
+            EXPECT_DOUBLE_EQ(generatedPathFW, allPairResult[start][end].first);
         }
     }
 }
+TEST_F(AlgorithmTest, DijkstraAllPairTest)
+{
+    // Due to the complexity of this algorithm/verification, only using a known-answer problem
+    // To an extent, this also serves as a test for decrease() on the heap structure used
+    graph::graph<char, true, true> input;
+    std::vector<char> vertices({ 's', 'a', 'b', 'c', 'd', 'e', 'f' });
+    for (char& vert : vertices)
+        input.add_vertex(vert);
 
-TEST_F(AlgorithmTest, LISTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        std::vector<uint32_t> input(sizeDist(engine));
-        std::generate(input.begin(), input.end(), [&inputDist, this]() {return inputDist(engine); });
+    input.set_edge('s', 'b', 7);
+    input.set_edge('s', 'c', 20);
+    input.set_edge('s', 'd', 2);
+    input.set_edge('s', 'e', 13);
+    input.set_edge('a', 'd', 1);
+    input.set_edge('b', 'a', 7);
+    input.set_edge('b', 'c', 10);
+    input.set_edge('b', 'd', 8);
+    input.set_edge('b', 'f', 8);
+    input.set_edge('d', 'c', 8);
+    input.set_edge('d', 'f', 5);
+    input.set_edge('e', 'f', 12);
 
-        auto result = Sequence::longestOrderedSubsequence(input.begin(), input.end());
-        auto it2 = result.begin();
-        auto it1 = it2++;
-        for (; it2 != result.end(); ++it1, ++it2) {
-            EXPECT_GT(*it2 - *it1, 0);
-            EXPECT_GT(**it2, **it1);
-            auto vectIt = *it1;
-            for (++vectIt; vectIt != *it2; ++vectIt)
-                EXPECT_TRUE(*vectIt >= **it2 || *vectIt <= **it1);
-        }
-
-        auto vectIt = *it1;
-        for (++vectIt; vectIt != input.end(); ++vectIt)
-            EXPECT_LE(*vectIt, **it1);
-        
-    }
+    auto result = graph_alg::Dijkstra_all_targets(input, 's');
+    EXPECT_EQ(result['s'].first, 0);
+    EXPECT_EQ(result['a'], std::make_pair(14., 'b'));
+    EXPECT_EQ(result['b'], std::make_pair(7., 's'));
+    EXPECT_EQ(result['c'], std::make_pair(10., 'd'));
+    EXPECT_EQ(result['d'], std::make_pair(2., 's'));
+    EXPECT_EQ(result['e'], std::make_pair(13., 's'));
+    EXPECT_EQ(result['f'], std::make_pair(7., 'd'));
 }
 
-TEST_F(AlgorithmTest, LISIteratorTest) {
-    for (uint32_t i = 0; i < 100; ++i) {
-        std::uniform_int_distribution<uint32_t> inputDist;
-        std::uniform_int_distribution<uint32_t> sizeDist(1, 1000);
-        auto size = sizeDist(engine);
-        std::list<uint32_t> input;
-        std::generate_n(std::back_inserter(input), size, [&inputDist, this]() {return inputDist(engine); });
+TEST_F(AlgorithmTest, DijkstraSinglePathTest)
+{
+    // Due to the complexity of this algorithm/verification, only using a known-answer problem
+    graph::graph<int, false, true> input;
+    std::vector<int> vertices({ 1, 2, 3, 4, 5, 6 });
+    for (int& vert : vertices)
+        input.add_vertex(vert);
 
-        auto result = Sequence::longestOrderedSubsequence(input.begin(), input.end());
-        auto it2 = result.begin();
-        auto it1 = it2++;
-        for (; it2 != result.end(); ++it1, ++it2) {
-            EXPECT_GT(**it2, **it1);
-            auto vectIt = *it1;
-            for (++vectIt; vectIt != *it2; ++vectIt)
-                EXPECT_TRUE(*vectIt >= **it2 || *vectIt <= **it1);
-        }
+    input.set_edge(1, 2, 7);
+    input.set_edge(1, 3, 9);
+    input.set_edge(1, 6, 14);
+    input.set_edge(2, 3, 10);
+    input.set_edge(2, 4, 15);
+    input.set_edge(3, 4, 11);
+    input.set_edge(3, 6, 2);
+    input.set_edge(4, 5, 6);
+    input.set_edge(5, 6, 9);
 
-        auto vectIt = *it1;
-        for (++vectIt; vectIt != input.end(); ++vectIt)
-            EXPECT_LE(*vectIt, **it1);
-
-    }
+    auto result = graph_alg::Dijkstra_single_target(input, 1, 5);
+    EXPECT_EQ(result.first, 20);
+    std::vector<int> correctPath({ 3, 6, 5 });
+    EXPECT_EQ(result.second.size(), correctPath.size());
+    EXPECT_TRUE(std::equal(result.second.begin(), result.second.end(), correctPath.begin()));
 }

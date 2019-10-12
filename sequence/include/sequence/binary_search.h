@@ -11,10 +11,12 @@ namespace sequence {
  Straightforward binary search
  Values iterators point to should be sorted with Compare
  */
-    template <typename RandomIt, typename T, typename Compare = std::less<>, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
-    RandomIt binary_search(RandomIt first, RandomIt last, const T& item) {
-        return binary_search(first, last, item, Compare());
-    }
+template <typename RandomIt, typename T, typename Compare = std::less<>,
+    typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+RandomIt binary_search(RandomIt first, RandomIt last, const T& item)
+{
+    return binary_search(first, last, item, Compare());
+}
 template <typename RandomIt, typename T, typename Compare>
 RandomIt binary_search(RandomIt first, RandomIt last, const T& item, Compare comp);
 
@@ -32,10 +34,12 @@ Requirements:
 For some 0 <= x < (last-first), if i != x, comp(*(first + i), *(first + i + 1))
 If x != 0, comp(*first, *(last - 1))
 */
-    template <typename RandomIt, typename T, typename Compare = std::less<>, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
-    RandomIt find_min_in_cyclic(RandomIt first, RandomIt last) {
-        return find_min_in_cyclic(first, last, Compare());
-    }
+template <typename RandomIt, typename T, typename Compare = std::less<>,
+    typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+RandomIt find_min_in_cyclic(RandomIt first, RandomIt last)
+{
+    return find_min_in_cyclic(first, last, Compare());
+}
 template <typename RandomIt, typename Compare>
 RandomIt find_min_in_cyclic(RandomIt first, RandomIt last, Compare comp);
 

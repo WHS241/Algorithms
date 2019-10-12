@@ -9,20 +9,23 @@ namespace graph_alg {
 /*
 Determine the connected components using DFS
 */
-template <typename T, bool Weighted> std::list<std::unordered_set<T>> connected_components(const graph::graph<T, false, Weighted>& src);
+template <typename T, bool Weighted>
+std::list<std::unordered_set<T>> connected_components(const graph::graph<T, false, Weighted>& src);
 
 /*
 Find all articulation points of a graph
 John Hopcroft, Robert Tarjan: O(V+E)
 */
-    template <typename T, bool Weighted> std::unordered_set<T> articulation_points(const graph::graph<T, false, Weighted>& src);
+template <typename T, bool Weighted>
+std::unordered_set<T> articulation_points(const graph::graph<T, false, Weighted>& src);
 
 /*
 Find all strongly connected components
 Tarjan: O(V+E)
 */
-    template <typename T, bool Weighted>
-    std::list<std::unordered_set<T>> strongly_connected_components(const graph::graph<T, true, Weighted>& src);
+template <typename T, bool Weighted>
+std::list<std::unordered_set<T>> strongly_connected_components(
+    const graph::graph<T, true, Weighted>& src);
 } // namespace GraphAlg
 
 #include <src/graph/components.cpp>

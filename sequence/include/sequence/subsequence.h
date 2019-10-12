@@ -10,7 +10,7 @@ masterLast) Conditions: It1::value_type is equivalent to It2::value_type
 Θ(distance(targetFirst, targetLast) + distance(masterFirst, masterLast))
 */
 template <typename It1, typename It2>
-bool isSubsequence(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast);
+bool is_subsequence(It1 target_first, It1 target_last, It2 master_first, It2 master_last);
 
 /*
 Stuttering subsequence problem:
@@ -20,7 +20,7 @@ Mirzaian (1987): Θ((n+m)log(n/m)) where m = distance(targetFirst, targetLast), 
 = distance(masterFirst, masterLast)
 */
 template <typename It1, typename It2>
-uint32_t maxStutter(It1 targetFirst, It1 targetLast, It2 masterFirst, It2 masterLast);
+uint32_t max_stutter(It1 target_first, It1 target_last, It2 master_first, It2 master_last);
 
 /*
 Longest ordered (increasing) subsequence
@@ -36,42 +36,43 @@ namespace {
      Iterator adaptor:
      Simulate stuttering without having to create a new container
      */
-    template <typename It> class StutterIterator {
+    template <typename It> class stutter_iterator {
     public:
         typedef typename std::iterator_traits<It>::value_type value_type;
 
-        StutterIterator(const It it, uint32_t stutterAmount)
-            : iterator(it)
-            , SETTING(stutterAmount)
-            , counter(0) {};
+        stutter_iterator(const It it, uint32_t stutter)
+            : _iterator(it)
+            , _stutter(stutter)
+            , _counter(0) {};
 
-        bool operator==(const StutterIterator& rhs)
+        bool operator==(const stutter_iterator& rhs)
         {
-            return SETTING == rhs.SETTING && counter == rhs.counter && iterator == rhs.iterator;
+            return _stutter == rhs._stutter && _counter == rhs._counter
+                && _iterator == rhs._iterator;
         }
-        bool operator!=(const StutterIterator& rhs) { return !operator==(rhs); }
-        StutterIterator& operator++()
+        bool operator!=(const stutter_iterator& rhs) { return !operator==(rhs); }
+        stutter_iterator& operator++()
         {
-            counter = (counter + 1) % SETTING;
-            if (counter == 0)
-                ++iterator;
+            _counter = (_counter + 1) % _stutter;
+            if (_counter == 0)
+                ++_iterator;
             return *this;
         }
-        StutterIterator operator++(int)
+        stutter_iterator operator++(int)
         {
-            StutterIterator temp(*this);
+            stutter_iterator temp(*this);
             ++*this;
             return temp;
         }
 
-        const value_type& operator*() const { return *iterator; }
+        const value_type& operator*() const { return *_iterator; }
 
-        const value_type* operator->() const { return iterator; }
+        const value_type* operator->() const { return _iterator; }
 
     private:
-        const uint32_t SETTING;
-        uint32_t counter;
-        It iterator;
+        const uint32_t _stutter;
+        uint32_t _counter;
+        It _iterator;
     };
 } // namespace
 } // namespace Sequence

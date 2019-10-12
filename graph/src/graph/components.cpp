@@ -7,14 +7,15 @@
 #include <graph/search.h>
 
 template <typename T, bool Weighted>
-std::list<std::unordered_set<T>> graph_alg::connected_components(const graph::graph<T, false, Weighted>& src)
+std::list<std::unordered_set<T>> graph_alg::connected_components(
+    const graph::graph<T, false, Weighted>& src)
 {
     std::list<std::unordered_set<T>> result;
     if (src.order() == 0)
         return result;
 
     std::unordered_set<T> current;
-    depthFirstForest(
+    depth_first_forest(
         src, src.vertices().front(), [&current](const T& item) { current.insert(item); },
         [](const T&, const T&) {},
         [&result, &current](const T&) {
@@ -25,7 +26,8 @@ std::list<std::unordered_set<T>> graph_alg::connected_components(const graph::gr
     return result;
 }
 
-template <typename T, bool Weighted> std::unordered_set<T> graph_alg::articulation_points(const graph::graph<T, false, Weighted>& src)
+template <typename T, bool Weighted>
+std::unordered_set<T> graph_alg::articulation_points(const graph::graph<T, false, Weighted>& src)
 {
     std::unordered_map<T, bool> visited;
     std::unordered_map<T, uint32_t> search_number, low;
@@ -44,7 +46,7 @@ template <typename T, bool Weighted> std::unordered_set<T> graph_alg::articulati
         const T& start = it->first;
         uint32_t num_children_of_root = 0;
 
-        depthFirst(
+        depth_first(
             src, start,
             [&current_dfs_num, &search_number, &low, &visited](const T& curr) {
                 search_number[curr] = low[curr] = current_dfs_num++;
@@ -83,7 +85,8 @@ template <typename T, bool Weighted> std::unordered_set<T> graph_alg::articulati
 }
 
 template <typename T, bool Weighted>
-std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(const graph::graph<T, true, Weighted>& src)
+std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(
+    const graph::graph<T, true, Weighted>& src)
 {
     std::unordered_map<T, bool> finished;
     std::unordered_map<T, uint32_t> search_number, low;
@@ -98,7 +101,7 @@ std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(const 
     for (T& v : vertices)
         finished[v] = false;
 
-    depthFirstForest(
+    depth_first_forest(
         src, src.vertices().front(),
         [&current_num, &search_number, &low, &component](const T& curr) {
             search_number[curr] = low[curr] = current_num++;
