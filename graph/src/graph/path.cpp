@@ -185,7 +185,7 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
     std::unordered_map<T, node*> tracker;
 
     auto it1 = vertices.begin();
-    for (auto& vertex_data : data_map) {
+    for (data& vertex_data : data_map) {
         tracker[*it1] = heap.add(vertex_data);
         ++it1;
     }
@@ -255,7 +255,7 @@ std::unordered_map<T, std::pair<double, T>> Bellman_Ford_all_targets(
     const graph::graph<T, true, true>& src, const T& start)
 {
     std::unordered_map<T, std::pair<double, T>> result;
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
     for (const T& v : vertices)
         result[v] = std::make_pair(v == start ? 0 : std::numeric_limits<double>::max(), v);
 
@@ -268,7 +268,7 @@ std::unordered_map<T, std::pair<double, T>> Bellman_Ford_all_targets(
         for (const T& v : vertices) {
             // updating won't help if we haven't visited yet
             if (v == start || result[v].second != v) {
-                for (auto& edge : src.edges(v)) {
+                for (std::pair<T, double>& edge : src.edges(v)) {
                     if ((edge.first != start && result[edge.first].second == edge.first)
                         || (result[v].first + edge.second < result[edge.first].first)) {
                         result[edge.first] = std::make_pair(result[v].first + edge.second, v);
@@ -289,7 +289,7 @@ std::unordered_map<T, std::pair<double, T>> Bellman_Ford_all_targets(
     // After V-1 iterations, any further updates must be the result of a negative cycle
     for (const T& v : vertices)
         if (v == start || result[v].second != v)
-            for (auto& edge : src.edges(v))
+            for (const std::pair<T, double>& edge : src.edges(v))
                 if (result[v].first + edge.second < result[edge.first].first)
                     throw std::domain_error("Negative cycle");
 
@@ -301,14 +301,14 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
     const graph::graph<T, true, true>& src)
 {
     std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> result;
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
 
     // initialize array with already existing edges
     // distance from a vertex to itself should always be 0
     for (const T& v : vertices) {
         result[v][v] = std::make_pair(0., v);
 
-        for (const auto& edge : src.edges(v))
+        for (const std::pair<T, double>& edge : src.edges(v))
             result[v][edge.first] = std::make_pair(edge.second, v);
     }
 
@@ -363,7 +363,7 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
         temp.set_edge(new_vertex, original_vertex, 0);
 
     // O(VE)
-    auto shortest_path_tree
+    std::unordered_map<T, std::pair<double, T>> shortest_path_tree
         = Bellman_Ford_all_targets(temp, new_vertex); // where we find negative cycles
 
     // O(E)
@@ -372,7 +372,7 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
     // re-weight edges based on Bellman-Ford result:
     // edge from u to v is weighted by tree_path(u) - tree_path(v)
     for (const T& start : vertices)
-        for (const auto& edge : src.edges(start))
+        for (const std::pair<T, double>& edge : src.edges(start))
             temp.set_edge(start, edge.first,
                 edge.second + shortest_path_tree[start].first
                     - shortest_path_tree[edge.first].first);
@@ -381,8 +381,8 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
 
     // Use Dijkstra's algorithm to find the rest
     for (const T& start : vertices) {
-        auto subresult = Dijkstra_all_targets(temp, start);
-        for (auto& endpoint : subresult) {
+        std::unordered_map<T, std::pair<double, T>> subresult = Dijkstra_all_targets(temp, start);
+        for (std::pair<T, std::pair<double, T>>& endpoint : subresult) {
             if (endpoint.first != endpoint.second.second) {
                 // unweight
                 result[start][endpoint.first] = std::make_pair(endpoint.second.first

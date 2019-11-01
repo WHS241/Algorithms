@@ -1,8 +1,12 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <algorithm>
+#include <iterator>
 #include <list>
 #include <memory>
+#include <ostream>
+#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -64,6 +68,21 @@ private:
     std::unordered_map<T, uint32_t> _translation;
     std::vector<T> _reverse_translation;
 };
+
+template<typename T, bool Directed>
+std::ostream& operator<<(std::ostream& os, const graph<T, Directed, true>& rhs) {
+    for(const T& vertex : rhs.vertices()) {
+        os << vertex << ": ";
+        auto edges = rhs.edges(vertex);
+        std::transform(edges.begin(), edges.end(), std::ostream_iterator<std::string>(os, ", "), [](const std::pair<T, double>& edge){
+            std::ostringstream builder;
+            builder << '[' << edge.first << "] (" << edge.second << ')';
+            return builder.str();
+        });
+        os << std::endl;
+    }
+    return os;
+}
 }
 
 #include "src/structures/graph.cpp"

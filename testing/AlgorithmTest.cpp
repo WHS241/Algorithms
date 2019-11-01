@@ -7,10 +7,8 @@
 
 #include <structures/graph.h>
 
-#include <graph/components.h>
-#include <graph/min_flow_max_cut.h>
+#include <graph/max_flow_min_cut.h>
 #include <graph/path.h>
-#include <graph/spanning_tree.h>
 
 #include "generator.h"
 
@@ -106,7 +104,7 @@ template <typename F> void test_case_two(F target_algorithm)
     EXPECT_EQ(result.degree('t'), 0);
 }
 
-TEST_F(AlgorithmTest, Min_Flow_Edmonds_Karp)
+TEST_F(AlgorithmTest, Max_Flow_Edmonds_Karp)
 {
     test_case_one([](const auto& a, const auto& b, const auto& c) {
         return graph_alg::Edmonds_Karp(a, b, c);
@@ -116,10 +114,109 @@ TEST_F(AlgorithmTest, Min_Flow_Edmonds_Karp)
     });
 }
 
-TEST_F(AlgorithmTest, Min_Flow_Dinitz)
+TEST_F(AlgorithmTest, Max_Flow_Dinitz)
 {
     test_case_one(
         [](const auto& a, const auto& b, const auto& c) { return graph_alg::Dinitz(a, b, c); });
     test_case_two(
         [](const auto& a, const auto& b, const auto& c) { return graph_alg::Dinitz(a, b, c); });
+}
+
+TEST_F(AlgorithmTest, Flow_Properties) {
+    for(uint32_t i = 0; i < 50; ++i) {
+        graph::graph<int, true, true> input = random_graph<true, true>(engine);
+        auto vertices = input.vertices();
+        if(vertices.size() > 1) {
+            std::uniform_int_distribution<uint32_t> vertex_picker(0, vertices.size() - 1);
+            uint32_t start_index = vertex_picker(engine);
+            uint32_t end_index = vertex_picker(engine);
+            while(end_index == start_index)
+                end_index = vertex_picker(engine);
+
+            auto max_flow = graph_alg::Dinitz(input, vertices[start_index], vertices[end_index]);
+
+            // verify conservation of flow
+            std::vector<double> divergence(max_flow.vertices().size(), 0);
+            for(const int& v : max_flow.vertices()) {
+                for(auto edge : max_flow.edges(v)) {
+                    EXPECT_LE(edge.second, input.edge_cost(v, edge.first) + 1e-10);
+                    divergence[v] -= edge.second;
+                    divergence[edge.first] += edge.second;
+                }
+            }
+
+            double out_flow = divergence[vertices[start_index]];
+            double in_flow = divergence[vertices[end_index]];
+            EXPECT_NEAR(out_flow, -in_flow, 1e-10);
+            for(int j = 0; j < divergence.size(); ++j) {
+                if(j != start_index && j != end_index) {
+                    EXPECT_NEAR(divergence[j], 0., 1e-10);
+                }
+            }
+        }
+    }
+}
+
+TEST_F(AlgorithmTest, Directed_Min_Cut) {
+    for(uint32_t i = 0; i < 50; ++i) {
+        graph::graph<int, true, true> input = random_graph<true, true>(engine);
+        auto vertices = input.vertices();
+        if(vertices.size() > 1) {
+            std::uniform_int_distribution<uint32_t> vertex_picker(0, vertices.size() - 1);
+            uint32_t start_index = vertex_picker(engine);
+            uint32_t end_index = vertex_picker(engine);
+            while(end_index == start_index)
+                end_index = vertex_picker(engine);
+
+            auto max_flow = graph_alg::Dinitz(input, vertices[start_index], vertices[end_index]);
+            auto min_cut = graph_alg::minimum_cut(input, vertices[start_index], vertices[end_index]);
+
+            // verify max-flow-min-cut theorem
+            auto flow_start = max_flow.edges(vertices[start_index]);
+            double flow_value = std::accumulate(flow_start.begin(), flow_start.end(), 0., [](double prev, const auto& curr){
+                return prev + curr.second;
+            });
+            double cut_cost = std::accumulate(min_cut.begin(), min_cut.end(), 0., [&input](double prev, const graph_alg::cut_edge<int>& curr){
+                return prev + input.edge_cost(curr.start, curr.end);
+            });
+            EXPECT_DOUBLE_EQ(flow_value, cut_cost);
+
+            // verify cut
+            for(const auto& edge : min_cut) {
+                input.remove_edge(edge.start, edge.end);
+            }
+            EXPECT_THROW(graph_alg::least_edges_path(input, vertices[start_index], vertices[end_index]), graph_alg::no_path_exception);
+        }
+    }
+}
+
+TEST_F(AlgorithmTest, Undirected_Min_Cut) {
+    for(uint32_t i = 0; i < 50; ++i) {
+        graph::graph<int, false, true> input = random_graph<false, true>(engine);
+        auto vertices = input.vertices();
+        if(vertices.size() > 1) {
+            std::uniform_int_distribution<uint32_t> vertex_picker(0, vertices.size() - 1);
+            uint32_t start_index = vertex_picker(engine);
+            uint32_t end_index = vertex_picker(engine);
+            while(end_index == start_index)
+                end_index = vertex_picker(engine);
+
+            auto max_flow = graph_alg::Dinitz(input, vertices[start_index], vertices[end_index]);
+            auto min_cut = graph_alg::minimum_cut(input, vertices[start_index], vertices[end_index]);
+
+            // verify max-flow-min-cut theorem
+            auto flow_start = max_flow.edges(vertices[start_index]);
+            EXPECT_DOUBLE_EQ(std::accumulate(flow_start.begin(), flow_start.end(), 0., [](double prev, const auto& curr){
+                return prev + curr.second;
+            }), std::accumulate(min_cut.begin(), min_cut.end(), 0., [&input](double prev, const graph_alg::cut_edge<int>& curr){
+                return prev + input.edge_cost(curr.start, curr.end);
+            }));
+
+            // verify cut
+            for(const auto& edge : min_cut) {
+                input.remove_edge(edge.start, edge.end);
+            }
+            EXPECT_THROW(graph_alg::least_edges_path(input, vertices[start_index], vertices[end_index]), graph_alg::no_path_exception);
+        }
+    }
 }
