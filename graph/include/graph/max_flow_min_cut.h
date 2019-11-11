@@ -38,9 +38,10 @@ template <typename T, bool Directed>
 graph::graph<T, Directed, true> Dinitz(
     const graph::graph<T, Directed, true>& input, const T& source, const T& sink);
 
-template<typename T>
-struct cut_edge {
-    cut_edge(const T& start, const T& end): start(start), end(end) {};
+template <typename T> struct cut_edge {
+    cut_edge(const T& start, const T& end)
+        : start(start)
+        , end(end) {};
     T start;
     T end;
 };
@@ -49,9 +50,9 @@ struct cut_edge {
  * Minimum cut from start to terminal
  * Max-flow-min-cut theorem: minimum cut is the edges that are saturated in maximum flow
  */
- template<typename T, bool Directed>
- std::list<cut_edge<T>> minimum_cut(
-         const graph::graph<T, Directed, true>& input, const T& start, const T& terminal);
+template <typename T, bool Directed>
+std::list<cut_edge<T>> minimum_cut(
+    const graph::graph<T, Directed, true>& input, const T& start, const T& terminal);
 
 }
 

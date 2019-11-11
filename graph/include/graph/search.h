@@ -30,10 +30,9 @@ void depth_first_forest(
     F2 on_backtrack = [](const T& parent, const T& child) {}, F3 on_finish_root = [](const T&) {});
 
 /*
- * AI-style depth-first
+ * Tree-style depth-first
  * May visit a vertex multiple times
  */
-
 template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
 void depth_first_tree(
     const graph::graph<T, Directed, Weighted>& src, const T& start, F1 on_arrival = [](const T&) {},

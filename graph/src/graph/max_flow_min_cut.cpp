@@ -88,13 +88,13 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
 
                         double forward_residual = residual.edge_cost(*edge_start, *edge_end);
                         double backward_residual = residual.edge_cost(*edge_end, *edge_start);
-                        if(std::isnan(backward_residual))
+                        if (std::isnan(backward_residual))
                             backward_residual = 0;
 
                         double current_flow = 0;
                         if (result.has_edge(*edge_end, *edge_start))
                             current_flow -= result.edge_cost(*edge_end, *edge_start);
-                        else if(result.has_edge(*edge_start, *edge_end))
+                        else if (result.has_edge(*edge_start, *edge_end))
                             current_flow += result.edge_cost(*edge_start, *edge_end);
 
                         double new_flow = current_flow + allowed_flow;
@@ -103,24 +103,24 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
 
                         // Set flow
                         if (new_flow > 1e-10) {
-                            if(current_flow < 0)
+                            if (current_flow < 0)
                                 result.remove_edge(*edge_end, *edge_start);
                             result.set_edge(*edge_start, *edge_end, new_flow);
                         } else if (new_flow < -1e-10) {
-                            if(current_flow > 0)
+                            if (current_flow > 0)
                                 result.remove_edge(*edge_start, *edge_end);
                             result.set_edge(*edge_end, *edge_start, -new_flow);
                         } else {
-                            if(current_flow > 0)
+                            if (current_flow > 0)
                                 result.remove_edge(*edge_start, *edge_end);
-                            else if(current_flow < 0)
+                            else if (current_flow < 0)
                                 result.remove_edge(*edge_end, *edge_start);
                         }
 
                         // Set residuals
                         if (std::abs(new_forward) <= 1e-10)
                             residual.remove_edge(*edge_start, *edge_end);
-                        else 
+                        else
                             residual.set_edge(*edge_start, *edge_end, new_forward);
                         residual.set_edge(*edge_end, *edge_start, new_backward);
                     }
@@ -215,32 +215,36 @@ graph::graph<T, Directed, true> Dinitz(
         });
 }
 
-template<typename T, bool Directed>
+template <typename T, bool Directed>
 std::list<cut_edge<T>> minimum_cut(
-        const graph::graph<T, Directed, true>& input, const T& start, const T& terminal) {
+    const graph::graph<T, Directed, true>& input, const T& start, const T& terminal)
+{
     // Use max-flow-min-cut theorem
     graph::graph<T, Directed, true> flow_graph = Dinitz(input, start, terminal);
     std::list<cut_edge<T>> result;
 
-    // Using theorem, all edges in min-cut must be saturated in max-flow: start by adding these to a set of potential results
-    // Create a copy of graph without potential edges, then see which of them actually are involved in the cut
+    // Using theorem, all edges in min-cut must be saturated in max-flow: start by adding these to a
+    // set of potential results Create a copy of graph without potential edges, then see which of
+    // them actually are involved in the cut
     graph::graph<T, Directed, true> partition_graph(input);
-    for(const T& vertex : input.vertices())
-        for(const std::pair<T, double>& edge : flow_graph.edges(vertex))
-            if(std::abs(edge.second - input.edge_cost(vertex, edge.first)) < 1e-5) {
+    for (const T& vertex : input.vertices())
+        for (const std::pair<T, double>& edge : flow_graph.edges(vertex))
+            if (std::abs(edge.second - input.edge_cost(vertex, edge.first)) < 1e-5) {
                 result.push_back(cut_edge<T>(vertex, edge.first));
                 partition_graph.remove_edge(vertex, edge.first);
-            } else { 
+            } else {
                 // flow should not flow back from cut region to uncut region (double-counting error)
                 // pseudo-residual: make sure start of edge is reachable
                 partition_graph.set_edge(edge.first, vertex);
             }
-    
+
     std::unordered_set<T> reachable_vertices;
-    breadth_first(partition_graph, start, [&reachable_vertices](const T& v){reachable_vertices.insert(v);});
-    result.remove_if([&reachable_vertices](const cut_edge<T>& edge){
+    breadth_first(partition_graph, start,
+        [&reachable_vertices](const T& v) { reachable_vertices.insert(v); });
+    result.remove_if([&reachable_vertices](const cut_edge<T>& edge) {
         // Only allow edges that cross the reachable-unreachable boundary
-        return (reachable_vertices.find(edge.start) == reachable_vertices.end()) || (reachable_vertices.find(edge.end) != reachable_vertices.end());
+        return (reachable_vertices.find(edge.start) == reachable_vertices.end())
+            || (reachable_vertices.find(edge.end) != reachable_vertices.end());
     });
 
     return result;

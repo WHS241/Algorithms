@@ -69,16 +69,18 @@ private:
     std::vector<T> _reverse_translation;
 };
 
-template<typename T, bool Directed>
-std::ostream& operator<<(std::ostream& os, const graph<T, Directed, true>& rhs) {
-    for(const T& vertex : rhs.vertices()) {
+template <typename T, bool Directed>
+std::ostream& operator<<(std::ostream& os, const graph<T, Directed, true>& rhs)
+{
+    for (const T& vertex : rhs.vertices()) {
         os << vertex << ": ";
         auto edges = rhs.edges(vertex);
-        std::transform(edges.begin(), edges.end(), std::ostream_iterator<std::string>(os, ", "), [](const std::pair<T, double>& edge){
-            std::ostringstream builder;
-            builder << '[' << edge.first << "] (" << edge.second << ')';
-            return builder.str();
-        });
+        std::transform(edges.begin(), edges.end(), std::ostream_iterator<std::string>(os, ", "),
+            [](const std::pair<T, double>& edge) {
+                std::ostringstream builder;
+                builder << '[' << edge.first << "] (" << edge.second << ')';
+                return builder.str();
+            });
         os << std::endl;
     }
     return os;
