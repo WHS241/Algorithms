@@ -59,8 +59,8 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
             for (const std::list<T>& augment_path : paths) {
                 double allowed_flow = 0;
                 bool blocked = false;
-                for (auto it = augment_path.begin(); !blocked && it != augment_path.end(); ++it) {
-                    if (it == augment_path.begin()) {
+                for (auto it = augment_path.cbegin(); !blocked && it != augment_path.cend(); ++it) {
+                    if (it == augment_path.cbegin()) {
                         allowed_flow = residual.edge_cost(source, *it);
                         blocked = std::isnan(allowed_flow);
                     } else {
@@ -75,10 +75,10 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
 
                 if (!blocked) {
                     // add flow to result graph and update residual
-                    for (auto edge_end = augment_path.begin(); edge_end != augment_path.end();
+                    for (auto edge_end = augment_path.cbegin(); edge_end != augment_path.cend();
                          ++edge_end) {
                         const T* edge_start;
-                        if (edge_end == augment_path.begin()) {
+                        if (edge_end == augment_path.cbegin()) {
                             edge_start = &source;
                         } else {
                             auto temp(edge_end);

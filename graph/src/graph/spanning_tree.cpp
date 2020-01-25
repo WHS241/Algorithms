@@ -17,8 +17,8 @@ namespace graph_alg {
 template <typename T>
 graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, false, true>& input)
 {
-    auto input_vertices = input.vertices();
-    auto num_input_components = connected_components(input).size();
+    std::vector<T> input_vertices = input.vertices();
+    uint32_t num_input_components = connected_components(input).size();
 
     struct edge {
         T start;

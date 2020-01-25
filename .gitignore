@@ -1,6 +1,7 @@
 .vs/*
 .vscode/*
 .idea/*
+apps/
 bin/
 build/
 cmake-build-debug/

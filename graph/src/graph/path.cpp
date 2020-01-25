@@ -106,7 +106,7 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
 
     // start processing
     std::unordered_map<T, std::pair<double, T>> result;
-    auto it = std::find(topological_order.begin(), topological_order.end(), start);
+    auto it = std::find(topological_order.cbegin(), topological_order.cend(), start);
     if (it == topological_order.end())
         throw std::invalid_argument("Start vertex does not exist");
     result[start].first = 0;
@@ -184,7 +184,7 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
     heap::Fibonacci<data, decltype(compare)> heap(compare);
     std::unordered_map<T, node*> tracker;
 
-    auto it1 = vertices.begin();
+    auto it1 = vertices.cbegin();
     for (data& vertex_data : data_map) {
         tracker[*it1] = heap.add(vertex_data);
         ++it1;

@@ -49,7 +49,7 @@ void graph_alg::depth_first(
     static_assert(
         std::is_invocable_v<F1, T> && std::is_invocable_v<F2, T, T>, "incompatible functions");
     std::unordered_map<T, bool> visited;
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
     if (vertices.empty())
         return;
 
@@ -70,7 +70,7 @@ void graph_alg::depth_first_forest(const graph::graph<T, Directed, Weighted>& sr
         std::is_invocable_v<F1, T> && std::is_invocable_v<F2, T, T> && std::is_invocable_v<F3, T>,
         "incompatible functions");
     std::unordered_map<T, bool> visited;
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
     if (vertices.empty())
         return;
 
@@ -87,8 +87,8 @@ void graph_alg::depth_first_forest(const graph::graph<T, Directed, Weighted>& sr
 
     auto findUnvisited = [](const std::pair<T, bool>& x) { return !x.second; };
 
-    for (auto it = std::find_if(visited.begin(), visited.end(), findUnvisited); it != visited.end();
-         it = std::find_if(visited.begin(), visited.end(), findUnvisited)) {
+    for (auto it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited); it != visited.cend();
+         it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited)) {
         if (depth_first_helper(src, it->first, on_arrival, on_backtrack, visited))
             return;
         on_finish_root(it->first);
@@ -101,7 +101,7 @@ void graph_alg::depth_first_tree(
 {
     static_assert(
         std::is_invocable_v<F1, T> && std::is_invocable_v<F2, T, T>, "incompatible functions");
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
     if (vertices.empty())
         return;
 
@@ -117,7 +117,7 @@ void graph_alg::breadth_first(
 {
     static_assert(std::is_invocable_v<F, T>, "incompatible functions");
     std::unordered_map<T, bool> visited;
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
     if (vertices.empty())
         return;
 

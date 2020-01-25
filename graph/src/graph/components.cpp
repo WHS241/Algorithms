@@ -37,12 +37,12 @@ std::unordered_set<T> graph_alg::articulation_points(const graph::graph<T, false
     if (src.order() == 0)
         return result;
 
-    auto vertices = src.vertices();
-    for (T& v : vertices)
+    std::vector<T> vertices = src.vertices();
+    for (const T& v : vertices)
         visited[v] = false;
 
-    for (auto it = visited.begin(); it != visited.end();
-         it = std::find_if(it, visited.end(), [](auto val) { return !val.second; })) {
+    for (auto it = visited.cbegin(); it != visited.cend();
+         it = std::find_if(it, visited.cend(), [](const std::pair<T, bool>& val) { return !val.second; })) {
         const T& start = it->first;
         uint32_t num_children_of_root = 0;
 
@@ -97,7 +97,7 @@ std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(
     if (src.order() == 0)
         return result;
 
-    auto vertices = src.vertices();
+    std::vector<T> vertices = src.vertices();
     for (T& v : vertices)
         finished[v] = false;
 
@@ -120,7 +120,7 @@ std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(
 
             // break off SCC if found
             if (low[child] == search_number[child]) {
-                auto& toAdd = component[child];
+                std::unordered_set<T>& toAdd = component[child];
                 for (const T& member : toAdd)
                     finished[member] = true;
                 result.push_back(std::move(toAdd));
@@ -137,7 +137,7 @@ std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(
         },
         [&component, &result, &finished](const T& root) {
             // Handle root
-            auto& toAdd = component[root];
+            std::unordered_set<T>& toAdd = component[root];
             for (const T& member : toAdd)
                 finished[member] = true;
             result.push_back(toAdd);

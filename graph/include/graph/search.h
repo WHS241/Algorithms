@@ -31,7 +31,7 @@ void depth_first_forest(
 
 /*
  * Tree-style depth-first
- * May visit a vertex multiple times
+ * Infinite run-time unless DAG or F1/F2 return values
  */
 template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
 void depth_first_tree(
