@@ -25,14 +25,16 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
     const graph::graph<T, Directed, true>& input, const T& source, const T& sink, Function f);
 
 /**
- * Jack Edmonds and Richard Karp (1972): O(VE^2)
+ * Jack Edmonds, Richard Karp (1972)
+ * Θ(VE^2)
  */
 template <typename T, bool Directed>
 graph::graph<T, Directed, true> Edmonds_Karp(
     const graph::graph<T, Directed, true>& input, const T& source, const T& sink);
 
 /**
- * Yefim Dinitz (1972): O(V^2 E)
+ * Yefim Dinitz (1972)
+ * Θ(V^2 E)
  */
 template <typename T, bool Directed>
 graph::graph<T, Directed, true> Dinitz(

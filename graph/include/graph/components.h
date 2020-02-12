@@ -14,14 +14,16 @@ std::list<std::unordered_set<T>> connected_components(const graph::graph<T, fals
 
 /*
 Find all articulation points of a graph
-John Hopcroft, Robert Tarjan: O(V+E)
+John Hopcroft, Robert Tarjan (1973)
+Θ(V+E)
 */
 template <typename T, bool Weighted>
 std::unordered_set<T> articulation_points(const graph::graph<T, false, Weighted>& src);
 
 /*
 Find all strongly connected components
-Tarjan: O(V+E)
+Tarjan (1972)
+Θ(V+E)
 */
 template <typename T, bool Weighted>
 std::list<std::unordered_set<T>> strongly_connected_components(

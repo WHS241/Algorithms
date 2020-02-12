@@ -39,8 +39,10 @@ graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, fals
     while (tree_components.num_sets() > num_input_components) { // O(log V iterations)
         for (const T& vertex : input_vertices) {
             // each iteration, add shortest edge out of every subtree
+            // Note that since we iterate over all vertices every time, the depth of UNION-FIND tree
+            // <= 3 so this is constant time
             T component = tree_components.find(vertex);
-            auto edges = input.edges(vertex);
+            std::list<std::pair<T, double>> edges = input.edges(vertex);
 
             // ignore edges that create cycles or are already added
             for (auto it = edges.begin(); it != edges.end();) {
@@ -52,15 +54,17 @@ graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, fals
             }
 
             if (!edges.empty()) {
-                auto least_weight_edge = *std::min_element(edges.begin(), edges.end(),
-                    [](const auto& x, const auto& y) { return x.second < y.second; });
+                std::pair<T, double> least_weight_edge = *std::min_element(edges.begin(),
+                    edges.end(), [](const std::pair<T, double>& x, const std::pair<T, double>& y) {
+                        return x.second < y.second;
+                    });
 
                 edge found_edge;
                 found_edge.start = vertex;
                 found_edge.terminal = least_weight_edge.first;
                 found_edge.weight = least_weight_edge.second;
 
-                // not adding yet because we need to find all shortest edges first
+                // check if it is the smallest out of current set so far
                 if (to_add.find(component) == to_add.end()
                     || found_edge.weight < to_add[component].weight) {
                     to_add[component] = found_edge;
@@ -69,10 +73,14 @@ graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, fals
         }
 
         // add edge and update connected components
-        for (const auto& edge_to_insert : to_add) {
-            result.set_edge(edge_to_insert.second.start, edge_to_insert.second.terminal,
-                edge_to_insert.second.weight);
-            tree_components.union_(edge_to_insert.second.start, edge_to_insert.second.terminal);
+        for (const std::pair<T, edge>& edge_to_insert : to_add) {
+            // tie-breaker: make sure we haven't already connected these two components
+            if (tree_components.find(edge_to_insert.second.start)
+                != tree_components.find(edge_to_insert.second.terminal)) {
+                result.set_edge(edge_to_insert.second.start, edge_to_insert.second.terminal,
+                    edge_to_insert.second.weight);
+                tree_components.union_(edge_to_insert.second.start, edge_to_insert.second.terminal);
+            }
         }
         to_add.clear();
     }
@@ -114,7 +122,7 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
     std::unordered_map<T, node*> tracker;
 
     auto it1 = vertices.begin();
-    for (auto& vertex_data : data_map) {
+    for (edge& vertex_data : data_map) {
         tracker[*it1] = heap.add(vertex_data);
         ++it1;
     }
@@ -130,7 +138,7 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
         if (to_add.from != to_add.current)
             result.set_edge(to_add.from, to_add.current, to_add.weight);
 
-        // update heap values with newly added vertex regardless
+        // update heap values with edges from newly added vertex
         for (const T& neighbor : input.neighbors(to_add.current)) {
             auto it = tracker.find(neighbor);
             if (it != tracker.end()) {
@@ -161,10 +169,11 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
         T terminal;
         double weight;
     };
-    std::unordered_set<T> processed_vertices;
+    std::unordered_set<T> processed_vertices; // used to prevent double-counting edges
 
     auto edge_compare = [](const edge& x, const edge& y) { return x.weight < y.weight; };
-    std::set<edge, decltype(edge_compare)> edges(edge_compare); // all edges, ordered by weight
+    std::vector<edge> edges; // all edges, ordered by weight
+    edges.reserve(vertices.size());
 
     graph::graph<T, false, true> result;
 
@@ -173,7 +182,7 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
         processed_vertices.insert(vertex);
 
         // insert all edges into set
-        for (auto curr_edge : input.edges(vertex))
+        for (const std::pair<T, double>& curr_edge : input.edges(vertex))
             if (processed_vertices.find(curr_edge.first) == processed_vertices.end()) {
                 edge current;
                 current.start = vertex;
@@ -182,6 +191,8 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
                 edges.insert(current);
             }
     }
+
+    std::sort(edges.begin(), edges.end(), edge_compare);
 
     disjoint_set<T> components(vertices.begin(), vertices.end());
     uint32_t num_input_components = graph_alg::connected_components(input).size();

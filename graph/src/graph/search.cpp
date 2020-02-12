@@ -87,8 +87,8 @@ void graph_alg::depth_first_forest(const graph::graph<T, Directed, Weighted>& sr
 
     auto findUnvisited = [](const std::pair<T, bool>& x) { return !x.second; };
 
-    for (auto it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited); it != visited.cend();
-         it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited)) {
+    for (auto it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited);
+         it != visited.cend(); it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited)) {
         if (depth_first_helper(src, it->first, on_arrival, on_backtrack, visited))
             return;
         on_finish_root(it->first);

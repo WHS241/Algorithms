@@ -42,7 +42,8 @@ std::unordered_set<T> graph_alg::articulation_points(const graph::graph<T, false
         visited[v] = false;
 
     for (auto it = visited.cbegin(); it != visited.cend();
-         it = std::find_if(it, visited.cend(), [](const std::pair<T, bool>& val) { return !val.second; })) {
+         it = std::find_if(
+             it, visited.cend(), [](const std::pair<T, bool>& val) { return !val.second; })) {
         const T& start = it->first;
         uint32_t num_children_of_root = 0;
 
@@ -76,6 +77,7 @@ std::unordered_set<T> graph_alg::articulation_points(const graph::graph<T, false
                 }
             });
 
+        // determining if the root of DFS tree is an articulation point
         if (num_children_of_root > 1) {
             result.insert(start);
         }
@@ -112,6 +114,8 @@ std::list<std::unordered_set<T>> graph_alg::strongly_connected_components(
         [&component, &finished, &low, &result, &search_number, &src](
             const T& parent, const T& child) {
             // calculate low value for child (stored min low value of children)
+            // Do not consider children that have already been placed in an SCC (search tree cross
+            // edge)
             std::list<T> neighbors = src.neighbors(child);
             for (const T& v : neighbors) {
                 if (!finished[v] && (low[child] > search_number[v]))

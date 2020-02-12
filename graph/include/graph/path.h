@@ -9,7 +9,15 @@ template <typename T, bool Directed, bool Weighted> class graph;
 
 /*
 Supplies algorithms for finding the shortest path(s) in a graph
-All functions throw std::domain_error if no path exists
+All functions throw no_path_exception (std::domain_error) if no path exists
+
+Algorithms on weighted graphs:
+Single target: result.first is length, result.second is path (does not include start)
+Single source, all targets: result[v] = (total length, immediate predecessor)
+All pairs:
+    result[v][v] = (0, v)
+    result[u][v] = (total length u -> v,
+                            vertex m such that result[u][v] = result[u][m] + result[m][v])
 */
 namespace graph_alg {
 
@@ -28,21 +36,22 @@ std::list<T> least_edges_path(
 
 /*
 Use topological sort on a weighted DAG
-O(V+E)
+Can be used with other comparison operators (e.g. find longest path)
+Θ(V+E)
 */
 template <typename T, typename Compare = std::less<>>
 std::pair<double, std::list<T>> shortest_path_DAG(const graph::graph<T, true, true>& src,
     const T& start, const T& dest, Compare compare = Compare());
 template <typename T, typename Compare = std::less<>>
-std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
+std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all_targets(
     const graph::graph<T, true, true>& src, const T& start, Compare compare = Compare());
 
 /*
 Single source shortest path
 Non-negative weights
-Dijkstra's algorithm: O(V^2)
-Binary heap: O((V+E) log V)
-Fibonacci heap: O(V log V + E)
+Edsger Dijkstra (1959): Θ(V^2)
+Binary heap: Θ((V+E) log V)
+Fibonacci heap: Θ(V log V + E)
 */
 template <typename T, bool Directed>
 std::pair<double, std::list<T>> Dijkstra_single_target(
@@ -51,7 +60,7 @@ template <typename T, bool Directed>
 std::unordered_map<T, std::pair<double, T>> Dijkstra_all_targets(
     const graph::graph<T, Directed, true>& src, const T& start);
 /*
- function determines whether to halt early
+ F function determines whether to halt early (returns true to halt)
  */
 template <typename T, bool Directed, typename F>
 std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
@@ -60,7 +69,9 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
 /*
 Single source shortest path
 Directed graph negative weights
-Bellman-Ford: O(VE)
+Alfonso Shimbel (1955), Lester Ford Jr. (1956),
+Edward F. Moore (1957), and Richard Bellman (1958)
+Θ(VE)
 */
 template <typename T>
 std::pair<double, std::list<T>> Bellman_Ford_single_target(
@@ -71,9 +82,8 @@ std::unordered_map<T, std::pair<double, T>> Bellman_Ford_all_targets(
 
 /*
 All-pairs shortest path
-Floyd-Warshall: O(V^3)
-result[i][j] gives vertex k in middle of path, such that shortest path from i to
-j is (shortest path from i to k) + (shortest path from k to j)
+Bernard Roy (1959), Stephen Warshall (1962), Robert Floyd (1962)
+Θ(V^3)
 */
 template <typename T>
 std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshall_all_pairs(
@@ -81,11 +91,10 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
 
 /*
 All-pairs shortest path
-Johnson: O(V^2 log V + VE)
-result[i][j] gives vertex k in middle of path, such that shortest path from i to
-j is (shortest path from i to k) + (shortest path from k to j)
+Donald B. Johnson (1977)
+Θ(V^2 log V + VE)
 
- This algorithm requires a vertex name for a temporary additional vertex
+This algorithm requires a vertex name for a temporary additional vertex
 */
 template <typename T>
 std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_pairs(

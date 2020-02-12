@@ -51,24 +51,22 @@ std::pair<double, std::list<T>> shortest_path_DAG(
     const graph::graph<T, true, true>& src, const T& start, const T& dest, Compare compare)
 {
     std::list<T> result;
-
-    if (start == dest) {
+    if (start == dest)
         return std::make_pair(0., result);
-    }
 
     std::unordered_map<T, std::pair<double, T>> all_destinations
-        = shortest_path_DAG_all(src, start, compare);
+        = shortest_path_DAG_all_targets(src, start, compare);
     if (all_destinations.find(dest) == all_destinations.end())
         throw no_path_exception();
 
-    for (T current = dest; current != start; current = all_destinations[current].second) {
+    for (T current = dest; current != start; current = all_destinations[current].second)
         result.push_back(current);
-    }
+
     return std::make_pair(all_destinations[dest].first, result);
 }
 
 template <typename T, typename Compare>
-std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
+std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all_targets(
     const graph::graph<T, true, true>& src, const T& start, Compare compare)
 {
     std::unordered_map<T, uint32_t> in_degree;
@@ -76,9 +74,8 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
     std::vector<T> topological_order; // stores topological sort
 
     // populate map
-    for (const T& vert : src.vertices()) {
+    for (const T& vert : src.vertices())
         in_degree[vert] = 0;
-    }
 
     // correct map values
     for (const T& source : src.vertices())
@@ -89,7 +86,8 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
         if (value.second == 0)
             candidates.push_back(value.first);
 
-    // topological sort
+    // Topological sort
+    // Arthur B. Kahn (1962)
     while (!candidates.empty()) {
         T current = candidates.front();
         candidates.pop_front();
@@ -112,6 +110,7 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
     result[start].first = 0;
     result[start].second = start;
 
+    // Traverse the sorted order, finding the shortest/longest path given possible predecessors
     for (; it != topological_order.end(); ++it) {
         if (result.find(*it) != result.end()) {
             for (const std::pair<T, double>& edge : src.edges(*it)) {
@@ -123,6 +122,8 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all(
             }
         }
     }
+
+    return result;
 }
 
 template <typename T, bool Directed>
@@ -133,16 +134,14 @@ std::pair<double, std::list<T>> Dijkstra_single_target(
         = Dijkstra_partial(src, start, [&start](const T& current) { return current == start; });
     std::list<T> path;
 
-    if (start == dest) {
+    if (start == dest)
         return std::make_pair(0., path);
-    }
 
     if (all_destinations.at(dest).second == dest)
         throw no_path_exception();
 
-    for (T current = dest; current != start; current = all_destinations[current].second) {
+    for (T current = dest; current != start; current = all_destinations[current].second)
         path.push_front(current);
-    }
 
     return std::make_pair(all_destinations[dest].first, path);
 }
@@ -160,6 +159,7 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
 {
     static_assert(std::is_invocable_r_v<bool, F, T>, "incompatible function");
 
+    // What we store in a heap; tracks predecessor and cost so far
     struct data {
         T current;
         T from;
@@ -182,7 +182,7 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
     auto compare = [](const data& x, const data& y) { return x.cost < y.cost; };
     typedef typename heap::node_base<data, decltype(compare)>::node node;
     heap::Fibonacci<data, decltype(compare)> heap(compare);
-    std::unordered_map<T, node*> tracker;
+    std::unordered_map<T, node*> tracker; // pointers to items in the heap
 
     auto it1 = vertices.cbegin();
     for (data& vertex_data : data_map) {
@@ -190,7 +190,7 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
         ++it1;
     }
 
-    auto heap_ptr = &heap;
+    auto heap_ptr = &heap; // need pointer-based polymorphism
     std::unordered_map<T, std::pair<double, T>> result;
 
     while (!heap_ptr->empty()) {
@@ -214,11 +214,11 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
                     if (edge < 0)
                         throw std::invalid_argument("Negative weight");
 
-                    double to_compare = edge + to_add.cost;
-                    if (to_compare < (*read_ptr)->cost) {
+                    double new_cost = edge + to_add.cost;
+                    if (new_cost < (*read_ptr)->cost) {
                         data replace(**read_ptr);
                         replace.from = to_add.current;
-                        replace.cost = to_compare;
+                        replace.cost = new_cost;
                         heap.decrease(ptr, replace);
                     }
                 }
@@ -233,19 +233,18 @@ template <typename T>
 std::pair<double, std::list<T>> Bellman_Ford_single_target(
     const graph::graph<T, true, true>& src, const T& start, const T& dest)
 {
-    std::unordered_map<T, std::pair<double, T>> all_destinations
-        = Bellman_Ford_all_targets(src, start);
-
     std::list<T> path;
     if (start == dest) {
         return std::make_pair(0., path);
     }
+
+    std::unordered_map<T, std::pair<double, T>> all_destinations
+        = Bellman_Ford_all_targets(src, start);
     if (all_destinations.at(dest).second == dest)
         throw no_path_exception();
 
-    for (T current = dest; current != start; current = all_destinations[current].second) {
+    for (T current = dest; current != start; current = all_destinations[current].second)
         path.push_front(current);
-    }
 
     return std::make_pair(all_destinations[dest].first, path);
 }
@@ -315,10 +314,11 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
     // dynamic programming portion:
     // for each j, compare i->j->k to shortest i->k yet discovered, update if i->j->k shorter
     for (const T& middle : vertices) {
-        if (result.find(middle) != result.end()) { // sanity check
+        // sanity check
+        if (result.find(middle) != result.end()) {
             for (const T& start : vertices) {
-                if (start
-                    != middle) { // worthless to check if current middle is one of the endpoints
+                // worthless to check if current middle is one of the endpoints
+                if (start != middle) {
                     for (const T& dest : vertices) {
                         if (dest != middle
                             && result.find(start) != result.end()
@@ -339,10 +339,9 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
             }
 
             // check for negative cycle: a vertex to itself in negative cost
-            for (const T& v : vertices) {
+            for (const T& v : vertices)
                 if (result[v][v].first < 0)
                     throw std::domain_error("Negative cycle");
-            }
         }
     }
 
@@ -392,7 +391,7 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
             }
         }
 
-        // for sake of completion
+        // To match Floyd-Warshall output (and specs given in .h)
         result[start][start] = std::make_pair(0., start);
     }
 

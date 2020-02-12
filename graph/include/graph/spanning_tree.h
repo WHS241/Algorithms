@@ -13,18 +13,23 @@
  */
 namespace graph_alg {
 /*
- * Otakar Boruvka (1926): O(E log V)
+ * Otakar Borůvka (1926)
+ * Θ(E log V)
  */
 template <typename T>
 graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, false, true>& input);
 
 /*
- * Vojtech Jarnik (1930) and Robert Prim (1957)
- * O(E + V log V) with Fibonacci heap
+ * Vojtěch Jarník (1930), Robert Prim (1957), Edsger Dijkstra (1959)
+ * Θ(E + V log V) with Fibonacci heap
  */
 template <typename T>
 graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, true>& input);
 
+/*
+ * Joseph Kruskal (1956)
+ * Θ(E log V) with sorting and UNION-FIND
+ */
 template <typename T>
 graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, false, true>& input);
 }

@@ -56,7 +56,9 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
                 auto found_paths = f(residual, source, sink);
                 paths = std::list<std::list<T>>(found_paths.begin(), found_paths.end());
             }
+
             for (const std::list<T>& augment_path : paths) {
+                // Determine how much flow can go down this path, or if it is blocked
                 double allowed_flow = 0;
                 bool blocked = false;
                 for (auto it = augment_path.cbegin(); !blocked && it != augment_path.cend(); ++it) {
@@ -101,7 +103,7 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
                         double new_forward = forward_residual - allowed_flow;
                         double new_backward = backward_residual + allowed_flow;
 
-                        // Set flow
+                        // Set new flow
                         if (new_flow > 1e-10) {
                             if (current_flow < 0)
                                 result.remove_edge(*edge_end, *edge_start);
@@ -117,7 +119,7 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
                                 result.remove_edge(*edge_end, *edge_start);
                         }
 
-                        // Set residuals
+                        // Set new residuals
                         if (std::abs(new_forward) <= 1e-10)
                             residual.remove_edge(*edge_start, *edge_end);
                         else
@@ -224,8 +226,9 @@ std::list<cut_edge<T>> minimum_cut(
     std::list<cut_edge<T>> result;
 
     // Using theorem, all edges in min-cut must be saturated in max-flow: start by adding these to a
-    // set of potential results Create a copy of graph without potential edges, then see which of
-    // them actually are involved in the cut
+    // set of potential results.
+    // Create a copy of graph without potential edges, then see which of them actually are
+    // involved in the cut
     graph::graph<T, Directed, true> partition_graph(input);
     for (const T& vertex : input.vertices())
         for (const std::pair<T, double>& edge : flow_graph.edges(vertex))
@@ -243,8 +246,8 @@ std::list<cut_edge<T>> minimum_cut(
         [&reachable_vertices](const T& v) { reachable_vertices.insert(v); });
     result.remove_if([&reachable_vertices](const cut_edge<T>& edge) {
         // Only allow edges that cross the reachable-unreachable boundary
-        return (reachable_vertices.find(edge.start) == reachable_vertices.end())
-            || (reachable_vertices.find(edge.end) != reachable_vertices.end());
+        return !((reachable_vertices.find(edge.start) != reachable_vertices.end())
+            && (reachable_vertices.find(edge.end) == reachable_vertices.end()));
     });
 
     return result;
