@@ -45,8 +45,8 @@ std::list<It> sequence::longest_ordered_subsequence(It first, It last, Compare c
     if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category,
                       std::random_access_iterator_tag>::value) {
         std::vector<It> predecessor(last - first, last);
-        std::vector<It> tail(predecessor.size(),
-            last); // all non-last entries point to elements in ascending order
+        // all non-last entries point to elements in ascending order
+        std::vector<It> tail(predecessor.size(), last); 
 
         // populate vectors
         uint32_t index = 0;
@@ -69,7 +69,7 @@ std::list<It> sequence::longest_ordered_subsequence(It first, It last, Compare c
         }
         return result;
     } else {
-        // transfer something with random access iterators
+        // transfer to something with random access iterators
         std::vector<typename std::iterator_traits<It>::value_type> buffer(first, last);
         auto tempResult = longest_ordered_subsequence(buffer.begin(), buffer.end(), comp);
 

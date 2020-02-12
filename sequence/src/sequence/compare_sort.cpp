@@ -106,25 +106,22 @@ template <typename It, typename Compare> void sequence::heapsort(It first, It la
     // Random access: can sort without extra space
     if constexpr (std::is_same_v<typename std::iterator_traits<It>::iterator_category,
                       std::random_access_iterator_tag>) {
-        auto distance = last - first;
+        typedef typename std::iterator_traits<It>::difference_type diff_type;
+        diff_type distance = last - first;
 
         // heapify in opposite direction
-        for (auto position = distance - 1; position + 1 > 0; --position) {
-            auto current(position);
-            It current_it = first + current;
+        for (diff_type position = distance - 1; position + 1 > 0; --position) {
+            diff_type current(position);
 
             while (2 * current + 1 < distance) {
-                auto child(2 * current + 1);
-                It child_iterator = first + child;
-                if (2 * current + 2 < distance && compare(child_iterator[0], child_iterator[1])) {
+                diff_type child(2 * current + 1);
+                if (2 * current + 2 < distance && compare(first[child], first[child + 1])) {
                     ++child;
-                    ++child_iterator;
                 }
 
-                if (compare(*current_it, *child_iterator)) {
-                    std::iter_swap(current_it, child_iterator);
+                if (compare(first[current], first[child])) {
+                    std::iter_swap(first + current, first + child);
                     current = child;
-                    current_it = child_iterator;
                 } else {
                     break;
                 }
@@ -136,20 +133,16 @@ template <typename It, typename Compare> void sequence::heapsort(It first, It la
             std::iter_swap(first, last);
             --distance;
 
-            typename std::iterator_traits<It>::difference_type current = 0;
-            It current_it = first;
+            diff_type current = 0;
             while (2 * current + 1 < distance) {
-                auto child(2 * current + 1);
-                It child_it = first + child;
-                if (2 * current + 2 < distance && compare(*child_it, child_it[1])) {
+                diff_type child(2 * current + 1);
+                if (2 * current + 2 < distance && compare(first[child], first[child + 1])) {
                     ++child;
-                    ++child_it;
                 }
 
-                if (compare(*current_it, *child_it)) {
-                    std::iter_swap(current_it, child_it);
+                if (compare(first[current], first[child])) {
+                    std::iter_swap(first + current, first + child);
                     current = child;
-                    current_it = child_it;
                 } else {
                     break;
                 }

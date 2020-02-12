@@ -12,8 +12,8 @@ namespace sequence {
  Mergesort
  Forward iterators are sufficient
  John von Neumann (1945)
- O(n log n) worst case
- O(n) extra space
+ Θ(n log n) worst case
+ Θ(n) extra space
  */
 template <typename ForwardIt, typename Compare = std::less<>>
 void mergesort(ForwardIt first, ForwardIt last, Compare compare = Compare());
@@ -22,8 +22,8 @@ void mergesort(ForwardIt first, ForwardIt last, Compare compare = Compare());
 Quicksort
 Needs bidirectional iterators
 Tony Hoare (1959)
-O(n^2) worst case, O(n log n) expected case
-O(1) extra space
+Θ(n^2) worst case, Θ(n log n) expected case
+Θ(1) extra space
 */
 template <typename BiDirIt, typename Compare = std::less<>>
 void quicksort(BiDirIt first, BiDirIt last, Compare compare = Compare());
@@ -38,9 +38,9 @@ BiDirIt partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compar
 
 /*
 Heapsort
- J. W. J. Williams (1964)
-O(n log n) worst case
-O(1) extra space for random access iterators, O(n) for any other type
+J. W. J. Williams (1964)
+Θ(n log n) worst case
+Θ(1) extra space for random access iterators, Θ(n) for any other type
 */
 template <typename It, typename Compare = std::less<>>
 void heapsort(It first, It last, Compare compare = Compare());

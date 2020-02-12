@@ -6,7 +6,8 @@
 namespace sequence {
 /*
 Verify if [targetFirst, targetLast) is a subsequence of [masterFirst,
-masterLast) Conditions: It1::value_type is equivalent to It2::value_type
+masterLast) 
+Conditions: It1::value_type is equivalent to It2::value_type
 Θ(distance(targetFirst, targetLast) + distance(masterFirst, masterLast))
 */
 template <typename It1, typename It2>
@@ -15,9 +16,10 @@ bool is_subsequence(It1 target_first, It1 target_last, It2 master_first, It2 mas
 /*
 Stuttering subsequence problem:
 Find the maximum value of x such that the sequence a_i described by the
-following is a subsequence of the master a_i = targetFirst[i % x] Andranik
-Mirzaian (1987): Θ((n+m)log(n/m)) where m = distance(targetFirst, targetLast), n
-= distance(masterFirst, masterLast)
+following is a subsequence of the master a_i = targetFirst[i % x] 
+Andranik Mirzaian (1987)
+Θ((n+m) log(n/m)) where m = distance(targetFirst, targetLast), 
+                        n = distance(masterFirst, masterLast)
 */
 template <typename It1, typename It2>
 uint32_t max_stutter(It1 target_first, It1 target_last, It2 master_first, It2 master_last);
@@ -25,8 +27,9 @@ uint32_t max_stutter(It1 target_first, It1 target_last, It2 master_first, It2 ma
 /*
 Longest ordered (increasing) subsequence
 Find the longest sequence n_0, n_2, ..., n_x such that 0 <= n_0 <= n_1 <= ... <=
-n_x <= (last - first) and compare(first[n_(i-1)], first[n_i]) is true for any 0
-< i <= x O(n log n)
+n_x <= (last - first) 
+and compare(first[n_(i-1)], first[n_i]) is true for any 0 < i <= x 
+Θ(n log n)
 */
 template <typename It, typename Compare = std::less<>>
 std::list<It> longest_ordered_subsequence(It first, It last, Compare comp = Compare());

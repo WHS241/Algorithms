@@ -4,7 +4,7 @@
 #include <functional>
 
 /*
-All algorithms require random access iterators for O(log n)
+All algorithms require random access iterators for Θ(log n)
 */
 namespace sequence {
 /*

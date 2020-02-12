@@ -7,7 +7,7 @@
 namespace sequence {
 /*
 Generate the Huffman encoding
-O(n log n)
+Θ(n log n)
 David A. Huffman (1952)
 */
 tree::binary_tree<char>::node* createHuffmanTree(const std::string& message);
