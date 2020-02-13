@@ -17,7 +17,8 @@ Single source, all targets: result[v] = (total length, immediate predecessor)
 All pairs:
     result[v][v] = (0, v)
     result[u][v] = (total length u -> v,
-                            vertex m such that result[u][v] = result[u][m] + result[m][v])
+                            vertex m s.t. result[u][v] = result[u][m] + result[m][v])
+                            m != v, and m != u unless single-edge path is shortest
 */
 namespace graph_alg {
 

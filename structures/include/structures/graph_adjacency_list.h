@@ -47,6 +47,9 @@ public:
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     // O(deg(V))
     void set_edge(const uint32_t& start, const uint32_t& dest, double cost = 0) override;
+    // multigraph或已知无边时使用；不查edge是不是已经存在
+    // O(1)
+    void force_add(const uint32_t& start, const uint32_t& dest, double cost = 0);
 
     // 加结点
     // 输出：图阶新值

@@ -60,8 +60,8 @@ public:
 
     uint32_t size() const noexcept override;
 
-    // Though not included due to inheritance issues, children should also implement 
-    // merge([class]& src) which moves all the values of src into this, emptying src. 
+    // Though not included due to inheritance issues, children should also implement
+    // merge([class]& src) which moves all the values of src into this, emptying src.
     // Node pointers should not be invalidated by this merge.
 
 protected:

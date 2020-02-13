@@ -215,7 +215,7 @@ level_order_iterator_impl<T>::level_order_iterator_impl(typename binary_tree<T>:
     , _buffer()
 {
     _buffer.push_back(ptr);
-    for (auto node : _buffer) {
+    for (typename binary_tree<T>::node* node : _buffer) {
         if (node->left)
             _buffer.push_back(node->left);
         if (node->right)

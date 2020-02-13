@@ -16,23 +16,8 @@ public:
 
     template <typename It, typename _Compare = Compare,
         typename _Requires = typename std::enable_if_t<std::is_default_constructible_v<_Compare>>>
-    Fibonacci(It first, It last)
-        : Fibonacci(first, last, Compare()) {};
-    template <typename It>
-    Fibonacci(It first, It last, Compare comp)
-        : node_base<T, Compare>(comp)
-        , _trees()
-        , _min(nullptr)
-    {
-        try {
-            for (; first != last; ++first)
-                add(*first);
-        } catch (...) {
-            for (node* root : _trees)
-                delete root;
-            throw;
-        }
-    }
+    Fibonacci(It first, It last);
+    template <typename It> Fibonacci(It first, It last, Compare comp);
 
     virtual ~Fibonacci() noexcept;
     Fibonacci(const Fibonacci<T, Compare>&);

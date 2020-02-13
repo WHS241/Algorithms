@@ -18,7 +18,7 @@ const impl<Directed, Weighted>& graph_adjacency_matrix<Directed, Weighted>::copy
     _t_graph_rep temp(
         src.order(), std::vector<double>(src.order(), std::numeric_limits<double>::quiet_NaN()));
     for (uint32_t i = 0; i < src.order(); ++i) {
-        for (auto& n : src.edges(i)) {
+        for (std::pair<uint32_t, double>& n : src.edges(i)) {
             temp[i][n.first] = n.second;
         }
     }
@@ -56,7 +56,7 @@ uint32_t graph_adjacency_matrix<Directed, Weighted>::degree(const uint32_t& star
     if (start >= _graph.size())
         throw std::out_of_range("Degree number");
     return std::count_if(
-        _graph[start].begin(), _graph[start].end(), [](auto edge) { return !std::isnan(edge); });
+        _graph[start].begin(), _graph[start].end(), [](double edge) { return !std::isnan(edge); });
 }
 
 template <bool Directed, bool Weighted>
@@ -106,8 +106,8 @@ void graph_adjacency_matrix<Directed, Weighted>::set_edge(
 template <bool Directed, bool Weighted>
 uint32_t graph_adjacency_matrix<Directed, Weighted>::add_vertex()
 {
-    auto temp(_graph);
-    for (auto& vertex : temp)
+    _t_graph_rep temp(_graph);
+    for (std::vector<double>& vertex : temp)
         vertex.push_back(std::numeric_limits<double>::quiet_NaN());
     temp.emplace_back(_graph.size() + 1, std::numeric_limits<double>::quiet_NaN());
 
@@ -131,8 +131,8 @@ void graph_adjacency_matrix<Directed, Weighted>::isolate(const uint32_t& target)
     _graph[target] = std::vector<double>(_graph.size(), std::numeric_limits<double>::quiet_NaN());
 
     if constexpr (!Directed)
-        for (auto& edgeList : _graph)
-            edgeList[target] = std::numeric_limits<double>::quiet_NaN();
+        for (std::vector<double>& edge_list : _graph)
+            edge_list[target] = std::numeric_limits<double>::quiet_NaN();
 }
 
 template <bool Directed, bool Weighted>
@@ -142,7 +142,7 @@ void graph_adjacency_matrix<Directed, Weighted>::remove(const uint32_t& target)
         throw std::out_of_range("Degree number");
 
     std::swap(_graph[target], _graph.back());
-    for (auto& vertex : _graph)
+    for (std::vector<double>& vertex : _graph)
         std::swap(vertex[target], vertex.back());
 }
 

@@ -42,10 +42,15 @@ public:
     virtual graph<T, Directed, Weighted> convert(graph_type target) const;
     // return vertices in graph
     virtual std::vector<T> vertices() const;
+    // generate a subgraph induced by a set of vertices
+    template <typename InputIterator>
+    graph<T, Directed, Weighted> get_induced_subgraph(InputIterator first, InputIterator last);
 
     // set edge between start and dest to cost
     // adds edge if currently nonexistent
     virtual void set_edge(const T& start, const T& dest, double cost = 0.0);
+    // force add an edge, even if edge already exists
+    virtual void force_add(const T& start, const T& dest, double cost = 0.0);
     // add a new vertex with degree 0 and the given name
     // returns new size
     virtual uint32_t add_vertex(const T& name);

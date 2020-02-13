@@ -10,13 +10,7 @@ template <typename T> class disjoint_set {
 public:
     disjoint_set() = default;
 
-    template <typename It>
-    disjoint_set(It first, It last)
-        : _sets()
-        , _roots()
-    {
-        std::for_each(first, last, [this](const T& item) { insert(item); });
-    };
+    template <typename It> disjoint_set(It first, It last);
 
     // O(1)
     void insert(const T& item);

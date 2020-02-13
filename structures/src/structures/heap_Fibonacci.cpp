@@ -43,6 +43,30 @@ Fibonacci<T, Compare>::Fibonacci(const Fibonacci<T, Compare>& src)
 }
 
 template <typename T, typename Compare>
+template <typename It, typename _Compare, typename _Requires>
+Fibonacci<T, Compare>::Fibonacci(It first, It last)
+    : Fibonacci(first, last, Compare())
+{
+}
+
+template <typename T, typename Compare>
+template <typename It>
+Fibonacci<T, Compare>::Fibonacci(It first, It last, Compare comp)
+    : node_base<T, Compare>(comp)
+    , _trees()
+    , _min(nullptr)
+{
+    try {
+        for (; first != last; ++first)
+            add(*first);
+    } catch (...) {
+        for (node* root : _trees)
+            delete root;
+        throw;
+    }
+}
+
+template <typename T, typename Compare>
 Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(const Fibonacci<T, Compare>& rhs)
 {
     if (this != &rhs) {

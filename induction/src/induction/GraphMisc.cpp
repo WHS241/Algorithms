@@ -9,34 +9,6 @@
 #include <structures/graph.h>
 
 template <typename T, bool Weighted>
-graph::graph<T, false, Weighted> induction::minDegreeInducedSubgraph(
-    const graph::graph<T, false, Weighted>& src, uint32_t limit)
-{
-    graph::graph<T, false, Weighted> temp(src);
-
-    std::unordered_map<T, uint32_t> degree;
-    std::unordered_set<T> toRemove;
-    for (const T& vertex : temp.vertices()) {
-        degree[vertex] = temp.degree(vertex);
-        if (degree[vertex] < limit)
-            toRemove.insert(vertex);
-    }
-
-    while (!toRemove.empty()) {
-        T target = *toRemove.begin();
-        toRemove.erase(toRemove.begin());
-        for (const T& neighbor : temp.neighbors(target)) {
-            --degree[neighbor];
-            if (degree[neighbor] < limit)
-                toRemove.insert(neighbor);
-        }
-        temp.remove(target);
-    }
-
-    return temp;
-}
-
-template <typename T, bool Weighted>
 T induction::celebrity(const graph::graph<T, true, Weighted>& src)
 {
     if (src.order() == 0)

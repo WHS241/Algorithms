@@ -5,6 +5,29 @@
 #include <vector>
 
 namespace tree {
+
+template <typename T, typename Compare>
+binary_search_tree<T, Compare>::binary_search_tree(Compare comp)
+    : binary_tree<T>()
+    , _compare(comp) {};
+
+template <typename T, typename Compare>
+template <typename It, typename _Compare, typename _Requires>
+binary_search_tree<T, Compare>::binary_search_tree(It first, It last)
+    : binary_search_tree(first, last, Compare()) {};
+
+template <typename T, typename Compare>
+template <typename It>
+binary_search_tree<T, Compare>::binary_search_tree(It first, It last, Compare comp)
+    : binary_tree<T>()
+    , _compare(comp)
+{
+    std::vector<T> elements(first, last);
+    std::sort(elements.begin(), elements.end(), comp);
+    this->_root.reset(this->_generate(elements, 0, elements.size(), nullptr));
+    this->_size = elements.size();
+}
+
 template <typename T, typename Compare>
 bool binary_search_tree<T, Compare>::contains(const T& item) const noexcept
 {
@@ -46,7 +69,7 @@ template <typename T, typename Compare>
 void binary_search_tree<T, Compare>::_rotate(
     typename binary_tree<T>::node* upper, bool use_left_child)
 {
-    auto parent = upper->parent;
+    typename binary_tree<T>::node* parent = upper->parent;
     bool is_root = (parent == nullptr);
     bool is_left_child = !is_root && (upper == parent->left);
 
@@ -82,7 +105,7 @@ void binary_search_tree<T, Compare>::_rotate(
 template <typename T, typename Compare>
 void binary_search_tree<T, Compare>::_verify(typename binary_tree<T>::iterator check)
 {
-    auto found = _find(*check);
+    typename binary_tree<T>::node* found = _find(*check);
     if (found != binary_tree<T>::_get_node(check))
         throw std::invalid_argument("Not in current tree");
 }

@@ -34,7 +34,7 @@ tree::binary_tree<char>::node* sequence::createHuffmanTree(const std::string& me
         while (!values.empty()) {
             std::unique_ptr<tree::binary_tree<char>::node> node(new tree::binary_tree<char>::node);
             uint32_t count;
-            
+
             // Find the lowest-frequency node
             if (buffer.empty() || values.front().second < buffer.front().second) {
                 node->replace_left(values.front().first);

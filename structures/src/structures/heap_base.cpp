@@ -25,6 +25,40 @@ priority_queue<T, Compare, Container>::priority_queue(Compare comp)
 }
 
 template <typename T, typename Compare, typename Container>
+template <typename It, typename _Compare, typename _Requires>
+priority_queue<T, Compare, Container>::priority_queue(It first, It last)
+    : priority_queue(first, last, Compare()) {};
+
+template <typename T, typename Compare, typename Container>
+template <typename It>
+priority_queue<T, Compare, Container>::priority_queue(It first, It last, Compare comp)
+    : base<T, Compare>(comp)
+    , _heap(first, last)
+{
+    typedef typename std::iterator_traits<typename Container::iterator>::difference_type diff_type;
+    auto begin_it = _heap.begin();
+    diff_type size = last - first;
+    for (diff_type position = size - 1; position + 1 > 0; --position) {
+        diff_type current(position);
+
+        // bubble down
+        while (2 * current + 1 < size) {
+            diff_type child(2 * current + 1);
+            if (child + 1 != size && !this->_compare(begin_it[child], begin_it[child + 1])) {
+                ++child;
+            }
+
+            if (!this->_compare(begin_it[current], begin_it[child])) {
+                std::iter_swap(begin_it + current, begin_it + child);
+                current = child;
+            } else {
+                break;
+            }
+        }
+    }
+};
+
+template <typename T, typename Compare, typename Container>
 void priority_queue<T, Compare, Container>::merge(priority_queue<T, Compare, Container>&& src)
 {
     std::list<T> temp(_heap.begin(), _heap.end());

@@ -16,7 +16,7 @@ std::pair<It, It> extrema(It first, It last, Compare compare = Compare());
  Select the k-th smallest element (k passed as parameter rank)
  Parameter 4 (optional) is the size of subproblems algorithm divides into
  Must be >=5 for algorithm to be Θ(n), preferably odd. Infinite
- recursion/looping if 1 
+ recursion/looping if 1
  Manuel Blum, Robert Floyd, Vaughan Pratt, Ronald Rivest, Robert Tarjan (1972)
  */
 template <typename It, typename Compare = std::less<>>

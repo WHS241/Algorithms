@@ -2,6 +2,29 @@
 #define RED_BLACK_TREE_CPP
 
 namespace tree {
+
+template <typename T, typename Compare>
+red_black_tree<T, Compare>::red_black_tree(Compare comp)
+    : binary_search_tree<T, Compare>(comp)
+{
+}
+
+template <typename T, typename Compare>
+template <typename It, typename _Compare, typename _Requires>
+red_black_tree<T, Compare>::red_black_tree(It first, It last)
+    : red_black_tree(first, last, Compare()) {};
+
+template <typename T, typename Compare>
+template <typename It>
+red_black_tree<T, Compare>::red_black_tree(It first, It last, Compare comp)
+    : binary_search_tree<T, Compare>()
+{
+    this->_size = 0;
+    for (; first != last; ++first) {
+        insert(*first);
+    }
+}
+
 template <typename T, typename Compare> void red_black_tree<T, Compare>::insert(const T& item)
 {
     auto* ptr = dynamic_cast<t_node*>(this->_root.get());
@@ -13,11 +36,11 @@ template <typename T, typename Compare> void red_black_tree<T, Compare>::insert(
     }
 
     bool go_left = this->_compare(item, ptr->item);
-    auto* next = go_left ? dynamic_cast<t_node*>(ptr->left) : dynamic_cast<t_node*>(ptr->right);
+    auto* next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
     while (next != nullptr) {
         ptr = next;
         go_left = this->_compare(item, ptr->item);
-        next = go_left ? dynamic_cast<t_node*>(ptr->left) : dynamic_cast<t_node*>(ptr->right);
+        next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
     }
 
     auto add = new t_node(item, false, ptr);
@@ -91,7 +114,7 @@ void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
 
     // if two children, find successor and swap values
     if (node->left && node->right) {
-        auto successor = node->left;
+        typename binary_tree<T>::node* successor = node->left;
         while (successor->right)
             successor = successor->right;
 
@@ -258,7 +281,7 @@ template <typename T, typename Compare>
 void red_black_tree<T, Compare>::t_node::replace_left(
     red_black_tree<T, Compare>::t_node* to_add) noexcept
 {
-    auto prev = change_left(to_add);
+    t_node* prev = change_left(to_add);
     delete prev;
 }
 
@@ -266,7 +289,7 @@ template <typename T, typename Compare>
 void red_black_tree<T, Compare>::t_node::replace_right(
     red_black_tree<T, Compare>::t_node* to_add) noexcept
 {
-    auto prev = change_right(to_add);
+    t_node* prev = change_right(to_add);
     delete prev;
 }
 }

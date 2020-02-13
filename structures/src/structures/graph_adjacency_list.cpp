@@ -39,9 +39,9 @@ bool adjacency_list<Directed, Weighted>::has_edge(const uint32_t& start, const u
 {
     if (start >= _graph.size() || dest >= _graph.size())
         return false;
-    return std::find_if(_graph[start].begin(), _graph[start].end(), [&dest](auto edge) {
+    return std::find_if(_graph[start].cbegin(), _graph[start].cend(), [&dest](const _t_edge& edge) {
         return edge.first == dest;
-    }) != _graph[start].end();
+    }) != _graph[start].cend();
 }
 
 template <bool Directed, bool Weighted>
@@ -50,9 +50,9 @@ double adjacency_list<Directed, Weighted>::edge_cost(
 {
     if (start >= _graph.size() || dest >= _graph.size())
         return std::numeric_limits<double>::quiet_NaN();
-    auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
-        [&dest](auto edge) { return edge.first == dest; });
-    return (it == _graph[start].end()) ? std::numeric_limits<double>::quiet_NaN() : it->second;
+    auto it = std::find_if(_graph[start].cbegin(), _graph[start].cend(),
+        [&dest](const _t_edge& edge) { return edge.first == dest; });
+    return (it == _graph[start].cend()) ? std::numeric_limits<double>::quiet_NaN() : it->second;
 }
 
 template <bool Directed, bool Weighted>
@@ -69,8 +69,8 @@ std::list<uint32_t> adjacency_list<Directed, Weighted>::neighbors(const uint32_t
     if (start >= _graph.size())
         throw std::out_of_range("Degree number");
     std::list<uint32_t> result;
-    std::transform(_graph[start].begin(), _graph[start].end(), std::back_inserter(result),
-        [](auto edge) { return edge.first; });
+    std::transform(_graph[start].cbegin(), _graph[start].cend(), std::back_inserter(result),
+        [](const _t_edge& edge) { return edge.first; });
     return result;
 }
 
@@ -94,23 +94,23 @@ void adjacency_list<Directed, Weighted>::set_edge(
 
     if constexpr (Directed) {
         auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
-            [&dest](auto edge) { return edge.first == dest; });
+            [&dest](const _t_edge& edge) { return edge.first == dest; });
         if (it == _graph[start].end())
             _graph[start].push_back(std::make_pair(dest, cost));
         else
             it->second = cost;
     } else {
         // exception safety
-        auto temp1(_graph[start]), temp2(_graph[dest]);
-        auto it = std::find_if(
-            temp1.begin(), temp1.end(), [&dest](auto edge) { return edge.first == dest; });
+        std::list<_t_edge> temp1(_graph[start]), temp2(_graph[dest]);
+        auto it = std::find_if(temp1.begin(), temp1.end(),
+            [&dest](const _t_edge& edge) { return edge.first == dest; });
         if (it == temp1.end()) {
             temp1.push_back(std::make_pair(dest, cost));
             temp2.push_back(std::make_pair(start, cost));
         } else {
             it->second = cost;
-            it = std::find_if(
-                temp2.begin(), temp2.end(), [&start](auto edge) { return edge.first == start; });
+            it = std::find_if(temp2.begin(), temp2.end(),
+                [&start](const _t_edge& edge) { return edge.first == start; });
             it->second = cost;
         }
 
@@ -119,9 +119,30 @@ void adjacency_list<Directed, Weighted>::set_edge(
     }
 }
 
+template <bool Directed, bool Weighted>
+void adjacency_list<Directed, Weighted>::force_add(
+    const uint32_t& start, const uint32_t& dest, double cost)
+{
+    if (start == dest)
+        throw std::invalid_argument("Self-loops not allowed");
+    if (start >= _graph.size() || dest >= _graph.size())
+        throw std::out_of_range("Degree number");
+
+    if constexpr (Directed) {
+        _graph[start].push_back(std::make_pair(dest, cost));
+    } else {
+        // exception safety
+        std::list<_t_edge> temp1(_graph[start]), temp2(_graph[dest]);
+        temp1.push_back(std::make_pair(dest, cost));
+        temp2.push_back(std::make_pair(start, cost));
+        _graph[start] = std::move(temp1);
+        _graph[dest] = std::move(temp2);
+    }
+}
+
 template <bool Directed, bool Weighted> uint32_t adjacency_list<Directed, Weighted>::add_vertex()
 {
-    _graph.push_back(std::list<_t_edge>());
+    _graph.emplace_back();
     return _graph.size();
 }
 
@@ -132,12 +153,12 @@ void adjacency_list<Directed, Weighted>::remove_edge(const uint32_t& start, cons
         throw std::out_of_range("Degree number");
 
     auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
-        [&dest](auto edge) { return edge.first == dest; });
+        [&dest](const _t_edge& edge) { return edge.first == dest; });
     if (it != _graph[start].end()) {
         _graph[start].erase(it);
         if constexpr (!Directed) {
             it = std::find_if(_graph[dest].begin(), _graph[dest].end(),
-                [&start](auto edge) { return edge.first == start; });
+                [&start](const _t_edge& edge) { return edge.first == start; });
             _graph[dest].erase(it);
         }
     }
@@ -151,9 +172,9 @@ void adjacency_list<Directed, Weighted>::isolate(const uint32_t& target)
 
     if constexpr (!Directed) {
         std::list<_t_edge> edges = _graph[target];
-        for (auto& e : edges)
+        for (const _t_edge& e : edges)
             _graph[e.first].erase(std::find_if(_graph[e.first].begin(), _graph[e.first].end(),
-                [&target](auto complement) { return complement.first == target; }));
+                [&target](const _t_edge& complement) { return complement.first == target; }));
     }
 
     _graph[target].clear();

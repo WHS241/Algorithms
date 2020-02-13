@@ -4,11 +4,6 @@
 #include <structures/graph.h>
 
 namespace induction {
-// find k-core: maximal induced subgraph with all degrees >= k
-// David W. Matula and Leland D. Beck (1983): Θ(V)
-template <typename T, bool Weighted>
-graph::graph<T, false, Weighted> minDegreeInducedSubgraph(
-    const graph::graph<T, false, Weighted>& src, uint32_t k);
 
 // Celebrity problem
 // Find a vertex (person) with in-degree V-1 and out-degree 0

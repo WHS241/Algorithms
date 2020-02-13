@@ -2,6 +2,21 @@
 #define PRIMITIVE_BINARY_SEARCH_TREE_CPP
 
 namespace tree {
+
+template <typename T, typename Compare>
+template <typename It, typename _Compare, typename _Requires>
+basic_binary_search_tree<T, Compare>::basic_binary_search_tree(It first, It last)
+    : basic_binary_search_tree<T, Compare>(first, last, Compare())
+{
+}
+
+template <typename T, typename Compare>
+template <typename It>
+basic_binary_search_tree<T, Compare>::basic_binary_search_tree(It first, It last, Compare comp)
+    : binary_search_tree<T, Compare>(first, last, comp)
+{
+}
+
 template <typename T, typename Compare>
 void basic_binary_search_tree<T, Compare>::insert(const T& item)
 {
@@ -32,11 +47,11 @@ template <typename T, typename Compare>
 void basic_binary_search_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
 {
     binary_search_tree<T, Compare>::_verify(it);
-    auto node = binary_tree<T>::_get_node(it);
+    typename binary_tree<T>::node* node = binary_tree<T>::_get_node(it);
     if (node == nullptr)
         return;
 
-    auto parent = node->parent;
+    typename binary_tree<T>::node* parent = node->parent;
     bool is_root = parent == nullptr;
     bool is_left_child = !is_root && (node == parent->left);
 
@@ -92,7 +107,7 @@ void basic_binary_search_tree<T, Compare>::remove(typename binary_tree<T>::itera
     }
 
     // Two children: must determine successor
-    auto successor = node->left;
+    typename binary_tree<T>::node* successor = node->left;
     while (successor->right)
         successor = successor->right;
 

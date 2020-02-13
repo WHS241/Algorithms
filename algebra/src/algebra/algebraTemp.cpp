@@ -5,7 +5,8 @@
 #include <iterator>
 
 template <typename It, typename Compare, typename Function>
-std::pair<It, It> algebra::maximum_consecutive_sum(It first, It last, Compare compare, Function func)
+std::pair<It, It> algebra::maximum_consecutive_sum(
+    It first, It last, Compare compare, Function func)
 {
     if (first == last)
         return std::make_pair(first, first);

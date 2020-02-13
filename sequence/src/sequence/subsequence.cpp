@@ -46,7 +46,7 @@ std::list<It> sequence::longest_ordered_subsequence(It first, It last, Compare c
                       std::random_access_iterator_tag>::value) {
         std::vector<It> predecessor(last - first, last);
         // all non-last entries point to elements in ascending order
-        std::vector<It> tail(predecessor.size(), last); 
+        std::vector<It> tail(predecessor.size(), last);
 
         // populate vectors
         uint32_t index = 0;

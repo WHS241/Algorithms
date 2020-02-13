@@ -11,16 +11,10 @@ class basic_binary_search_tree : public binary_search_tree<T, Compare> {
 public:
     basic_binary_search_tree() = default;
 
-    template <typename It, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
-    basic_binary_search_tree(It first, It last)
-        : basic_binary_search_tree<T, Compare>(first, last, Compare())
-    {
-    }
-    template <typename It>
-    basic_binary_search_tree(It first, It last, Compare comp)
-        : binary_search_tree<T, Compare>(first, last, comp)
-    {
-    }
+    template <typename It, typename _Compare = Compare,
+        typename _Requires = std::enable_if_t<std::is_default_constructible_v<_Compare>>>
+    basic_binary_search_tree(It first, It last);
+    template <typename It> basic_binary_search_tree(It first, It last, Compare comp);
 
     void insert(const T&) override;
     virtual void remove(typename binary_tree<T>::iterator it);

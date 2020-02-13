@@ -77,7 +77,7 @@ graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, fals
             // tie-breaker: make sure we haven't already connected these two components
             if (tree_components.find(edge_to_insert.second.start)
                 != tree_components.find(edge_to_insert.second.terminal)) {
-                result.set_edge(edge_to_insert.second.start, edge_to_insert.second.terminal,
+                result.force_add(edge_to_insert.second.start, edge_to_insert.second.terminal,
                     edge_to_insert.second.weight);
                 tree_components.union_(edge_to_insert.second.start, edge_to_insert.second.terminal);
             }
@@ -115,7 +115,6 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
 
     // the heap structure used here determines the runtime of the algorithm
     // must be a node_base
-    // Peculiarities with binomial heap make it incompatible.
     auto compare = [](const edge& x, const edge& y) { return x.weight < y.weight; };
     typedef typename heap::node_base<edge, decltype(compare)>::node node;
     heap::Fibonacci<edge, decltype(compare)> heap(compare);
@@ -136,7 +135,7 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
 
         // don't allow self-loops; may add unconnected vertex if graph is not connected
         if (to_add.from != to_add.current)
-            result.set_edge(to_add.from, to_add.current, to_add.weight);
+            result.force_add(to_add.from, to_add.current, to_add.weight);
 
         // update heap values with edges from newly added vertex
         for (const T& neighbor : input.neighbors(to_add.current)) {
@@ -188,7 +187,7 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
                 current.start = vertex;
                 current.terminal = curr_edge.first;
                 current.weight = curr_edge.second;
-                edges.insert(current);
+                edges.push_back(current);
             }
     }
 
@@ -203,7 +202,7 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
             break;
 
         if (components.find(current.start) != components.find(current.terminal)) {
-            result.set_edge(current.start, current.terminal, current.weight);
+            result.force_add(current.start, current.terminal, current.weight);
             components.union_(current.start, current.terminal);
         }
     }

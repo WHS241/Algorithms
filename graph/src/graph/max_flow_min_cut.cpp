@@ -144,7 +144,7 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
 
         for (const T& vertex : vertices)
             for (const std::pair<T, double>& flow_edge : result.edges(vertex))
-                undirected_result.set_edge(vertex, flow_edge.first, flow_edge.second);
+                undirected_result.force_add(vertex, flow_edge.first, flow_edge.second);
 
         return undirected_result;
     }
@@ -192,7 +192,7 @@ graph::graph<T, Directed, true> Dinitz(
                 for (const std::pair<T, double>& edge : residual.edges(vertex))
                     if (layer.find(edge.first) != layer.end()
                         && layer[edge.first] == layer[vertex] + 1)
-                        layer_graph.set_edge(vertex, edge.first, edge.second);
+                        layer_graph.force_add(vertex, edge.first, edge.second);
 
             // layer graph constructed, now to find the blocking path
             // essentially just add all possible paths from source to sink in layer graph
@@ -238,7 +238,7 @@ std::list<cut_edge<T>> minimum_cut(
             } else {
                 // flow should not flow back from cut region to uncut region (double-counting error)
                 // pseudo-residual: make sure start of edge is reachable
-                partition_graph.set_edge(edge.first, vertex);
+                partition_graph.force_add(edge.first, vertex);
             }
 
     std::unordered_set<T> reachable_vertices;

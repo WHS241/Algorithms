@@ -4,6 +4,15 @@
 #include <stdexcept>
 #include <unordered_set>
 
+template <typename T>
+template <typename It>
+disjoint_set<T>::disjoint_set(It first, It last)
+    : _sets()
+    , _roots()
+{
+    std::for_each(first, last, [this](const T& item) { insert(item); });
+};
+
 template <typename T> void disjoint_set<T>::insert(const T& item)
 {
     if (_sets.find(item) != _sets.end())
@@ -40,7 +49,7 @@ template <typename T> void disjoint_set<T>::union_(const T& first, const T& seco
 template <typename T> T disjoint_set<T>::find(const T& item)
 {
     // at() throws std::out_of_range
-    auto& data = _sets.at(item);
+    t_data& data = _sets.at(item);
 
     if (data.parent != item) {
         data.parent = find(data.parent);
@@ -50,7 +59,7 @@ template <typename T> T disjoint_set<T>::find(const T& item)
 
 template <typename T> void disjoint_set<T>::remove_set(const T& member)
 {
-    auto to_remove = find(member);
+    T to_remove = find(member);
     for (auto it(_sets.begin()); it != _sets.end();) {
         if (to_remove == find(it->first))
             it = _sets.erase(it);

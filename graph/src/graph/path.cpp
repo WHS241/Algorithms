@@ -178,7 +178,6 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
 
     // the heap structure used here determines the runtime of the algorithm
     // must be a node_base
-    // Peculiarities with binomial heap make it incompatible.
     auto compare = [](const data& x, const data& y) { return x.cost < y.cost; };
     typedef typename heap::node_base<data, decltype(compare)>::node node;
     heap::Fibonacci<data, decltype(compare)> heap(compare);
@@ -359,7 +358,7 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
 
     temp.add_vertex(new_vertex);
     for (const T& original_vertex : vertices)
-        temp.set_edge(new_vertex, original_vertex, 0);
+        temp.force_add(new_vertex, original_vertex, 0);
 
     // O(VE)
     std::unordered_map<T, std::pair<double, T>> shortest_path_tree
@@ -381,7 +380,7 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
     // Use Dijkstra's algorithm to find the rest
     for (const T& start : vertices) {
         std::unordered_map<T, std::pair<double, T>> subresult = Dijkstra_all_targets(temp, start);
-        for (std::pair<T, std::pair<double, T>>& endpoint : subresult) {
+        for (const std::pair<T, std::pair<double, T>>& endpoint : subresult) {
             if (endpoint.first != endpoint.second.second) {
                 // unweight
                 result[start][endpoint.first] = std::make_pair(endpoint.second.first

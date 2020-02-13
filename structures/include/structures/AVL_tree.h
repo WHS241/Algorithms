@@ -10,21 +10,12 @@ template <typename T, typename Compare = std::less<>>
 class AVL_tree : public binary_search_tree<T, Compare> {
 public:
     AVL_tree() = default;
-    explicit AVL_tree(Compare comp)
-        : binary_search_tree<T, Compare>(comp) {};
+    explicit AVL_tree(Compare comp);
 
-    template <typename It, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
-    AVL_tree(It first, It last)
-        : AVL_tree(first, last, Compare()) {};
-    template <typename It>
-    AVL_tree(It first, It last, Compare comp = Compare())
-        : binary_search_tree<T, Compare>(first, last, comp)
-    {
-        std::vector<T> elements(first, last);
-        std::sort(elements.begin(), elements.end(), comp);
-        this->_root.reset(generate(elements, 0, elements.size(), nullptr));
-        this->_size = elements.size();
-    }
+    template <typename It, typename _Compare = Compare,
+        typename _Requires = std::enable_if_t<std::is_default_constructible_v<_Compare>>>
+    AVL_tree(It first, It last);
+    template <typename It> AVL_tree(It first, It last, Compare comp);
 
     // Θ(log n)
     void insert(const T&) override;

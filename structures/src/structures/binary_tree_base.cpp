@@ -103,7 +103,7 @@ template <typename T>
 typename binary_tree<T>::node* binary_tree<T>::node::change_left(
     typename binary_tree<T>::node* add) noexcept
 {
-    auto ptr = left;
+    typename binary_tree<T>::node* ptr = left;
     left = add;
 
     if (add != nullptr)
@@ -119,7 +119,7 @@ template <typename T>
 typename binary_tree<T>::node* binary_tree<T>::node::change_right(
     typename binary_tree<T>::node* add) noexcept
 {
-    auto ptr = right;
+    typename binary_tree<T>::node* ptr = right;
     right = add;
 
     if (add != nullptr)
@@ -134,14 +134,14 @@ typename binary_tree<T>::node* binary_tree<T>::node::change_right(
 template <typename T>
 void binary_tree<T>::node::replace_left(typename binary_tree<T>::node* add) noexcept
 {
-    auto prev = change_left(add);
+    typename binary_tree<T>::node* prev = change_left(add);
     delete prev;
 }
 
 template <typename T>
 void binary_tree<T>::node::replace_right(typename binary_tree<T>::node* add) noexcept
 {
-    auto prev = change_right(add);
+    typename binary_tree<T>::node* prev = change_right(add);
     delete prev;
 }
 

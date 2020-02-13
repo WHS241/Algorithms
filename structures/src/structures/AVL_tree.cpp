@@ -24,6 +24,26 @@ typename AVL_tree<T, Compare>::t_node* AVL_tree<T, Compare>::generate(
     return root.release();
 }
 
+template <typename T, typename Compare>
+AVL_tree<T, Compare>::AVL_tree(Compare comp)
+    : binary_search_tree<T, Compare>(comp) {};
+
+template <typename T, typename Compare>
+template <typename It, typename _Compare, typename _Requires>
+AVL_tree<T, Compare>::AVL_tree(It first, It last)
+    : AVL_tree(first, last, Compare()) {};
+
+template <typename T, typename Compare>
+template <typename It>
+AVL_tree<T, Compare>::AVL_tree(It first, It last, Compare comp)
+    : binary_search_tree<T, Compare>(first, last, comp)
+{
+    std::vector<T> elements(first, last);
+    std::sort(elements.begin(), elements.end(), comp);
+    this->_root.reset(generate(elements, 0, elements.size(), nullptr));
+    this->_size = elements.size();
+}
+
 template <typename T, typename Compare> void AVL_tree<T, Compare>::insert(const T& item)
 {
     t_node* ptr = dynamic_cast<t_node*>(this->_root.get());
@@ -116,7 +136,7 @@ template <typename T, typename C>
 typename AVL_tree<T, C>::t_node* AVL_tree<T, C>::t_node::change_left(
     typename AVL_tree<T, C>::t_node* add) noexcept
 {
-    auto ptr = binary_tree<T>::node::change_left(add);
+    typename binary_tree<T>::node* ptr = binary_tree<T>::node::change_left(add);
     left_height = (add != nullptr) ? std::max(add->left_height, add->right_height) + 1 : 0;
     return dynamic_cast<t_node*>(ptr);
 }
@@ -125,7 +145,7 @@ template <typename T, typename C>
 typename AVL_tree<T, C>::t_node* AVL_tree<T, C>::t_node::change_right(
     typename AVL_tree<T, C>::t_node* add) noexcept
 {
-    auto ptr = binary_tree<T>::node::change_right(add);
+    typename binary_tree<T>::node* ptr = binary_tree<T>::node::change_right(add);
     right_height = (add != nullptr) ? std::max(add->left_height, add->right_height) + 1 : 0;
     return dynamic_cast<t_node*>(ptr);
 }
@@ -133,21 +153,21 @@ typename AVL_tree<T, C>::t_node* AVL_tree<T, C>::t_node::change_right(
 template <typename T, typename C>
 void AVL_tree<T, C>::t_node::replace_left(typename AVL_tree<T, C>::t_node* add) noexcept
 {
-    auto prev = change_left(add);
+    t_node* prev = change_left(add);
     delete prev;
 }
 
 template <typename T, typename C>
 void AVL_tree<T, C>::t_node::replace_right(typename AVL_tree<T, C>::t_node* add) noexcept
 {
-    auto prev = change_right(add);
+    t_node* prev = change_right(add);
     delete prev;
 }
 
 template <typename T, typename C> void AVL_tree<T, C>::remove(typename binary_tree<T>::iterator it)
 {
     binary_search_tree<T, C>::_verify(it);
-    auto node = binary_tree<T>::_get_node(it);
+    typename binary_tree<T>::node* node = binary_tree<T>::_get_node(it);
     if (node == nullptr)
         return;
     if (this->_size == 1) {

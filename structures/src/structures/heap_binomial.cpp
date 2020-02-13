@@ -14,11 +14,10 @@ binomial<T, Compare>::binomial(Compare comp)
 {
 }
 
-template<typename T, typename Compare>
-template <typename It, typename _Compare,
-        typename _Requires>
-    binomial<T, Compare>::binomial(It first, It last)
-        : binomial(first, last, Compare()) {};
+template <typename T, typename Compare>
+template <typename It, typename _Compare, typename _Requires>
+binomial<T, Compare>::binomial(It first, It last)
+    : binomial(first, last, Compare()) {};
 
 template <typename T, typename Compare> binomial<T, Compare>::~binomial() noexcept
 {
@@ -26,22 +25,22 @@ template <typename T, typename Compare> binomial<T, Compare>::~binomial() noexce
         delete root;
 }
 
-template<typename T, typename Compare>
+template <typename T, typename Compare>
 template <typename It>
-    binomial<T, Compare>::binomial(It first, It last, Compare comp)
-        : node_base<T, Compare>(comp)
-        , _trees()
-        , _min(nullptr)
-    {
-        try {
-            for (; first != last; ++first)
-                add(*first);
-        } catch (...) {
-            for (node* root : _trees)
-                delete root;
-            throw;
-        }
+binomial<T, Compare>::binomial(It first, It last, Compare comp)
+    : node_base<T, Compare>(comp)
+    , _trees()
+    , _min(nullptr)
+{
+    try {
+        for (; first != last; ++first)
+            add(*first);
+    } catch (...) {
+        for (node* root : _trees)
+            delete root;
+        throw;
     }
+}
 
 template <typename T, typename Compare>
 binomial<T, Compare>::binomial(const binomial<T, Compare>& src)
@@ -52,8 +51,8 @@ binomial<T, Compare>::binomial(const binomial<T, Compare>& src)
     this->_size = src._size;
     node* min_element;
     try {
-        std::transform(
-            src._trees.begin(), src._trees.end(), _trees.begin(), [this, &min_element, &src](node* root) {
+        std::transform(src._trees.begin(), src._trees.end(), _trees.begin(),
+            [this, &min_element, &src](node* root) {
                 if (root == nullptr)
                     return root;
 
@@ -94,23 +93,23 @@ binomial<T, Compare>::binomial(binomial<T, Compare>&& src) noexcept
     *this = std::move(src);
 }
 
-template<typename T, typename Compare>
-    binomial<T, Compare>& binomial<T, Compare>::operator=(binomial<T, Compare>&& rhs) noexcept
-    {
-        if (this != &rhs) {
-            for (node* root : _trees) {
-                delete root;
-            }
-            _trees.clear();
-            _min = nullptr;
-            this->_size = 0;
-            std::swap(_trees, rhs._trees);
-            std::swap(_min, rhs._min);
-            std::swap(this->_size, rhs._size);
-            this->_compare = std::move(rhs._compare);
+template <typename T, typename Compare>
+binomial<T, Compare>& binomial<T, Compare>::operator=(binomial<T, Compare>&& rhs) noexcept
+{
+    if (this != &rhs) {
+        for (node* root : _trees) {
+            delete root;
         }
-        return *this;
+        _trees.clear();
+        _min = nullptr;
+        this->_size = 0;
+        std::swap(_trees, rhs._trees);
+        std::swap(_min, rhs._min);
+        std::swap(this->_size, rhs._size);
+        this->_compare = std::move(rhs._compare);
     }
+    return *this;
+}
 
 template <typename T, typename Compare>
 typename binomial<T, Compare>::node* binomial<T, Compare>::add(const T& item)
@@ -268,7 +267,7 @@ template <typename T, typename Compare> void binomial<T, Compare>::merge(binomia
                     // 0+0+1
                     *it1 = *it2;
                     (*it2)->_parent = nullptr;
-                } else { 
+                } else {
                     // 0+1+1: merge the two and put into carry
                     if (this->_compare(***it1, ***it2)) {
                         std::iter_swap(it1, it2);
@@ -279,7 +278,7 @@ template <typename T, typename Compare> void binomial<T, Compare>::merge(binomia
                     carry = *it2;
                     *it1 = nullptr;
                 }
-            } else if (*it1 == nullptr && (it2 == src._trees.end() || *it2 == nullptr)) { 
+            } else if (*it1 == nullptr && (it2 == src._trees.end() || *it2 == nullptr)) {
                 // 1+0+0
                 *it1 = carry;
                 carry->_parent = nullptr;
@@ -296,7 +295,7 @@ template <typename T, typename Compare> void binomial<T, Compare>::merge(binomia
                 carry->_children.push_back(*it1);
                 (*it1)->_parent = carry;
                 *it1 = nullptr;
-            } else { 
+            } else {
                 // 1+1+1
                 // we'll keep it1 and merge it2 into carry
                 if (this->_compare(***it2, **carry))

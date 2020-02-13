@@ -140,6 +140,27 @@ void graph<T, Directed, Weighted>::set_edge(const T& start, const T& dest, doubl
 }
 
 template <typename T, bool Directed, bool Weighted>
+void graph<T, Directed, Weighted>::force_add(const T& start, const T& dest, double cost)
+{
+    if (start == dest)
+        throw std::invalid_argument("Self-loops not allowed");
+
+    switch (_type) {
+    case adj_matrix:
+        _impl->set_edge(_translation.at(start), _translation.at(dest), cost);
+        break;
+
+    case adj_list:
+        dynamic_cast<adjacency_list<Directed, Weighted>*>(_impl.get())
+            ->force_add(_translation.at(start), _translation.at(dest), cost);
+        break;
+
+    default:
+        break;
+    }
+}
+
+template <typename T, bool Directed, bool Weighted>
 uint32_t graph<T, Directed, Weighted>::add_vertex(const T& name)
 {
     if (_translation.find(name) != _translation.end())

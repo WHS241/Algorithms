@@ -27,6 +27,8 @@ protected:
 template <typename T, typename Compare = std::less<>, typename Container = std::vector<T>>
 class priority_queue : virtual public base<T, Compare> {
 public:
+    static_assert(
+        std::is_invocable_r_v<bool, Compare, T, T>, "comparator incompatible with data types");
     static_assert(std::is_same_v<T, typename Container::value_type>,
         "value_type must be same as underlying container");
     static_assert(std::is_same_v<std::random_access_iterator_tag,
@@ -36,37 +38,10 @@ public:
     explicit priority_queue(Compare comp);
 
     // Θ(n)
-    template <typename It, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
-    priority_queue(It first, It last)
-        : priority_queue(first, last, Compare()) {};
-    template <typename It>
-    priority_queue(It first, It last, Compare comp)
-        : base<T, Compare>(comp)
-        , _heap(first, last)
-    {
-        for (uint32_t position = _heap.size() - 1; position + 1 > 0; --position) {
-            uint32_t current(position);
-            auto current_it = _heap.begin() + position;
-
-            // bubble down
-            while (current_it + (current_it - _heap.begin()) + 1 < _heap.end()) {
-                uint32_t child(2 * current + 1);
-                auto child_it = current_it + (current_it - _heap.begin()) + 1;
-                if (child_it + 1 != _heap.end() && !this->_compare(child_it[0], child_it[1])) {
-                    ++child_it;
-                    ++child;
-                }
-
-                if (!this->_compare(*current_it, *child_it)) {
-                    std::iter_swap(current_it, child_it);
-                    current = child;
-                    current_it += (child_it - current_it);
-                } else {
-                    break;
-                }
-            }
-        }
-    };
+    template <typename It, typename _Compare = Compare,
+        typename _Requires = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+    priority_queue(It first, It last);
+    template <typename It> priority_queue(It first, It last, Compare comp);
 
     // Θ(log n)
     virtual void insert(const T&);

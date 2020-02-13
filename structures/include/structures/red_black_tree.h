@@ -9,21 +9,12 @@ template <typename T, typename Compare = std::less<>>
 class red_black_tree : public binary_search_tree<T, Compare> {
 public:
     red_black_tree() = default;
-    explicit red_black_tree(Compare comp)
-        : binary_search_tree<T, Compare>(comp) {};
+    explicit red_black_tree(Compare comp);
 
-    template <typename It, typename = std::enable_if_t<std::is_default_constructible_v<Compare>>>
-    red_black_tree(It first, It last)
-        : red_black_tree(first, last, Compare()) {};
-    template <typename It>
-    red_black_tree(It first, It last, Compare comp)
-        : binary_search_tree<T, Compare>()
-    {
-        this->_size = 0;
-        for (; first != last; ++first) {
-            insert(*first);
-        }
-    }
+    template <typename It, typename _Compare = Compare,
+        typename _Requires = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+    red_black_tree(It first, It last);
+    template <typename It> red_black_tree(It first, It last, Compare comp);
 
     // Θ(log n)
     void insert(const T&) override;
