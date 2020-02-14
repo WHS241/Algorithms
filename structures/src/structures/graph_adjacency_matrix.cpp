@@ -4,13 +4,14 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#include <memory>
 
 namespace graph {
 template <bool Directed, bool Weighted>
-const impl<Directed, Weighted>& graph_adjacency_matrix<Directed, Weighted>::copy_from(
+const impl<Directed, Weighted>& adjacency_matrix<Directed, Weighted>::copy_from(
     const impl<Directed, Weighted>& src)
 {
-    auto cast = dynamic_cast<const graph_adjacency_matrix*>(&src);
+    auto cast = dynamic_cast<const adjacency_matrix*>(&src);
     if (cast) {
         return (*this = *cast);
     }
@@ -29,20 +30,20 @@ const impl<Directed, Weighted>& graph_adjacency_matrix<Directed, Weighted>::copy
 }
 
 template <bool Directed, bool Weighted>
-uint32_t graph_adjacency_matrix<Directed, Weighted>::order() const noexcept
+uint32_t adjacency_matrix<Directed, Weighted>::order() const noexcept
 {
     return _graph.size();
 }
 
 template <bool Directed, bool Weighted>
-bool graph_adjacency_matrix<Directed, Weighted>::has_edge(
+bool adjacency_matrix<Directed, Weighted>::has_edge(
     const uint32_t& start, const uint32_t& dest) const noexcept
 {
     return !std::isnan(edge_cost(start, dest));
 }
 
 template <bool Directed, bool Weighted>
-double graph_adjacency_matrix<Directed, Weighted>::edge_cost(
+double adjacency_matrix<Directed, Weighted>::edge_cost(
     const uint32_t& start, const uint32_t& dest) const noexcept
 {
     if (start >= _graph.size() || dest >= _graph.size())
@@ -51,7 +52,7 @@ double graph_adjacency_matrix<Directed, Weighted>::edge_cost(
 }
 
 template <bool Directed, bool Weighted>
-uint32_t graph_adjacency_matrix<Directed, Weighted>::degree(const uint32_t& start) const
+uint32_t adjacency_matrix<Directed, Weighted>::degree(const uint32_t& start) const
 {
     if (start >= _graph.size())
         throw std::out_of_range("Degree number");
@@ -60,7 +61,7 @@ uint32_t graph_adjacency_matrix<Directed, Weighted>::degree(const uint32_t& star
 }
 
 template <bool Directed, bool Weighted>
-std::list<uint32_t> graph_adjacency_matrix<Directed, Weighted>::neighbors(
+std::list<uint32_t> adjacency_matrix<Directed, Weighted>::neighbors(
     const uint32_t& start) const
 {
     if (start >= _graph.size())
@@ -75,7 +76,7 @@ std::list<uint32_t> graph_adjacency_matrix<Directed, Weighted>::neighbors(
 }
 
 template <bool Directed, bool Weighted>
-std::list<std::pair<uint32_t, double>> graph_adjacency_matrix<Directed, Weighted>::edges(
+std::list<std::pair<uint32_t, double>> adjacency_matrix<Directed, Weighted>::edges(
     const uint32_t& start) const
 {
     if (start >= _graph.size())
@@ -89,8 +90,36 @@ std::list<std::pair<uint32_t, double>> graph_adjacency_matrix<Directed, Weighted
     return result;
 }
 
+template<bool Directed, bool Weighted>
+std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> adjacency_matrix<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const {
+    std::vector<bool> selected(_graph.size(), false);
+    for(uint32_t vertex : subset) {
+        if (vertex >= _graph.size())
+            throw std::out_of_range("Degree number");
+        selected[vertex] = true;
+    }
+
+    // determine what vertex in subgraph corresponds to what vertex
+    std::unique_ptr<adjacency_matrix<Directed, Weighted>> subgraph = std::make_unique<adjacency_matrix<Directed, Weighted>>();
+    std::vector<uint32_t> translate_to_sub(_graph.size());
+    for(uint32_t i = 0; i < _graph.size(); ++i) {
+        if (selected[i]) {
+            translate_to_sub[i] = subgraph->order();
+            subgraph->add_vertex();
+        }
+    }
+
+    for(uint32_t i = 0; i < _graph.size(); ++i)
+        if (selected[i])
+            for (uint32_t j = 0; j < _graph.size(); ++j)
+                if (selected[j])
+                    subgraph->_graph[translate_to_sub[i]][translate_to_sub[j]] = _graph[i][j];
+    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(subgraph.release(), std::move(translate_to_sub));
+
+}
+
 template <bool Directed, bool Weighted>
-void graph_adjacency_matrix<Directed, Weighted>::set_edge(
+void adjacency_matrix<Directed, Weighted>::set_edge(
     const uint32_t& start, const uint32_t& dest, double cost)
 {
     if (start == dest)
@@ -104,7 +133,7 @@ void graph_adjacency_matrix<Directed, Weighted>::set_edge(
 }
 
 template <bool Directed, bool Weighted>
-uint32_t graph_adjacency_matrix<Directed, Weighted>::add_vertex()
+uint32_t adjacency_matrix<Directed, Weighted>::add_vertex()
 {
     _t_graph_rep temp(_graph);
     for (std::vector<double>& vertex : temp)
@@ -116,7 +145,7 @@ uint32_t graph_adjacency_matrix<Directed, Weighted>::add_vertex()
 }
 
 template <bool Directed, bool Weighted>
-void graph_adjacency_matrix<Directed, Weighted>::remove_edge(
+void adjacency_matrix<Directed, Weighted>::remove_edge(
     const uint32_t& start, const uint32_t& dest)
 {
     if (start != dest)
@@ -124,7 +153,7 @@ void graph_adjacency_matrix<Directed, Weighted>::remove_edge(
 }
 
 template <bool Directed, bool Weighted>
-void graph_adjacency_matrix<Directed, Weighted>::isolate(const uint32_t& target)
+void adjacency_matrix<Directed, Weighted>::isolate(const uint32_t& target)
 {
     if (target >= _graph.size())
         throw std::out_of_range("Degree number");
@@ -136,7 +165,7 @@ void graph_adjacency_matrix<Directed, Weighted>::isolate(const uint32_t& target)
 }
 
 template <bool Directed, bool Weighted>
-void graph_adjacency_matrix<Directed, Weighted>::remove(const uint32_t& target)
+void adjacency_matrix<Directed, Weighted>::remove(const uint32_t& target)
 {
     if (target >= _graph.size())
         throw std::out_of_range("Degree number");
@@ -147,7 +176,7 @@ void graph_adjacency_matrix<Directed, Weighted>::remove(const uint32_t& target)
 }
 
 template <bool Directed, bool Weighted>
-void graph_adjacency_matrix<Directed, Weighted>::clear() noexcept
+void adjacency_matrix<Directed, Weighted>::clear() noexcept
 {
     _graph.clear();
 }

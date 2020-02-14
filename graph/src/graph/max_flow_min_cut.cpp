@@ -129,7 +129,7 @@ graph::graph<T, Directed, true> Ford_Fulkerson(
                 }
             }
         }
-    } catch (graph_alg::no_path_exception& exception) {
+    } catch (graph_alg::no_path_exception&) {
         // indicates no augmenting flow found
         // simply absorb the exception and use as an exit out of while loop
     }

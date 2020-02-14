@@ -43,8 +43,8 @@ public:
     // return vertices in graph
     virtual std::vector<T> vertices() const;
     // generate a subgraph induced by a set of vertices
-    template <typename InputIterator>
-    graph<T, Directed, Weighted> get_induced_subgraph(InputIterator first, InputIterator last);
+    template <typename InputIterator, typename _Requires = std::enable_if_t<std::is_convertible_v<typename std::iterator_traits<InputIterator>::value_type, T>>>
+    graph<T, Directed, Weighted> generate_induced_subgraph(InputIterator first, InputIterator last) const;
 
     // set edge between start and dest to cost
     // adds edge if currently nonexistent

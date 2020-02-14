@@ -131,6 +131,31 @@ std::vector<T> graph<T, Directed, Weighted>::vertices() const
     return _reverse_translation;
 }
 
+template<typename T, bool Directed, bool Weighted>
+template<typename InputIterator, typename _Requires>
+graph<T, Directed, Weighted> graph<T, Directed, Weighted>::generate_induced_subgraph(InputIterator first, InputIterator last) const {
+    // get this in sorted order for impl
+    std::vector<bool> selected(_reverse_translation.size(), false);
+    std::for_each(first, last, [this, &selected](const T& vertex){
+        selected[_translation.at(vertex)] = true;
+    });
+
+    std::list<uint32_t> vertex_subset;
+    for(uint32_t i = 0; i < _reverse_translation.size(); ++i)
+        if(selected[i])
+            vertex_subset.push_back(i);
+    graph<T, Directed, Weighted> result(_type);
+    std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> output = _impl->induced_subgraph(vertex_subset);
+    result._impl.reset(output.first);
+    result._reverse_translation.resize(vertex_subset.size());
+    for(uint32_t i = 0; i < _reverse_translation.size(); ++i)
+        if(selected[i]) {
+            result._translation[_reverse_translation[i]] = output.second[i];
+            result._reverse_translation[output.second[i]] = _reverse_translation[i];
+        }
+    return result;
+}
+
 template <typename T, bool Directed, bool Weighted>
 void graph<T, Directed, Weighted>::set_edge(const T& start, const T& dest, double cost)
 {
@@ -231,7 +256,7 @@ void graph<T, Directed, Weighted>::_set_empty(graph_type type)
 {
     switch (type) {
     case adj_matrix:
-        _impl.reset(new graph_adjacency_matrix<Directed, Weighted>());
+        _impl.reset(new adjacency_matrix<Directed, Weighted>());
         break;
 
     case adj_list:

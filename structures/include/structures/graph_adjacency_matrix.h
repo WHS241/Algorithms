@@ -14,9 +14,9 @@ namespace graph {
 // 图的邻接矩阵储存表示
 // 空间: O(V^2)
 template <bool Directed, bool Weighted>
-class graph_adjacency_matrix : public impl<Directed, Weighted> {
+class adjacency_matrix : public impl<Directed, Weighted> {
 public:
-    virtual ~graph_adjacency_matrix() = default;
+    virtual ~adjacency_matrix() = default;
 
     const impl<Directed, Weighted>& copy_from(const impl<Directed, Weighted>&) override;
 
@@ -43,6 +43,7 @@ public:
     std::list<uint32_t> neighbors(const uint32_t& start) const override;
 
     std::list<std::pair<uint32_t, double>> edges(const uint32_t&) const override;
+    std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> induced_subgraph(const std::list<uint32_t>&) const override;
 
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     // O(1)

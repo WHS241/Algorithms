@@ -1,11 +1,11 @@
 #ifndef ADJACENCY_LIST_CPP
 #define ADJACENCY_LIST_CPP
-#include <structures/graph_adjacency_list.h>
 
 #include <algorithm>
 #include <functional>
 #include <iterator>
 #include <limits>
+#include <memory>
 
 namespace graph {
 template <bool Directed, bool Weighted>
@@ -83,6 +83,37 @@ std::list<std::pair<uint32_t, double>> adjacency_list<Directed, Weighted>::edges
     return _graph[start];
 }
 
+template<bool Directed, bool Weighted>
+std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> adjacency_list<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const {
+    std::vector<bool> selected(_graph.size(), false);
+    for(uint32_t vertex : subset) {
+        if (vertex >= _graph.size())
+            throw std::out_of_range("Degree number");
+        selected[vertex] = true;
+    }
+
+    // determine what vertex in subgraph corresponds to what vertex
+    std::unique_ptr<adjacency_list<Directed, Weighted>> subgraph = std::make_unique<adjacency_list<Directed, Weighted>>();
+    std::vector<uint32_t> translate_to_sub(_graph.size());
+    for(uint32_t i = 0; i < _graph.size(); ++i) {
+        if (selected[i]) {
+            translate_to_sub[i] = subgraph->order();
+            subgraph->add_vertex();
+        }
+    }
+
+    for(uint32_t i = 0; i < _graph.size(); ++i)
+        if (selected[i])
+            for (const _t_edge& edge : _graph[i])
+                if (selected[edge.first])
+                    if constexpr(Directed)
+                        subgraph->force_add(translate_to_sub[i], translate_to_sub[edge.first], edge.second);
+                    else if (translate_to_sub[i] < translate_to_sub[edge.first])
+                        subgraph->force_add(translate_to_sub[i], translate_to_sub[edge.first], edge.second);
+    
+    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(subgraph.release(), std::move(translate_to_sub));
+}
+
 template <bool Directed, bool Weighted>
 void adjacency_list<Directed, Weighted>::set_edge(
     const uint32_t& start, const uint32_t& dest, double cost)
@@ -96,7 +127,7 @@ void adjacency_list<Directed, Weighted>::set_edge(
         auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
             [&dest](const _t_edge& edge) { return edge.first == dest; });
         if (it == _graph[start].end())
-            _graph[start].push_back(std::make_pair(dest, cost));
+            _graph[start].emplace_back(dest, cost);
         else
             it->second = cost;
     } else {
@@ -105,8 +136,8 @@ void adjacency_list<Directed, Weighted>::set_edge(
         auto it = std::find_if(temp1.begin(), temp1.end(),
             [&dest](const _t_edge& edge) { return edge.first == dest; });
         if (it == temp1.end()) {
-            temp1.push_back(std::make_pair(dest, cost));
-            temp2.push_back(std::make_pair(start, cost));
+            temp1.emplace_back(dest, cost);
+            temp2.emplace_back(start, cost);
         } else {
             it->second = cost;
             it = std::find_if(temp2.begin(), temp2.end(),
@@ -129,12 +160,12 @@ void adjacency_list<Directed, Weighted>::force_add(
         throw std::out_of_range("Degree number");
 
     if constexpr (Directed) {
-        _graph[start].push_back(std::make_pair(dest, cost));
+        _graph[start].emplace_back(dest, cost);
     } else {
         // exception safety
         std::list<_t_edge> temp1(_graph[start]), temp2(_graph[dest]);
-        temp1.push_back(std::make_pair(dest, cost));
-        temp2.push_back(std::make_pair(start, cost));
+        temp1.emplace_back(dest, cost);
+        temp2.emplace_back(start, cost);
         _graph[start] = std::move(temp1);
         _graph[dest] = std::move(temp2);
     }
