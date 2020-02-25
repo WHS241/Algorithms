@@ -150,4 +150,40 @@ void graph_alg::breadth_first(
     }
 }
 
+template <typename T, bool Weighted>
+std::vector<T> graph_alg::topological_sort(const graph::graph<T, true, Weighted>& src) {
+    std::unordered_map<T, uint32_t> in_degree;
+    std::list<T> candidates; // vertices with in-degree 0
+    std::vector<T> result; // stores topological sort
+
+    // populate map
+    for (const T& vert : src.vertices())
+        in_degree[vert] = 0;
+
+    // correct map values
+    for (const T& source : src.vertices())
+        for (const T& terminal : src.neighbors(source))
+            ++in_degree[terminal];
+
+    for (const std::pair<T, uint32_t>& value : in_degree)
+        if (value.second == 0)
+            candidates.push_back(value.first);
+
+    while (!candidates.empty()) {
+        T current = candidates.front();
+        candidates.pop_front();
+        result.push_back(current);
+        for (const T& terminal : src.neighbors(current)) {
+            --in_degree[terminal];
+            if (in_degree[terminal] == 0)
+                candidates.push_back(terminal);
+        }
+    }
+
+    if (result.size() != src.order())
+        throw std::invalid_argument("Not DAG");
+    
+    return result;
+}
+
 #endif // GRAPH_SEARCH_CPP

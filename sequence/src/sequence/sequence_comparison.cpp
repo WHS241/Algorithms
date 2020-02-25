@@ -38,7 +38,7 @@ typename std::basic_string<CharT>::const_iterator sequence::find_substring(
 }
 
 template <typename CharT>
-std::vector<sequence::instruction> sequence::edit_distance(
+std::vector<sequence::instruction> sequence::Levenshtein_distance(
     const std::basic_string<CharT>& src, const std::basic_string<CharT>& target)
 {
     struct helper_node {

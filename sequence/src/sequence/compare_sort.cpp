@@ -30,11 +30,9 @@ void sequence::mergesort(ForwardIt first, ForwardIt last, Compare compare)
     auto it1 = first_half.begin(), it2 = second_half.begin();
     while (it1 != first_half.end() && it2 != second_half.end()) {
         if (compare(*it1, *it2)) {
-            *first++ = std::move(*it1);
-            ++it1;
+            *first++ = std::move(*(it1++));
         } else {
-            *first++ = std::move(*it2);
-            ++it2;
+            *first++ = std::move(*(it2++));
         }
     }
 

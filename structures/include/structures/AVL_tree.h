@@ -4,8 +4,14 @@
 #include "binary_search_tree.h"
 
 namespace tree {
-// AVL tree implementation
-// For any node, difference in height between subtrees <= 1
+/**
+ *  AVL tree implementation
+ * For any node, difference in height between subtrees <= 1
+ * 
+ * Georgy Adelson-Velsky, Evgenii Landis
+ * An algorithm for the organization of information
+ * (1962) Soviet Doklady
+ */
 template <typename T, typename Compare = std::less<>>
 class AVL_tree : public binary_search_tree<T, Compare> {
 public:

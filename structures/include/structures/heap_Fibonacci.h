@@ -6,6 +6,11 @@
 #include <unordered_set>
 
 namespace heap {
+/*
+Michael L. Fredman, Robert E. Tarjan
+Fibonacci Heaps And Their Uses In Improved Network Optimization Algorithms
+(1984) doi:10.1109/SFCS.1984.715934
+*/
 template <typename T, typename Compare = std::less<>>
 class Fibonacci : public node_base<T, Compare> {
 public:

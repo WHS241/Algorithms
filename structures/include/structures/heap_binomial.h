@@ -6,6 +6,12 @@
 #include <vector>
 
 namespace heap {
+
+/**
+ * Jean Vuillemin
+ * A data structure for manipulating priority queues
+ * (1978) doi:10.1145/359460.359478
+ */
 template <typename T, typename Compare = std::less<>>
 class binomial : public node_base<T, Compare> {
 public:

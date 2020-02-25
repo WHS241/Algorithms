@@ -21,7 +21,10 @@ void mergesort(ForwardIt first, ForwardIt last, Compare compare = Compare());
 /*
 Quicksort
 Needs bidirectional iterators
-Tony Hoare (1959)
+Tony Hoare 
+Algorithm 64: Quicksort
+(1959) doi:10.1145/366622.366644
+
 Θ(n^2) worst case, Θ(n log n) expected case
 Θ(1) extra space
 */
@@ -38,7 +41,10 @@ BiDirIt partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compar
 
 /*
 Heapsort
-J. W. J. Williams (1964)
+J. W. J. Williams
+Algorithm 232: Heapsort
+(1964) doi:10.1145/512274.512284
+
 Θ(n log n) worst case
 Θ(1) extra space for random access iterators, Θ(n) for any other type
 */

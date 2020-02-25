@@ -4,7 +4,12 @@
 #include "binary_search_tree.h"
 
 namespace tree {
-// Red-black tree
+/**
+ * Red black trees
+ * Leonidas Guibas, Robert Sedgewick
+ * A Dichromatic Framework for Balanced Trees
+ * (1978) doi:10.1109/SFCS.1978.3
+ */
 template <typename T, typename Compare = std::less<>>
 class red_black_tree : public binary_search_tree<T, Compare> {
 public:

@@ -102,15 +102,12 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
 
     for (T& vertex : vertices)
         result.add_vertex(vertex);
-
+    
+    // Keep track of the shortest edge to each vertex so far
     std::vector<edge> data_map(vertices.size());
     std::transform(vertices.begin(), vertices.end(), data_map.begin(), [](const T& value) {
-        edge result;
-        result.current = value;
-        result.from = value;
-        result.weight
-            = std::numeric_limits<double>::max(); // orders unconnected vertices after connected
-        return result;
+        // double max orders unconnected vertices after connected
+        return edge{value, value, std::numeric_limits<double>::max()};
     });
 
     // the heap structure used here determines the runtime of the algorithm
@@ -121,10 +118,8 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
     std::unordered_map<T, node*> tracker;
 
     auto it1 = vertices.begin();
-    for (edge& vertex_data : data_map) {
-        tracker[*it1] = heap.add(vertex_data);
-        ++it1;
-    }
+    for (edge& vertex_data : data_map)
+        tracker[*(it1++)] = heap.add(vertex_data);
 
     auto heap_ptr = &heap;
 
@@ -201,9 +196,11 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
         if (components.size() == num_input_components)
             break;
 
-        if (components.find(current.start) != components.find(current.terminal)) {
+        T root_a = components.find(current.start);
+        T root_b = components.find(current.terminal);
+        if (root_a != root_b) {
             result.force_add(current.start, current.terminal, current.weight);
-            components.union_(current.start, current.terminal);
+            components.union_(root_a, root_b);
         }
     }
 

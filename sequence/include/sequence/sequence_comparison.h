@@ -7,7 +7,11 @@ namespace sequence {
 /*
 Determine if target is a substring of input
 Returns iterator to start if yes, end of input if no
-Donald Knuth, James Morris Jr., Vaughan Pratt (1977)
+
+Donald Knuth, James Morris Jr., Vaughan Pratt
+Fast pattern matching in strings
+(1977) doi:10.1137/0206024
+
 O(m+n)
 */
 template <typename CharT>
@@ -23,12 +27,16 @@ struct instruction {
 };
 
 /*
-Returns the shortest edit distance from src to target
+Returns the Levenshtein distance from src to target
+(edit distance, where Insert, Delete, and Replace are unit-cost operations)
+Taras Vintsyuk 
+Speech discrimination by dynamic programming
+(1968) Cybernetics
 Robert Wagner, Michael Fischer (1974)
 O(mn)
 */
 template <typename CharT>
-std::vector<instruction> edit_distance(
+std::vector<instruction> Levenshtein_distance(
     const std::basic_string<CharT>& src, const std::basic_string<CharT>& target);
 } // namespace Sequence
 

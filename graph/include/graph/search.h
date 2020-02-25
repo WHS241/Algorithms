@@ -49,6 +49,17 @@ Requirements: F::operator()(T param) is defined
 template <typename T, bool Directed, bool Weighted, typename F>
 void breadth_first(
     const graph::graph<T, Directed, Weighted>& src, const T& start, F on_visit = [](const T&) {});
+
+/*
+Returns a topological sort of the input graph
+Throws if input is not directed acyclic.
+Arthur B. Kahn
+Topological sorting of large networks
+(1962) doi:10.1145/368996.369025
+Θ(V+E)
+*/
+template <typename T, bool Weighted>
+std::vector<T> topological_sort(const graph::graph<T, true, Weighted>& src);
 } // namespace graph_alg
 
 #include <src/graph/search.cpp>

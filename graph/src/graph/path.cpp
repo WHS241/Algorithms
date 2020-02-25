@@ -69,40 +69,8 @@ template <typename T, typename Compare>
 std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all_targets(
     const graph::graph<T, true, true>& src, const T& start, Compare compare)
 {
-    std::unordered_map<T, uint32_t> in_degree;
-    std::list<T> candidates; // vertices with in-degree 0
-    std::vector<T> topological_order; // stores topological sort
+    std::vector<T> topological_order = topological_sort(src);
 
-    // populate map
-    for (const T& vert : src.vertices())
-        in_degree[vert] = 0;
-
-    // correct map values
-    for (const T& source : src.vertices())
-        for (const T& terminal : src.neighbors(source))
-            ++in_degree[terminal];
-
-    for (const std::pair<T, uint32_t>& value : in_degree)
-        if (value.second == 0)
-            candidates.push_back(value.first);
-
-    // Topological sort
-    // Arthur B. Kahn (1962)
-    while (!candidates.empty()) {
-        T current = candidates.front();
-        candidates.pop_front();
-        topological_order.push_back(current);
-        for (const T& terminal : src.neighbors(current)) {
-            --in_degree[terminal];
-            if (in_degree[terminal] == 0)
-                candidates.push_back(terminal);
-        }
-    }
-
-    if (topological_order.size() != src.order())
-        throw std::invalid_argument("Not DAG");
-
-    // start processing
     std::unordered_map<T, std::pair<double, T>> result;
     auto it = std::find(topological_order.cbegin(), topological_order.cend(), start);
     if (it == topological_order.end())
@@ -130,12 +98,12 @@ template <typename T, bool Directed>
 std::pair<double, std::list<T>> Dijkstra_single_target(
     const graph::graph<T, Directed, true>& src, const T& start, const T& dest)
 {
-    std::unordered_map<T, std::pair<double, T>> all_destinations
-        = Dijkstra_partial(src, start, [&start](const T& current) { return current == start; });
     std::list<T> path;
-
     if (start == dest)
         return std::make_pair(0., path);
+
+    std::unordered_map<T, std::pair<double, T>> all_destinations
+        = Dijkstra_partial(src, start, [&start](const T& current) { return current == start; });
 
     if (all_destinations.at(dest).second == dest)
         throw no_path_exception();
@@ -167,13 +135,12 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
     };
 
     std::vector<T> vertices = src.vertices();
+
+    // Keep track of where the shortest path comes from and what the cost is
+    // Initialize to self and 0 or NaN, depending on if it is the start
     std::vector<data> data_map(vertices.size());
     std::transform(vertices.begin(), vertices.end(), data_map.begin(), [&start](const T& value) {
-        data result;
-        result.current = value;
-        result.from = value;
-        result.cost = (value == start) ? 0 : std::numeric_limits<double>::max();
-        return result;
+        return data{value, value, (value == start) ? 0 : std::numeric_limits<double>::max()};
     });
 
     // the heap structure used here determines the runtime of the algorithm
@@ -184,10 +151,8 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
     std::unordered_map<T, node*> tracker; // pointers to items in the heap
 
     auto it1 = vertices.cbegin();
-    for (data& vertex_data : data_map) {
-        tracker[*it1] = heap.add(vertex_data);
-        ++it1;
-    }
+    for (data& vertex_data : data_map)
+        tracker[*(it1++)] = heap.add(vertex_data);
 
     auto heap_ptr = &heap; // need pointer-based polymorphism
     std::unordered_map<T, std::pair<double, T>> result;

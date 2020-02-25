@@ -15,9 +15,13 @@ std::pair<It, It> extrema(It first, It last, Compare compare = Compare());
  Selection
  Select the k-th smallest element (k passed as parameter rank)
  Parameter 4 (optional) is the size of subproblems algorithm divides into
+
+ Manuel Blum, Robert Floyd, Vaughan Pratt, Ronald Rivest, Robert Tarjan
+ Time bounds for selection
+ (1972) doi:10.1016/S0022-0000(73)80033-9
+
  Must be >=5 for algorithm to be Θ(n), preferably odd. Infinite
  recursion/looping if 1
- Manuel Blum, Robert Floyd, Vaughan Pratt, Ronald Rivest, Robert Tarjan (1972)
  */
 template <typename It, typename Compare = std::less<>>
 typename std::iterator_traits<It>::value_type selection(

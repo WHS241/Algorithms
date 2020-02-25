@@ -17,11 +17,13 @@ namespace graph_alg {
 
 /**
  * find k-core: maximum induced subgraph with all degrees >= k
- * David W. Matula and Leland D. Beck (1983)
+ * David W. Matula and Leland D. Beck:
+ * Smallest-Last Ordering and Clustering and Graph Coloring Algorithms
+ * (1983) doi:10.1145/2402.322385
  * Θ(V)
  */
 template <typename T, bool Weighted>
-graph::graph<T, false, Weighted> k_core(const graph::graph<T, false, Weighted>& src, uint32_t k);
+graph::graph<T, false, Weighted> k_core(graph::graph<T, false, Weighted> src, uint32_t k);
 
 /**
  * Find the transitive closure of a graph

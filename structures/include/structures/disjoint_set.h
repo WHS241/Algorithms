@@ -6,6 +6,19 @@
 #include <unordered_map>
 #include <unordered_set>
 
+/**
+ * Also known as UNION-FIND
+ * 
+ * Design:
+ * Bernard Galler, Michael Fischer
+ * An improved equivalence algorithm
+ * (1964) doi:10.1145/364099.364331
+ * 
+ * Analysis:
+ * Robert Tarjan
+ * Efficiency of a good but not linear set union algorithm
+ * (1975) doi:10.1145/321879.321884
+ */
 template <typename T> class disjoint_set {
 public:
     disjoint_set() = default;

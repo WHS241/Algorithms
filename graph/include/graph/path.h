@@ -38,7 +38,6 @@ std::list<T> least_edges_path(
 /*
 Use topological sort on a weighted DAG
 Can be used with other comparison operators (e.g. find longest path)
-Θ(V+E)
 */
 template <typename T, typename Compare = std::less<>>
 std::pair<double, std::list<T>> shortest_path_DAG(const graph::graph<T, true, true>& src,
@@ -50,7 +49,12 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all_targets(
 /*
 Single source shortest path
 Non-negative weights
-Edsger Dijkstra (1959): Θ(V^2)
+
+Edsger Dijkstra 
+A note on two problems in connexion with graphs
+(1959) doi:10.1007/BF01386390
+Θ(V^2)
+
 Binary heap: Θ((V+E) log V)
 Fibonacci heap: Θ(V log V + E)
 */
@@ -70,8 +74,19 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
 /*
 Single source shortest path
 Directed graph negative weights
-Alfonso Shimbel (1955), Lester Ford Jr. (1956),
-Edward F. Moore (1957), and Richard Bellman (1958)
+Alfonso Shimbel
+Structure in communication nets
+(1955)
+Lester Ford Jr. 
+Network Flow Theory
+(1956) RAND Corporation, Paper P-923
+Edward F. Moore
+The shortest path through a maze
+(1957) MR 0114710
+Richard Bellman
+On a routing problem
+(1958) MR 0102435
+
 Θ(VE)
 */
 template <typename T>
@@ -83,7 +98,17 @@ std::unordered_map<T, std::pair<double, T>> Bellman_Ford_all_targets(
 
 /*
 All-pairs shortest path
-Bernard Roy (1959), Stephen Warshall (1962), Robert Floyd (1962)
+
+Bernard Roy 
+Transitivité et connexité
+(1959) C. R. Acad. Sci. Paris
+Stephen Warshall 
+A theorem on Boolean matrices
+(1962) doi:10.1145/321105.321107
+Robert Floyd
+Algorithm 97: Shortest Path
+(1962) doi:10.1145/367766.368168
+
 Θ(V^3)
 */
 template <typename T>
@@ -92,7 +117,10 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Floyd_Warshal
 
 /*
 All-pairs shortest path
-Donald B. Johnson (1977)
+Donald B. Johnson
+Efficient algorithms for shortest paths in sparse networks
+(1977) doi:10.1145/321992.321993
+
 Θ(V^2 log V + VE)
 
 This algorithm requires a vertex name for a temporary additional vertex
