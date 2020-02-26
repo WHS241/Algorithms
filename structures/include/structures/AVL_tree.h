@@ -7,7 +7,7 @@ namespace tree {
 /**
  *  AVL tree implementation
  * For any node, difference in height between subtrees <= 1
- * 
+ *
  * Georgy Adelson-Velsky, Evgenii Landis
  * An algorithm for the organization of information
  * (1962) Soviet Doklady

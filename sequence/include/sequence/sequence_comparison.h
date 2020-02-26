@@ -29,7 +29,7 @@ struct instruction {
 /*
 Returns the Levenshtein distance from src to target
 (edit distance, where Insert, Delete, and Replace are unit-cost operations)
-Taras Vintsyuk 
+Taras Vintsyuk
 Speech discrimination by dynamic programming
 (1968) Cybernetics
 Robert Wagner, Michael Fischer (1974)

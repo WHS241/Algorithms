@@ -56,7 +56,8 @@ graph::graph<int, Directed, Weighted> random_graph(
 
 template <bool Weighted>
 graph::graph<int, false, Weighted> random_bipartite_graph(
-    std::mt19937_64& gen, graph::graph_type type = graph::adj_list) {
+    std::mt19937_64& gen, graph::graph_type type = graph::adj_list)
+{
 
     std::uniform_int_distribution<uint32_t> vert_dist(1, 50);
     std::uniform_real_distribution<double> weight(0, 1000);
@@ -67,9 +68,9 @@ graph::graph<int, false, Weighted> random_bipartite_graph(
 
     for (uint32_t i = 0; i < num_vertices_first + num_vertices_second; ++i)
         graph.add_vertex(graph.order());
-    
+
     // shuffle vertices, so it is not obvious this is bipartite
-    std::uniform_int_distribution<> random_bool(0,1);
+    std::uniform_int_distribution<> random_bool(0, 1);
     std::vector<uint32_t> first_set, second_set;
     first_set.reserve(num_vertices_first);
     second_set.reserve(num_vertices_second);

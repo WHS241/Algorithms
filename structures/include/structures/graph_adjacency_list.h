@@ -43,7 +43,8 @@ public:
     std::list<uint32_t> neighbors(const uint32_t& start) const override;
 
     std::list<std::pair<uint32_t, double>> edges(const uint32_t&) const override;
-    std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> induced_subgraph(const std::list<uint32_t>&) const override;
+    std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> induced_subgraph(
+        const std::list<uint32_t>&) const override;
 
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     // O(deg(V))

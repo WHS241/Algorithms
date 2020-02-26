@@ -21,7 +21,7 @@ void mergesort(ForwardIt first, ForwardIt last, Compare compare = Compare());
 /*
 Quicksort
 Needs bidirectional iterators
-Tony Hoare 
+Tony Hoare
 Algorithm 64: Quicksort
 (1959) doi:10.1145/366622.366644
 

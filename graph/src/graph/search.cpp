@@ -156,7 +156,8 @@ void graph_alg::breadth_first(
 }
 
 template <typename T, bool Weighted>
-std::vector<T> graph_alg::topological_sort(const graph::graph<T, true, Weighted>& src) {
+std::vector<T> graph_alg::topological_sort(const graph::graph<T, true, Weighted>& src)
+{
     std::unordered_map<T, uint32_t> in_degree;
     std::list<T> candidates; // vertices with in-degree 0
     std::vector<T> result; // stores topological sort
@@ -187,7 +188,7 @@ std::vector<T> graph_alg::topological_sort(const graph::graph<T, true, Weighted>
 
     if (result.size() != src.order())
         throw std::invalid_argument("Not DAG");
-    
+
     return result;
 }
 

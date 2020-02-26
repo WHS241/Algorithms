@@ -140,7 +140,7 @@ std::unordered_map<T, std::pair<double, T>> Dijkstra_partial(
     // Initialize to self and 0 or NaN, depending on if it is the start
     std::vector<data> data_map(vertices.size());
     std::transform(vertices.begin(), vertices.end(), data_map.begin(), [&start](const T& value) {
-        return data{value, value, (value == start) ? 0 : std::numeric_limits<double>::max()};
+        return data { value, value, (value == start) ? 0 : std::numeric_limits<double>::max() };
     });
 
     // the heap structure used here determines the runtime of the algorithm

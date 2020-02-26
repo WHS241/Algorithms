@@ -35,7 +35,8 @@ public:
 
     // 输入：结点
     // 输出：导出子图和translation
-    virtual std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> induced_subgraph(const std::list<uint32_t>&) const = 0;
+    virtual std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> induced_subgraph(
+        const std::list<uint32_t>&) const = 0;
 
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     virtual void set_edge(const uint32_t& start, const uint32_t& dest, double cost = 0.0) = 0;

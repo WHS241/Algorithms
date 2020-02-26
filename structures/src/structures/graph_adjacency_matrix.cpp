@@ -61,8 +61,7 @@ uint32_t adjacency_matrix<Directed, Weighted>::degree(const uint32_t& start) con
 }
 
 template <bool Directed, bool Weighted>
-std::list<uint32_t> adjacency_matrix<Directed, Weighted>::neighbors(
-    const uint32_t& start) const
+std::list<uint32_t> adjacency_matrix<Directed, Weighted>::neighbors(const uint32_t& start) const
 {
     if (start >= _graph.size())
         throw std::out_of_range("Degree number");
@@ -90,32 +89,35 @@ std::list<std::pair<uint32_t, double>> adjacency_matrix<Directed, Weighted>::edg
     return result;
 }
 
-template<bool Directed, bool Weighted>
-std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> adjacency_matrix<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const {
+template <bool Directed, bool Weighted>
+std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>>
+adjacency_matrix<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const
+{
     std::vector<bool> selected(_graph.size(), false);
-    for(uint32_t vertex : subset) {
+    for (uint32_t vertex : subset) {
         if (vertex >= _graph.size())
             throw std::out_of_range("Degree number");
         selected[vertex] = true;
     }
 
     // determine what vertex in subgraph corresponds to what vertex
-    std::unique_ptr<adjacency_matrix<Directed, Weighted>> subgraph = std::make_unique<adjacency_matrix<Directed, Weighted>>();
+    std::unique_ptr<adjacency_matrix<Directed, Weighted>> subgraph
+        = std::make_unique<adjacency_matrix<Directed, Weighted>>();
     std::vector<uint32_t> translate_to_sub(_graph.size());
-    for(uint32_t i = 0; i < _graph.size(); ++i) {
+    for (uint32_t i = 0; i < _graph.size(); ++i) {
         if (selected[i]) {
             translate_to_sub[i] = subgraph->order();
             subgraph->add_vertex();
         }
     }
 
-    for(uint32_t i = 0; i < _graph.size(); ++i)
+    for (uint32_t i = 0; i < _graph.size(); ++i)
         if (selected[i])
             for (uint32_t j = 0; j < _graph.size(); ++j)
                 if (selected[j])
                     subgraph->_graph[translate_to_sub[i]][translate_to_sub[j]] = _graph[i][j];
-    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(subgraph.release(), std::move(translate_to_sub));
-
+    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(
+        subgraph.release(), std::move(translate_to_sub));
 }
 
 template <bool Directed, bool Weighted>
@@ -132,8 +134,7 @@ void adjacency_matrix<Directed, Weighted>::set_edge(
         _graph[dest][start] = cost;
 }
 
-template <bool Directed, bool Weighted>
-uint32_t adjacency_matrix<Directed, Weighted>::add_vertex()
+template <bool Directed, bool Weighted> uint32_t adjacency_matrix<Directed, Weighted>::add_vertex()
 {
     _t_graph_rep temp(_graph);
     for (std::vector<double>& vertex : temp)
@@ -145,8 +146,7 @@ uint32_t adjacency_matrix<Directed, Weighted>::add_vertex()
 }
 
 template <bool Directed, bool Weighted>
-void adjacency_matrix<Directed, Weighted>::remove_edge(
-    const uint32_t& start, const uint32_t& dest)
+void adjacency_matrix<Directed, Weighted>::remove_edge(const uint32_t& start, const uint32_t& dest)
 {
     if (start != dest)
         set_edge(start, dest, std::numeric_limits<double>::quiet_NaN());
@@ -175,8 +175,7 @@ void adjacency_matrix<Directed, Weighted>::remove(const uint32_t& target)
         std::swap(vertex[target], vertex.back());
 }
 
-template <bool Directed, bool Weighted>
-void adjacency_matrix<Directed, Weighted>::clear() noexcept
+template <bool Directed, bool Weighted> void adjacency_matrix<Directed, Weighted>::clear() noexcept
 {
     _graph.clear();
 }

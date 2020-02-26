@@ -15,7 +15,7 @@ namespace graph_alg {
  *
  * Ford-Fulkerson method: runtime dependent on flow-finding strategy
  * Bad strategies may not necessarily converge on true cost for irrational values (infinite runtime)
- * 
+ *
  * L. R. Ford, D. R. Fulkerson
  * Maximal flow through a network
  * (1956) doi:10.4153/CJM-1956-045-5

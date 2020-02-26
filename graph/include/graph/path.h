@@ -50,7 +50,7 @@ std::unordered_map<T, std::pair<double, T>> shortest_path_DAG_all_targets(
 Single source shortest path
 Non-negative weights
 
-Edsger Dijkstra 
+Edsger Dijkstra
 A note on two problems in connexion with graphs
 (1959) doi:10.1007/BF01386390
 Θ(V^2)
@@ -77,7 +77,7 @@ Directed graph negative weights
 Alfonso Shimbel
 Structure in communication nets
 (1955)
-Lester Ford Jr. 
+Lester Ford Jr.
 Network Flow Theory
 (1956) RAND Corporation, Paper P-923
 Edward F. Moore
@@ -99,10 +99,10 @@ std::unordered_map<T, std::pair<double, T>> Bellman_Ford_all_targets(
 /*
 All-pairs shortest path
 
-Bernard Roy 
+Bernard Roy
 Transitivité et connexité
 (1959) C. R. Acad. Sci. Paris
-Stephen Warshall 
+Stephen Warshall
 A theorem on Boolean matrices
 (1962) doi:10.1145/321105.321107
 Robert Floyd

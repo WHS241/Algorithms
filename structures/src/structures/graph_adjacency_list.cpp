@@ -83,35 +83,41 @@ std::list<std::pair<uint32_t, double>> adjacency_list<Directed, Weighted>::edges
     return _graph[start];
 }
 
-template<bool Directed, bool Weighted>
-std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> adjacency_list<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const {
+template <bool Directed, bool Weighted>
+std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>>
+adjacency_list<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const
+{
     std::vector<bool> selected(_graph.size(), false);
-    for(uint32_t vertex : subset) {
+    for (uint32_t vertex : subset) {
         if (vertex >= _graph.size())
             throw std::out_of_range("Degree number");
         selected[vertex] = true;
     }
 
     // determine what vertex in subgraph corresponds to what vertex
-    std::unique_ptr<adjacency_list<Directed, Weighted>> subgraph = std::make_unique<adjacency_list<Directed, Weighted>>();
+    std::unique_ptr<adjacency_list<Directed, Weighted>> subgraph
+        = std::make_unique<adjacency_list<Directed, Weighted>>();
     std::vector<uint32_t> translate_to_sub(_graph.size());
-    for(uint32_t i = 0; i < _graph.size(); ++i) {
+    for (uint32_t i = 0; i < _graph.size(); ++i) {
         if (selected[i]) {
             translate_to_sub[i] = subgraph->order();
             subgraph->add_vertex();
         }
     }
 
-    for(uint32_t i = 0; i < _graph.size(); ++i)
+    for (uint32_t i = 0; i < _graph.size(); ++i)
         if (selected[i])
             for (const _t_edge& edge : _graph[i])
                 if (selected[edge.first])
-                    if constexpr(Directed)
-                        subgraph->force_add(translate_to_sub[i], translate_to_sub[edge.first], edge.second);
+                    if constexpr (Directed)
+                        subgraph->force_add(
+                            translate_to_sub[i], translate_to_sub[edge.first], edge.second);
                     else if (translate_to_sub[i] < translate_to_sub[edge.first])
-                        subgraph->force_add(translate_to_sub[i], translate_to_sub[edge.first], edge.second);
-    
-    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(subgraph.release(), std::move(translate_to_sub));
+                        subgraph->force_add(
+                            translate_to_sub[i], translate_to_sub[edge.first], edge.second);
+
+    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(
+        subgraph.release(), std::move(translate_to_sub));
 }
 
 template <bool Directed, bool Weighted>

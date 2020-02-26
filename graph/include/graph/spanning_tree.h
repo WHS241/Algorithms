@@ -28,10 +28,10 @@ graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, fals
  * Robert Prim
  * Shortest connection networks and some generalizations
  * (1957) doi:10.1002/j.1538-7305.1957.tb01515.x
- * Edsger Dijkstra 
+ * Edsger Dijkstra
  * A note on two problems in connexion with graphs
  * (1959) doi:10.1007/BF01386390
- * 
+ *
  * Θ(V^2) with array
  * Θ(E + V log V) with Fibonacci heap
  */

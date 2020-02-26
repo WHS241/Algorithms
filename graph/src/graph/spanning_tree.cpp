@@ -102,12 +102,12 @@ graph::graph<T, false, true> minimum_spanning_Prim(const graph::graph<T, false, 
 
     for (T& vertex : vertices)
         result.add_vertex(vertex);
-    
+
     // Keep track of the shortest edge to each vertex so far
     std::vector<edge> data_map(vertices.size());
     std::transform(vertices.begin(), vertices.end(), data_map.begin(), [](const T& value) {
         // double max orders unconnected vertices after connected
-        return edge{value, value, std::numeric_limits<double>::max()};
+        return edge { value, value, std::numeric_limits<double>::max() };
     });
 
     // the heap structure used here determines the runtime of the algorithm
