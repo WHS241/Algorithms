@@ -11,15 +11,19 @@ static bool depth_first_helper(const graph::graph<T, Directed, Weighted>& src, c
     F1& on_visit, F2& on_backtrack, std::unordered_map<T, bool>& visited)
 {
     visited[current] = true;
+
+    // account for if the user specified when to terminate early
     if constexpr (std::is_convertible_v<std::result_of_t<F1(T)>, bool>) {
         if (on_visit(current))
             return true;
     } else {
         on_visit(current);
     }
+
     for (const T& neighbor : src.neighbors(current)) {
         if (!visited[neighbor]) {
-            depth_first_helper(src, neighbor, on_visit, on_backtrack, visited);
+            if (depth_first_helper(src, neighbor, on_visit, on_backtrack, visited))
+                return true;
             on_backtrack(current, neighbor);
         }
     }
@@ -36,7 +40,8 @@ static bool depth_first_tree_helper(const graph::graph<T, Directed, Weighted>& s
         on_visit(current);
     }
     for (const T& neighbor : src.neighbors(current)) {
-        depth_first_tree_helper(src, neighbor, on_visit, on_backtrack);
+        if (depth_first_tree_helper(src, neighbor, on_visit, on_backtrack))
+            return true;
         on_backtrack(current, neighbor);
     }
     return false;
