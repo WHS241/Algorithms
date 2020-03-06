@@ -148,6 +148,8 @@ graph<T, Directed, Weighted> graph<T, Directed, Weighted>::generate_induced_subg
     graph<T, Directed, Weighted> result(_type);
     std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> output
         = _impl->induced_subgraph(vertex_subset);
+
+    // make sure the vertices line up with original in the translations
     result._impl.reset(output.first);
     result._reverse_translation.resize(vertex_subset.size());
     for (uint32_t i = 0; i < _reverse_translation.size(); ++i)

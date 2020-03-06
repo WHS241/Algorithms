@@ -128,6 +128,8 @@ void adjacency_list<Directed, Weighted>::set_edge(
         throw std::invalid_argument("Self-loops not allowed");
     if (start >= _graph.size() || dest >= _graph.size())
         throw std::out_of_range("Degree number");
+    if constexpr (!Weighted)
+        cost = 0;
 
     if constexpr (Directed) {
         auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
@@ -164,16 +166,23 @@ void adjacency_list<Directed, Weighted>::force_add(
         throw std::invalid_argument("Self-loops not allowed");
     if (start >= _graph.size() || dest >= _graph.size())
         throw std::out_of_range("Degree number");
+    if constexpr (!Weighted)
+        cost = 0;
 
     if constexpr (Directed) {
         _graph[start].emplace_back(dest, cost);
     } else {
         // exception safety
-        std::list<_t_edge> temp1(_graph[start]), temp2(_graph[dest]);
-        temp1.emplace_back(dest, cost);
-        temp2.emplace_back(start, cost);
-        _graph[start] = std::move(temp1);
-        _graph[dest] = std::move(temp2);
+        bool added_to_start = false;
+        try {
+            _graph[start].emplace_back(dest, cost);
+            added_to_start = true;
+            _graph[dest].emplace_back(start, cost);
+        } catch (...) {
+            if (added_to_start)
+                _graph[start].pop_back();
+            throw;
+        }
     }
 }
 

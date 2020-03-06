@@ -17,7 +17,7 @@ public:
     explicit red_black_tree(Compare comp);
 
     template <typename It, typename _Compare = Compare,
-        typename _Requires = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+        typename _Requires = std::enable_if_t<std::is_default_constructible_v<_Compare>>>
     red_black_tree(It first, It last);
     template <typename It> red_black_tree(It first, It last, Compare comp);
 

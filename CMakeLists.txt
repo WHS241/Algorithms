@@ -25,6 +25,7 @@ include(algebra.cmake)
 include(sequence.cmake)
 include(structures.cmake)
 include(graph.cmake)
+include(approx.cmake)
 
 set(SOURCE_FILES
         testing/main.cpp
@@ -52,3 +53,6 @@ target_link_libraries(testing sequence ${CMAKE_THREAD_LIBS_INIT})
 
 add_dependencies(testing graph)
 target_link_libraries(testing graph ${CMAKE_THREAD_LIBS_INIT})
+
+add_dependencies(testing approx)
+target_link_libraries(testing approx ${CMAKE_THREAD_LIBS_INIT})

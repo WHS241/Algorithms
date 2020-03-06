@@ -136,12 +136,17 @@ void adjacency_matrix<Directed, Weighted>::set_edge(
 
 template <bool Directed, bool Weighted> uint32_t adjacency_matrix<Directed, Weighted>::add_vertex()
 {
-    _t_graph_rep temp(_graph);
-    for (std::vector<double>& vertex : temp)
-        vertex.push_back(std::numeric_limits<double>::quiet_NaN());
-    temp.emplace_back(_graph.size() + 1, std::numeric_limits<double>::quiet_NaN());
-
-    _graph = std::move(temp);
+    uint32_t old_size = _graph.size();
+    try {
+        for (std::vector<double>& vertex : _graph)
+            vertex.push_back(std::numeric_limits<double>::quiet_NaN());
+        _graph.emplace_back(_graph.size() + 1, std::numeric_limits<double>::quiet_NaN());
+    } catch (...) {
+        for (std::vector<double>& vertex : _graph)
+            if (vertex.size() > old_size)
+                vertex.pop_back();
+        throw;
+    }
     return _graph.size();
 }
 

@@ -1,8 +1,9 @@
 
+#include <unordered_set>
+
 #include <gtest/gtest.h>
 
-#include <graph/bipartite.h>
-
+#include <approx/npc_graph.h>
 #include <structures/graph.h>
 
 #include "generator.h"
@@ -18,84 +19,69 @@ protected:
     }
 };
 
-TEST_F(AlgorithmTest, IdentifyBipartite)
+TEST_F(AlgorithmTest, VertexCoverTest)
 {
     for (uint32_t i = 0; i < 200; ++i) {
-        graph::graph<int, false, false> input = random_bipartite_graph<false>(engine);
-        auto output = graph_alg::verify_bipartite(input);
+        graph::graph<uint32_t, false, false> input(graph::adj_list);
+        std::uniform_int_distribution<uint32_t> size_gen(1, 100);
+        uint32_t graph_size = size_gen(engine);
+        for (uint32_t j = 0; j < graph_size; ++j) {
+            input.add_vertex(j);
+        }
+        std::uniform_int_distribution<uint32_t> cover_gen(1, graph_size);
+        uint32_t max_cover_size
+            = cover_gen(engine); // may not be minimal, but certainly an upper bound
+        std::unordered_set<uint32_t> cover_members;
+        for (uint32_t j = 0; j < max_cover_size; ++j)
+            cover_members.insert(cover_gen(engine) - 1);
 
-        EXPECT_EQ(output.first.size() + output.second.size(), input.order());
-        for (int u : output.first) {
-            EXPECT_EQ(
-                output.second.find(u), output.second.end()); // each vertex is in exactly one set
-            for (int v : output.first)
-                if (u != v)
-                    EXPECT_FALSE(input.has_edge(u, v)); // each half is an independent set
+        for (uint32_t v : cover_members) {
+            uint32_t neighbor = cover_gen(engine) - 1;
+            if (neighbor != v)
+                input.set_edge(v, neighbor);
         }
 
-        // Repeat with second set; don't need to check against first set since we would have found
-        // it already
-        for (int u : output.second)
-            for (int v : output.second)
-                if (u != v)
-                    EXPECT_FALSE(input.has_edge(u, v));
+        std::list<uint32_t> output = approx::vertex_cover_edge_double(input);
+        EXPECT_LE(output.size(), 2 * cover_members.size());
     }
 }
 
-TEST_F(AlgorithmTest, BipartiteFailTest)
-{
-    // Test graphs with odd cycles - should fail
-    for (uint32_t i = 0; i < 200; ++i) {
-        graph::graph<int, false, false> input = random_bipartite_graph<false>(engine);
-
-        // pick a start for odd cycle
-        // need a vertex with multiple children. If not found, we need a new graph
-        int start = -1;
-        for (uint32_t i = 0; i < input.order() && start == -1; ++i)
-            if (input.degree(i) > 1)
-                start = i;
-
-        while (start == -1) {
-            input = random_bipartite_graph<false>(engine);
-            for (uint32_t i = 0; i < input.order() && start == -1; ++i)
-                if (input.degree(i) > 1)
-                    start = i;
-        }
-
-        // Create the odd cycle: link two of the neighbors together
-        std::list<int> neighbors = input.neighbors(start);
-        input.force_add(neighbors.front(), neighbors.back());
-
-        auto output = graph_alg::verify_bipartite(input);
-        EXPECT_EQ(output.first.size(), 0);
-        EXPECT_EQ(output.second.size(), 0);
-    }
-}
-
-TEST_F(AlgorithmTest, MaxBipartiteMatch)
+TEST_F(AlgorithmTest, WigdersonTest)
 {
     for (uint32_t i = 0; i < 200; ++i) {
-        graph::graph<int, false, false> input = random_bipartite_graph<false>(engine);
-
-        graph::graph<int, false, false> matched_graph(graph::adj_list);
-        for (int v : input.vertices())
-            matched_graph.add_vertex(v);
-        std::list<std::pair<int, int>> result
-            = graph_alg::maximum_bipartite_matching(input, -1, -2);
-        for (std::pair<int, int> match : result) {
-            EXPECT_TRUE(input.has_edge(match.first, match.second));
-            matched_graph.force_add(match.first, match.second);
+        graph::graph<uint32_t, false, false> input(graph::adj_list);
+        std::uniform_int_distribution<uint32_t> size_gen(1, 200);
+        uint32_t graph_size = size_gen(engine);
+        std::vector<uint32_t> sets[3];
+        std::uniform_int_distribution<uint32_t> color_pick(0, 2);
+        for (uint32_t j = 0; j < graph_size; ++j) {
+            input.add_vertex(j);
+            sets[color_pick(engine)].push_back(j);
         }
 
-        for (int v : input.vertices()) {
-            EXPECT_LE(matched_graph.degree(v), 1);
+        // wire everything up
+        std::uniform_int_distribution<uint32_t> colored_chooser[]
+            = { std::uniform_int_distribution<uint32_t>(0, sets[0].size() - 1),
+                  std::uniform_int_distribution<uint32_t>(0, sets[1].size() - 1),
+                  std::uniform_int_distribution<uint32_t>(0, sets[2].size() - 1) };
 
-            // not a perfect maximum check, but works: make sure we don't have an obvious addition.
-            if (matched_graph.degree(v) == 0) {
-                for (int w : input.neighbors(v)) {
-                    EXPECT_EQ(matched_graph.degree(w), 1);
+        for (uint32_t j = 0; j < 3; ++j) {
+            for (uint32_t v : sets[j]) {
+                for (uint32_t k = 0; k < 3; ++k) {
+                    if (j != k && !sets[k].empty()) {
+                        for (uint32_t m = 0; m < sets[j].size(); ++m) { // make this dense, I guess
+                            input.set_edge(v, sets[k][colored_chooser[k](engine)]);
+                        }
+                    }
                 }
             }
         }
+
+        std::unordered_map<uint32_t, uint32_t> result = approx::three_color_Wigderson(input);
+
+        // verify coloring
+        for (uint32_t u : input.vertices())
+            for (uint32_t v : input.neighbors(u))
+                EXPECT_NE(result.at(u), result.at(v));
     }
 }
