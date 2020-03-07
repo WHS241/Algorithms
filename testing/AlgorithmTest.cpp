@@ -4,7 +4,8 @@
 #include <gtest/gtest.h>
 
 #include <approx/npc_graph.h>
-#include <structures/graph.h>
+#include <structures/van_Emde_Boas.h>
+#include <structures/vEB_iterator.h>
 
 #include "generator.h"
 
@@ -19,69 +20,31 @@ protected:
     }
 };
 
-TEST_F(AlgorithmTest, VertexCoverTest)
-{
-    for (uint32_t i = 0; i < 200; ++i) {
-        graph::graph<uint32_t, false, false> input(graph::adj_list);
-        std::uniform_int_distribution<uint32_t> size_gen(1, 100);
-        uint32_t graph_size = size_gen(engine);
-        for (uint32_t j = 0; j < graph_size; ++j) {
-            input.add_vertex(j);
+TEST_F(AlgorithmTest, vanEmdeBoasTest) {
+    for(uint32_t i = 0; i < 2000; ++i) {
+        std::uniform_int_distribution<uint32_t> size_gen(1, 20000);
+        uint32_t tree_size = size_gen(engine);
+        van_Emde_Boas_tree tree(tree_size);
+        std::vector<bool> included(tree_size, false);
+        std::uniform_int_distribution<uint32_t> data_gen(0, tree_size - 1);
+        for(uint32_t j = 0; j < tree_size; ++j) {
+            uint32_t next = data_gen(engine);
+            tree.insert(next);
+            included[next] = true;
         }
-        std::uniform_int_distribution<uint32_t> cover_gen(1, graph_size);
-        uint32_t max_cover_size
-            = cover_gen(engine); // may not be minimal, but certainly an upper bound
-        std::unordered_set<uint32_t> cover_members;
-        for (uint32_t j = 0; j < max_cover_size; ++j)
-            cover_members.insert(cover_gen(engine) - 1);
-
-        for (uint32_t v : cover_members) {
-            uint32_t neighbor = cover_gen(engine) - 1;
-            if (neighbor != v)
-                input.set_edge(v, neighbor);
+        for(uint32_t j = 0; j < tree_size; ++j) {
+            EXPECT_EQ(included[j], tree.contains(j));
         }
-
-        std::list<uint32_t> output = approx::vertex_cover_edge_double(input);
-        EXPECT_LE(output.size(), 2 * cover_members.size());
-    }
-}
-
-TEST_F(AlgorithmTest, WigdersonTest)
-{
-    for (uint32_t i = 0; i < 200; ++i) {
-        graph::graph<uint32_t, false, false> input(graph::adj_list);
-        std::uniform_int_distribution<uint32_t> size_gen(1, 200);
-        uint32_t graph_size = size_gen(engine);
-        std::vector<uint32_t> sets[3];
-        std::uniform_int_distribution<uint32_t> color_pick(0, 2);
-        for (uint32_t j = 0; j < graph_size; ++j) {
-            input.add_vertex(j);
-            sets[color_pick(engine)].push_back(j);
+        std::list<uint32_t> values;
+        std::copy(tree.begin(), tree.end(), std::back_inserter(values));
+        for(auto it = ++values.begin(); it != values.end(); ++it) {
+            auto it2 = it;
+            --it2;
+            EXPECT_LT(*it2, *it);
         }
 
-        // wire everything up
-        std::uniform_int_distribution<uint32_t> colored_chooser[]
-            = { std::uniform_int_distribution<uint32_t>(0, sets[0].size() - 1),
-                  std::uniform_int_distribution<uint32_t>(0, sets[1].size() - 1),
-                  std::uniform_int_distribution<uint32_t>(0, sets[2].size() - 1) };
-
-        for (uint32_t j = 0; j < 3; ++j) {
-            for (uint32_t v : sets[j]) {
-                for (uint32_t k = 0; k < 3; ++k) {
-                    if (j != k && !sets[k].empty()) {
-                        for (uint32_t m = 0; m < sets[j].size(); ++m) { // make this dense, I guess
-                            input.set_edge(v, sets[k][colored_chooser[k](engine)]);
-                        }
-                    }
-                }
-            }
-        }
-
-        std::unordered_map<uint32_t, uint32_t> result = approx::three_color_Wigderson(input);
-
-        // verify coloring
-        for (uint32_t u : input.vertices())
-            for (uint32_t v : input.neighbors(u))
-                EXPECT_NE(result.at(u), result.at(v));
+        std::list<uint32_t> rev_values(values);
+        std::copy(std::make_reverse_iterator(tree.end()), std::make_reverse_iterator(tree.begin()), rev_values.begin());
+        EXPECT_TRUE(std::equal(rev_values.rbegin(), rev_values.rend(), values.begin(), values.end()));
     }
 }
