@@ -39,6 +39,6 @@ std::list<std::pair<T, T>> maximum_bipartite_matching(
     const graph::graph<T, false, Weighted>& input, const T& dummy_1, const T& dummy_2);
 }
 
-#include "../../src/graph/bipartite.cpp"
+#include "../../src/graph/bipartite.tpp"
 
 #endif // GRAPH_BIPARTITE_H

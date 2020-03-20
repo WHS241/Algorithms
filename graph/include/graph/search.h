@@ -62,6 +62,6 @@ template <typename T, bool Weighted>
 std::vector<T> topological_sort(const graph::graph<T, true, Weighted>& src);
 } // namespace graph_alg
 
-#include <src/graph/search.cpp>
+#include "../../src/graph/search.tpp"
 
 #endif // GRAPH_TRAVERSAL_H

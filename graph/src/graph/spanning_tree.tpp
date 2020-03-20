@@ -79,7 +79,7 @@ graph::graph<T, false, true> minimum_spanning_Boruvka(const graph::graph<T, fals
                 != tree_components.find(edge_to_insert.second.terminal)) {
                 result.force_add(edge_to_insert.second.start, edge_to_insert.second.terminal,
                     edge_to_insert.second.weight);
-                tree_components.union_(edge_to_insert.second.start, edge_to_insert.second.terminal);
+                tree_components.union_sets(edge_to_insert.second.start, edge_to_insert.second.terminal);
             }
         }
         to_add.clear();
@@ -200,7 +200,7 @@ graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, fals
         T root_b = components.find(current.terminal);
         if (root_a != root_b) {
             result.force_add(current.start, current.terminal, current.weight);
-            components.union_(root_a, root_b);
+            components.union_sets(root_a, root_b);
         }
     }
 

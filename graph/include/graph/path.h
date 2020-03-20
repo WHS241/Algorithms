@@ -4,7 +4,7 @@
 #include <list>
 #include <unordered_map>
 namespace graph {
-template <typename T, bool Directed, bool Weighted> class graph;
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual> class graph;
 }
 
 /*
@@ -130,6 +130,6 @@ std::unordered_map<T, std::unordered_map<T, std::pair<double, T>>> Johnson_all_p
     const graph::graph<T, true, true>& src, const T& new_vertex);
 } // namespace graph_alg
 
-#include <src/graph/path.cpp>
+#include "../../src/graph/path.tpp"
 
 #endif // GRAPH_PATH_H

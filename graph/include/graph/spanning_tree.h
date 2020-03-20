@@ -48,6 +48,6 @@ template <typename T>
 graph::graph<T, false, true> minimum_spanning_Kruskal(const graph::graph<T, false, true>& input);
 }
 
-#include <src/graph/spanning_tree.cpp>
+#include "../../src/graph/spanning_tree.tpp"
 
 #endif // GRAPH_ALG_SPANNING_TREE_H

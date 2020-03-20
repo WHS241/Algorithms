@@ -66,6 +66,6 @@ std::list<cut_edge<T>> minimum_cut(
 
 }
 
-#include <src/graph/max_flow_min_cut.cpp>
+#include "../../src/graph/max_flow_min_cut.tpp"
 
 #endif // GRAPH_ALG_MIN_FLOW_H

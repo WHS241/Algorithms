@@ -34,6 +34,6 @@ std::list<std::unordered_set<T>> strongly_connected_components(
     const graph::graph<T, true, Weighted>& src);
 } // namespace GraphAlg
 
-#include <src/graph/components.cpp>
+#include "../../src/graph/components.tpp"
 
 #endif // GRAPH_COMPONENTS_H
