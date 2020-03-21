@@ -8,9 +8,9 @@
 #include <memory>
 
 namespace graph {
-template <bool Directed, bool Weighted>
-const impl<Directed, Weighted>& adjacency_list<Directed, Weighted>::copy_from(
-    const impl<Directed, Weighted>& src)
+template <bool Directed, bool Weighted, typename EdgeType>
+const impl<Directed, Weighted, EdgeType>& adjacency_list<Directed, Weighted, EdgeType>::copy_from(
+    const impl<Directed, Weighted, EdgeType>& src)
 {
     auto cast = dynamic_cast<const adjacency_list*>(&src);
     if (cast) {
@@ -27,55 +27,49 @@ const impl<Directed, Weighted>& adjacency_list<Directed, Weighted>::copy_from(
     return *this;
 }
 
-template <bool Directed, bool Weighted>
-uint32_t adjacency_list<Directed, Weighted>::order() const noexcept
+template <bool Directed, bool Weighted, typename EdgeType>
+uint32_t adjacency_list<Directed, Weighted, EdgeType>::order() const noexcept
 {
     return _graph.size();
 }
 
-template <bool Directed, bool Weighted>
-bool adjacency_list<Directed, Weighted>::has_edge(const uint32_t& start, const uint32_t& dest) const
+template <bool Directed, bool Weighted, typename EdgeType>
+bool adjacency_list<Directed, Weighted, EdgeType>::has_edge(const uint32_t& start, const uint32_t& dest) const
     noexcept
 {
-    if (start >= _graph.size() || dest >= _graph.size())
-        return false;
     return std::find_if(_graph[start].cbegin(), _graph[start].cend(), [&dest](const _t_edge& edge) {
         return edge.first == dest;
     }) != _graph[start].cend();
 }
 
-template <bool Directed, bool Weighted>
-double adjacency_list<Directed, Weighted>::edge_cost(
-    const uint32_t& start, const uint32_t& dest) const noexcept
+template <bool Directed, bool Weighted, typename EdgeType>
+EdgeType adjacency_list<Directed, Weighted, EdgeType>::edge_cost(
+    const uint32_t& start, const uint32_t& dest) const
 {
-    if (start >= _graph.size() || dest >= _graph.size())
-        return std::numeric_limits<double>::quiet_NaN();
     auto it = std::find_if(_graph[start].cbegin(), _graph[start].cend(),
         [&dest](const _t_edge& edge) { return edge.first == dest; });
-    return (it == _graph[start].cend()) ? std::numeric_limits<double>::quiet_NaN() : it->second;
+    if (it == _graph[start].cend()) 
+        throw std::domain_error("No edge");
+    return it->second;
 }
 
-template <bool Directed, bool Weighted>
-uint32_t adjacency_list<Directed, Weighted>::degree(const uint32_t& start) const
+template <bool Directed, bool Weighted, typename EdgeType>
+uint32_t adjacency_list<Directed, Weighted, EdgeType>::degree(const uint32_t& start) const
 {
-    if (start >= _graph.size())
-        throw std::out_of_range("Degree number");
     return _graph[start].size();
 }
 
-template <bool Directed, bool Weighted>
-std::list<uint32_t> adjacency_list<Directed, Weighted>::neighbors(const uint32_t& start) const
+template <bool Directed, bool Weighted, typename EdgeType>
+std::list<uint32_t> adjacency_list<Directed, Weighted, EdgeType>::neighbors(const uint32_t& start) const
 {
-    if (start >= _graph.size())
-        throw std::out_of_range("Degree number");
     std::list<uint32_t> result;
     std::transform(_graph[start].cbegin(), _graph[start].cend(), std::back_inserter(result),
         [](const _t_edge& edge) { return edge.first; });
     return result;
 }
 
-template <bool Directed, bool Weighted>
-std::list<std::pair<uint32_t, double>> adjacency_list<Directed, Weighted>::edges(
+template <bool Directed, bool Weighted, typename EdgeType>
+std::list<std::pair<uint32_t, EdgeType>> adjacency_list<Directed, Weighted, EdgeType>::edges(
     const uint32_t& start) const
 {
     if (start >= _graph.size())
@@ -83,9 +77,9 @@ std::list<std::pair<uint32_t, double>> adjacency_list<Directed, Weighted>::edges
     return _graph[start];
 }
 
-template <bool Directed, bool Weighted>
-std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>>
-adjacency_list<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& subset) const
+template <bool Directed, bool Weighted, typename EdgeType>
+std::pair<impl<Directed, Weighted, EdgeType>*, std::vector<uint32_t>>
+adjacency_list<Directed, Weighted, EdgeType>::induced_subgraph(const std::list<uint32_t>& subset) const
 {
     std::vector<bool> selected(_graph.size(), false);
     for (uint32_t vertex : subset) {
@@ -95,8 +89,8 @@ adjacency_list<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& 
     }
 
     // determine what vertex in subgraph corresponds to what vertex
-    std::unique_ptr<adjacency_list<Directed, Weighted>> subgraph
-        = std::make_unique<adjacency_list<Directed, Weighted>>();
+    std::unique_ptr<adjacency_list<Directed, Weighted, EdgeType>> subgraph
+        = std::make_unique<adjacency_list<Directed, Weighted, EdgeType>>();
     std::vector<uint32_t> translate_to_sub(_graph.size());
     for (uint32_t i = 0; i < _graph.size(); ++i) {
         if (selected[i]) {
@@ -116,21 +110,14 @@ adjacency_list<Directed, Weighted>::induced_subgraph(const std::list<uint32_t>& 
                         subgraph->force_add(
                             translate_to_sub[i], translate_to_sub[edge.first], edge.second);
 
-    return std::make_pair<impl<Directed, Weighted>*, std::vector<uint32_t>>(
+    return std::make_pair<impl<Directed, Weighted, EdgeType>*, std::vector<uint32_t>>(
         subgraph.release(), std::move(translate_to_sub));
 }
 
-template <bool Directed, bool Weighted>
-void adjacency_list<Directed, Weighted>::set_edge(
-    const uint32_t& start, const uint32_t& dest, double cost)
+template <bool Directed, bool Weighted, typename EdgeType>
+void adjacency_list<Directed, Weighted, EdgeType>::set_edge(
+    const uint32_t& start, const uint32_t& dest, const EdgeType& cost)
 {
-    if (start == dest)
-        throw std::invalid_argument("Self-loops not allowed");
-    if (start >= _graph.size() || dest >= _graph.size())
-        throw std::out_of_range("Degree number");
-    if constexpr (!Weighted)
-        cost = 0;
-
     if constexpr (Directed) {
         auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
             [&dest](const _t_edge& edge) { return edge.first == dest; });
@@ -158,17 +145,10 @@ void adjacency_list<Directed, Weighted>::set_edge(
     }
 }
 
-template <bool Directed, bool Weighted>
-void adjacency_list<Directed, Weighted>::force_add(
-    const uint32_t& start, const uint32_t& dest, double cost)
+template <bool Directed, bool Weighted, typename EdgeType>
+void adjacency_list<Directed, Weighted, EdgeType>::force_add(
+    const uint32_t& start, const uint32_t& dest, const EdgeType& cost)
 {
-    if (start == dest)
-        throw std::invalid_argument("Self-loops not allowed");
-    if (start >= _graph.size() || dest >= _graph.size())
-        throw std::out_of_range("Degree number");
-    if constexpr (!Weighted)
-        cost = 0;
-
     if constexpr (Directed) {
         _graph[start].emplace_back(dest, cost);
     } else {
@@ -186,18 +166,15 @@ void adjacency_list<Directed, Weighted>::force_add(
     }
 }
 
-template <bool Directed, bool Weighted> uint32_t adjacency_list<Directed, Weighted>::add_vertex()
+template <bool Directed, bool Weighted, typename EdgeType> uint32_t adjacency_list<Directed, Weighted, EdgeType>::add_vertex()
 {
     _graph.emplace_back();
     return _graph.size();
 }
 
-template <bool Directed, bool Weighted>
-void adjacency_list<Directed, Weighted>::remove_edge(const uint32_t& start, const uint32_t& dest)
+template <bool Directed, bool Weighted, typename EdgeType>
+void adjacency_list<Directed, Weighted, EdgeType>::remove_edge(const uint32_t& start, const uint32_t& dest)
 {
-    if (start >= _graph.size() || dest >= _graph.size())
-        throw std::out_of_range("Degree number");
-
     auto it = std::find_if(_graph[start].begin(), _graph[start].end(),
         [&dest](const _t_edge& edge) { return edge.first == dest; });
     if (it != _graph[start].end()) {
@@ -210,12 +187,9 @@ void adjacency_list<Directed, Weighted>::remove_edge(const uint32_t& start, cons
     }
 }
 
-template <bool Directed, bool Weighted>
-void adjacency_list<Directed, Weighted>::isolate(const uint32_t& target)
+template <bool Directed, bool Weighted, typename EdgeType>
+void adjacency_list<Directed, Weighted, EdgeType>::isolate(const uint32_t& target)
 {
-    if (target >= _graph.size())
-        throw std::out_of_range("Degree number");
-
     if constexpr (!Directed) {
         std::list<_t_edge> edges = _graph[target];
         for (const _t_edge& e : edges)
@@ -226,12 +200,9 @@ void adjacency_list<Directed, Weighted>::isolate(const uint32_t& target)
     _graph[target].clear();
 }
 
-template <bool Directed, bool Weighted>
-void adjacency_list<Directed, Weighted>::remove(const uint32_t& to_remove)
+template <bool Directed, bool Weighted, typename EdgeType>
+void adjacency_list<Directed, Weighted, EdgeType>::remove(const uint32_t& to_remove)
 {
-    if (to_remove >= _graph.size())
-        throw std::out_of_range("Degree number");
-
     std::swap(_graph[to_remove], _graph.back());
     for (uint32_t i = 0; i < _graph.size() - 1; ++i) {
         auto it = _graph[i].begin();
@@ -248,7 +219,7 @@ void adjacency_list<Directed, Weighted>::remove(const uint32_t& to_remove)
     _graph.pop_back();
 }
 
-template <bool Directed, bool Weighted> void adjacency_list<Directed, Weighted>::clear() noexcept
+template <bool Directed, bool Weighted, typename EdgeType> void adjacency_list<Directed, Weighted, EdgeType>::clear() noexcept
 {
     _graph.clear();
 }

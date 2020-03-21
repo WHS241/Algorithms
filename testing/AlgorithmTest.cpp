@@ -3,9 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <approx/npc_graph.h>
-#include <structures/van_Emde_Boas.h>
-#include <structures/vEB_iterator.h>
+#include <structures/graph.h>
+#include <graph/closure.h>
 
 #include "generator.h"
 
@@ -20,31 +19,38 @@ protected:
     }
 };
 
-TEST_F(AlgorithmTest, vanEmdeBoasTest) {
-    for(uint32_t i = 0; i < 2000; ++i) {
-        std::uniform_int_distribution<uint32_t> size_gen(1, 20000);
-        uint32_t tree_size = size_gen(engine);
-        van_Emde_Boas_tree tree(tree_size);
-        std::vector<bool> included(tree_size, false);
-        std::uniform_int_distribution<uint32_t> data_gen(0, tree_size - 1);
-        for(uint32_t j = 0; j < tree_size; ++j) {
-            uint32_t next = data_gen(engine);
-            tree.insert(next);
-            included[next] = true;
+TEST_F(AlgorithmTest, TransitiveClosureTest) {
+    for(uint32_t i = 0; i < 100; ++i) {
+        graph::graph<int, false, false> input = random_graph<false, false>(engine);
+        graph::graph<int, false, false> closure = graph_alg::transitive_closure(input);
+        for(int& v : input.vertices()) {
+            graph_alg::depth_first(input, v, [&closure, &v](int u) {
+                if(v != u)
+                    EXPECT_TRUE(closure.has_edge(u, v));
+            },[](int, int){});
         }
-        for(uint32_t j = 0; j < tree_size; ++j) {
-            EXPECT_EQ(included[j], tree.contains(j));
-        }
-        std::list<uint32_t> values;
-        std::copy(tree.begin(), tree.end(), std::back_inserter(values));
-        for(auto it = ++values.begin(); it != values.end(); ++it) {
-            auto it2 = it;
-            --it2;
-            EXPECT_LT(*it2, *it);
-        }
-
-        std::list<uint32_t> rev_values(values);
-        std::copy(std::make_reverse_iterator(tree.end()), std::make_reverse_iterator(tree.begin()), rev_values.begin());
-        EXPECT_TRUE(std::equal(rev_values.rbegin(), rev_values.rend(), values.begin(), values.end()));
     }
+}
+
+TEST_F(AlgorithmTest, ChvatalBondyTest) {
+    for(uint32_t i = 0; i < 100; ++i) {
+        graph::graph<int, false, false> input = random_graph<false, false>(engine);
+        uint32_t highest_degree = 0;
+        for(int v : input.vertices())
+            highest_degree = std::max(highest_degree, input.degree(v));
+        
+        for(uint32_t j = 0; j < highest_degree; ++j) {
+            graph::graph<int, false, false> result = graph_alg::Chvatal_Bondy_closure(input, j);
+
+            for(int u : input.vertices()) {
+                for(int v : input.vertices()) {
+                    if(u != v && result.degree(u) + result.degree(v) >= j)
+                        EXPECT_TRUE(result.has_edge(u, v));
+                    else
+                        EXPECT_EQ(input.has_edge(u, v), result.has_edge(u, v));
+                }
+            }
+        }
+    }
+
 }

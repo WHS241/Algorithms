@@ -12,7 +12,7 @@ namespace tree {
  * An algorithm for the organization of information
  * (1962) Soviet Doklady
  */
-template <typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<T>>
 class AVL_tree : public binary_search_tree<T, Compare> {
 public:
     AVL_tree() = default;

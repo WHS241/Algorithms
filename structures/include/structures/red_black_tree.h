@@ -10,7 +10,7 @@ namespace tree {
  * A Dichromatic Framework for Balanced Trees
  * (1978) doi:10.1109/SFCS.1978.3
  */
-template <typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<T>>
 class red_black_tree : public binary_search_tree<T, Compare> {
 public:
     red_black_tree() = default;

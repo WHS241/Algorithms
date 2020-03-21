@@ -6,7 +6,7 @@
 namespace tree {
 // A basic Binary Search Tree, with no self-balancing techniques
 // Operations may be Ω(n)
-template <typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<T>>
 class basic_binary_search_tree : public binary_search_tree<T, Compare> {
 public:
     basic_binary_search_tree() = default;

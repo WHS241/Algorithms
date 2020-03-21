@@ -11,8 +11,8 @@
 #include <structures/graph_adjacency_matrix.h>
 
 namespace graph {
-template <typename T, bool Directed, bool Weighted>
-graph<T, Directed, Weighted>::graph(graph_type type)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::graph(graph_type type)
     : _type(type)
     , _translation()
     , _reverse_translation()
@@ -20,8 +20,8 @@ graph<T, Directed, Weighted>::graph(graph_type type)
     _set_empty(type);
 }
 
-template <typename T, bool Directed, bool Weighted>
-graph<T, Directed, Weighted>::graph(const graph<T, Directed, Weighted>& src)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::graph(const graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>& src)
     : _type(src._type)
     , _translation(src._translation)
     , _reverse_translation(src._reverse_translation)
@@ -29,19 +29,19 @@ graph<T, Directed, Weighted>::graph(const graph<T, Directed, Weighted>& src)
     _set_type(_type, src._impl.get());
 }
 
-template <typename T, bool Directed, bool Weighted>
-const graph<T, Directed, Weighted>& graph<T, Directed, Weighted>::operator=(
-    const graph<T, Directed, Weighted>& rhs)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+const graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>& graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::operator=(
+    const graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>& rhs)
 {
     if (this != &rhs) {
-        graph<T, Directed, Weighted> temp(rhs);
+        graph temp(rhs);
         *this = std::move(temp);
     }
     return *this;
 }
 
-template <typename T, bool Directed, bool Weighted>
-graph<T, Directed, Weighted>::graph(graph<T, Directed, Weighted>&& src) noexcept
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::graph(graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>&& src) noexcept
     : _type()
     , _impl()
     , _translation()
@@ -50,9 +50,9 @@ graph<T, Directed, Weighted>::graph(graph<T, Directed, Weighted>&& src) noexcept
     *this = std::move(src);
 }
 
-template <typename T, bool Directed, bool Weighted>
-const graph<T, Directed, Weighted>& graph<T, Directed, Weighted>::operator=(
-    graph<T, Directed, Weighted>&& rhs) noexcept
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+const graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>& graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::operator=(
+    graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>&& rhs) noexcept
 {
     if (this != &rhs) {
         _impl.reset();
@@ -64,60 +64,62 @@ const graph<T, Directed, Weighted>& graph<T, Directed, Weighted>::operator=(
     return *this;
 }
 
-template <typename T, bool Directed, bool Weighted>
-uint32_t graph<T, Directed, Weighted>::order() const noexcept
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+uint32_t graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::order() const noexcept
 {
     return _impl->order();
 }
 
-template <typename T, bool Directed, bool Weighted>
-bool graph<T, Directed, Weighted>::has_edge(const T& start, const T& dest) const noexcept
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+bool graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::has_vertex(const VertexType& v) const noexcept
 {
-    if (_translation.find(start) == _translation.end()
-        || _translation.find(dest) == _translation.end())
-        return false;
+    return _translation.find(v) != _translation.end();
+}
 
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+bool graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::has_edge(const VertexType& start, const VertexType& dest) const
+{
     return _impl->has_edge(_translation.at(start), _translation.at(dest));
 }
 
-template <typename T, bool Directed, bool Weighted>
-double graph<T, Directed, Weighted>::edge_cost(const T& start, const T& dest) const
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+EdgeType graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::edge_cost(const VertexType& start, const VertexType& dest) const
 {
     return _impl->edge_cost(_translation.at(start), _translation.at(dest));
 }
 
-template <typename T, bool Directed, bool Weighted>
-uint32_t graph<T, Directed, Weighted>::degree(const T& vertex) const
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+uint32_t graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::degree(const VertexType& vertex) const
 {
     return _impl->degree(_translation.at(vertex));
 }
 
-template <typename T, bool Directed, bool Weighted>
-std::list<T> graph<T, Directed, Weighted>::neighbors(const T& start) const
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+std::list<VertexType> graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::neighbors(const VertexType& start) const
 {
-    auto representation = _impl->neighbors(_translation.at(start));
-    std::list<T> result;
+    std::list<uint32_t> representation = _impl->neighbors(_translation.at(start));
+    std::list<VertexType> result;
     std::transform(representation.begin(), representation.end(), std::back_inserter(result),
         [this](uint32_t& x) { return _reverse_translation[x]; });
     return result;
 }
 
-template <typename T, bool Directed, bool Weighted>
-std::list<std::pair<T, double>> graph<T, Directed, Weighted>::edges(const T& src) const
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+std::list<std::pair<VertexType, EdgeType>> graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::edges(const VertexType& src) const
 {
-    auto representation = _impl->edges(_translation.at(src));
-    std::list<std::pair<T, double>> result;
+    std::list<std::pair<uint32_t, EdgeType>> representation = _impl->edges(_translation.at(src));
+    std::list<std::pair<VertexType, EdgeType>> result;
     std::transform(representation.begin(), representation.end(), std::back_inserter(result),
-        [this](std::pair<uint32_t, double>& edge) {
+        [this](std::pair<uint32_t, EdgeType>& edge) {
             return std::make_pair(_reverse_translation[edge.first], edge.second);
         });
     return result;
 }
 
-template <typename T, bool Directed, bool Weighted>
-graph<T, Directed, Weighted> graph<T, Directed, Weighted>::convert(graph_type type) const
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual> graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::convert(graph_type type) const
 {
-    graph<T, Directed, Weighted> result(type);
+    graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual> result(type);
     result._translation = this->_translation;
     result._reverse_translation = this->_reverse_translation;
     result._set_type(type, this->_impl.get());
@@ -125,28 +127,28 @@ graph<T, Directed, Weighted> graph<T, Directed, Weighted>::convert(graph_type ty
     return result;
 }
 
-template <typename T, bool Directed, bool Weighted>
-std::vector<T> graph<T, Directed, Weighted>::vertices() const
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+std::vector<VertexType> graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::vertices() const
 {
     return _reverse_translation;
 }
 
-template <typename T, bool Directed, bool Weighted>
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
 template <typename InputIterator, typename _Requires>
-graph<T, Directed, Weighted> graph<T, Directed, Weighted>::generate_induced_subgraph(
+graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual> graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::generate_induced_subgraph(
     InputIterator first, InputIterator last) const
 {
     // get this in sorted order for impl
     std::vector<bool> selected(_reverse_translation.size(), false);
     std::for_each(first, last,
-        [this, &selected](const T& vertex) { selected[_translation.at(vertex)] = true; });
+        [this, &selected](const VertexType& vertex) { selected[_translation.at(vertex)] = true; });
 
     std::list<uint32_t> vertex_subset;
     for (uint32_t i = 0; i < _reverse_translation.size(); ++i)
         if (selected[i])
             vertex_subset.push_back(i);
-    graph<T, Directed, Weighted> result(_type);
-    std::pair<impl<Directed, Weighted>*, std::vector<uint32_t>> output
+    graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual> result(_type);
+    std::pair<impl<Directed, Weighted, EdgeType>*, std::vector<uint32_t>> output
         = _impl->induced_subgraph(vertex_subset);
 
     // make sure the vertices line up with original in the translations
@@ -160,28 +162,27 @@ graph<T, Directed, Weighted> graph<T, Directed, Weighted>::generate_induced_subg
     return result;
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::set_edge(const T& start, const T& dest, double cost)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::set_edge(const VertexType& start, const VertexType& dest, const EdgeType& cost)
 {
-    if (start == dest)
-        throw std::invalid_argument("Self-loops not allowed");
-    _impl->set_edge(_translation.at(start), _translation.at(dest), cost);
+    _check_self_loop(start, dest);
+    
+    _impl->set_edge(_translation.at(start), _translation.at(dest), Weighted ? cost : EdgeType());
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::force_add(const T& start, const T& dest, double cost)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::force_add(const VertexType& start, const VertexType& dest, const EdgeType& cost)
 {
-    if (start == dest)
-        throw std::invalid_argument("Self-loops not allowed");
+    _check_self_loop(start, dest);
 
     switch (_type) {
     case adj_matrix:
-        _impl->set_edge(_translation.at(start), _translation.at(dest), cost);
+        _impl->set_edge(_translation.at(start), _translation.at(dest), Weighted ? cost : EdgeType());
         break;
 
     case adj_list:
-        dynamic_cast<adjacency_list<Directed, Weighted>*>(_impl.get())
-            ->force_add(_translation.at(start), _translation.at(dest), cost);
+        dynamic_cast<adjacency_list<Directed, Weighted, EdgeType>*>(_impl.get())
+            ->force_add(_translation.at(start), _translation.at(dest), Weighted ? cost : EdgeType());
         break;
 
     default:
@@ -189,14 +190,14 @@ void graph<T, Directed, Weighted>::force_add(const T& start, const T& dest, doub
     }
 }
 
-template <typename T, bool Directed, bool Weighted>
-uint32_t graph<T, Directed, Weighted>::add_vertex(const T& name)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+uint32_t graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::add_vertex(const VertexType& name)
 {
     if (_translation.find(name) != _translation.end())
         throw std::invalid_argument("Already exists in graph");
 
-    auto tempTranslate(_translation);
-    auto tempReverse(_reverse_translation);
+    std::unordered_map<VertexType, uint32_t, Hash, KeyEqual> tempTranslate(_translation);
+    std::vector<VertexType> tempReverse(_reverse_translation);
     tempTranslate[name] = tempReverse.size();
     tempReverse.push_back(name);
     uint32_t result = _impl->add_vertex();
@@ -205,45 +206,49 @@ uint32_t graph<T, Directed, Weighted>::add_vertex(const T& name)
     return result;
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::remove_edge(const T& start, const T& dest)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::remove_edge(const VertexType& start, const VertexType& dest)
 {
     _impl->remove_edge(_translation.at(start), _translation.at(dest));
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::isolate(const T& start)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::isolate(const VertexType& start)
 {
     _impl->isolate(_translation.at(start));
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::remove(const T& to_remove)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::remove(const VertexType& to_remove)
 {
-    if (_translation.find(to_remove) == _translation.end())
+    if (!has_vertex(to_remove))
         return;
 
-    auto temp_translate(_translation);
-    auto temp_reverse(_reverse_translation);
-    temp_translate[_reverse_translation.back()] = _translation[to_remove];
-    temp_reverse[_translation[to_remove]] = temp_reverse.back();
+    std::unordered_map<VertexType, uint32_t, Hash, KeyEqual> temp_translate(_translation);
+    std::vector<VertexType> temp_reverse(_reverse_translation);
+    
+    // impl removes vertex by swapping it with the back; we need to update our maps
+    temp_translate[_reverse_translation.back()] = std::move(_translation[to_remove]);
+    temp_reverse[_translation[to_remove]] = std::move(temp_reverse.back());
     temp_translate.erase(to_remove);
     temp_reverse.pop_back();
+
     _impl->remove(_translation[to_remove]);
+
     _translation = std::move(temp_translate);
     _reverse_translation = std::move(temp_reverse);
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::clear() noexcept
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::clear() noexcept
 {
     _impl->clear();
     _translation.clear();
     _reverse_translation.clear();
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::_set_type(graph_type type, const impl<Directed, Weighted>* src)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::_set_type(graph_type type, const impl<Directed, Weighted, EdgeType>* src)
 {
     if (src == this->_impl.get()) {
         if (type != this->_type) {
@@ -255,21 +260,27 @@ void graph<T, Directed, Weighted>::_set_type(graph_type type, const impl<Directe
     }
 }
 
-template <typename T, bool Directed, bool Weighted>
-void graph<T, Directed, Weighted>::_set_empty(graph_type type)
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::_set_empty(graph_type type)
 {
     switch (type) {
     case adj_matrix:
-        _impl.reset(new adjacency_matrix<Directed, Weighted>());
+        _impl.reset(new adjacency_matrix<Directed, Weighted, EdgeType>());
         break;
 
     case adj_list:
-        _impl.reset(new adjacency_list<Directed, Weighted>());
+        _impl.reset(new adjacency_list<Directed, Weighted, EdgeType>());
         break;
 
     default:
         break;
     }
+}
+
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+void graph<VertexType, Directed, Weighted, EdgeType, Hash, KeyEqual>::_check_self_loop(const VertexType& u, const VertexType& v) {
+    if(_translation.key_eq()(u, v))
+        throw std::invalid_argument("Self-loops not allowed");
 }
 }
 

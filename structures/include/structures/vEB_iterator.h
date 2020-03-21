@@ -19,7 +19,7 @@ public:
     _vEB_iterator& operator--();
     _vEB_iterator operator--(int);
 
-    const uint32_t& operator*() const noexcept;
+    reference operator*() const noexcept;
 
 private:
     _vEB_iterator(const van_Emde_Boas_tree*, uint32_t);

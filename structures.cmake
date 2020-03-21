@@ -7,7 +7,7 @@ include_directories(SYSTEM
 
 set(DATA_STRUCTURES_SOURCES
     ${DATA_STRUCTURES_ROOT}/structures-all.cpp
-    ${DATA_STRUCTURES_ROOT}/src/structures/van_Emde_Boas.cpp
+    ${DATA_STRUCTURES_ROOT}/src/structures/van_Emde_Boas_tree.cpp
     ${DATA_STRUCTURES_ROOT}/src/structures/vEB_iterator.cpp
 )
 

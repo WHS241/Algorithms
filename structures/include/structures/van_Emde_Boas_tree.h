@@ -19,9 +19,10 @@ public:
     // Standard STL interface
     typedef _vEB_iterator iterator;
     typedef _vEB_iterator const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    van_Emde_Boas_tree() noexcept;
-    van_Emde_Boas_tree(uint32_t range);
+    explicit van_Emde_Boas_tree(uint32_t range = 0);
 
     ~van_Emde_Boas_tree() noexcept;
     van_Emde_Boas_tree(const van_Emde_Boas_tree&);
@@ -33,6 +34,10 @@ public:
     iterator end() noexcept;
     const_iterator cbegin() const noexcept;
     const_iterator cend() const noexcept;
+    reverse_iterator rbegin() noexcept;
+    reverse_iterator rend() noexcept;
+    const_reverse_iterator rcbegin() const noexcept;
+    const_reverse_iterator rcend() const noexcept;
 
     bool empty() const noexcept;
     uint32_t size() const noexcept;
@@ -40,7 +45,7 @@ public:
 
     void clear() noexcept;
 
-    // Θ(log log _RANGE)
+    // Θ(log log max_size())
     std::pair<iterator, bool> insert(uint32_t value);
     void erase(uint32_t key) noexcept;
 
@@ -55,8 +60,8 @@ private:
 
     // determines if subtree index has been constructed
     bool _constructed(uint32_t index) const noexcept;
-    // construct subtree at index if non-existent
-    void _create_or_noop(uint32_t index);
+    // construct subtree at index if non-existent; return true if we did construct
+    bool _create_or_noop(uint32_t index);
 
     friend class _vEB_iterator;
 

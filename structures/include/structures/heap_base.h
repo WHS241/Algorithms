@@ -8,7 +8,7 @@
 
 namespace heap {
 // Base class for heap structures
-template <typename T, typename Compare = std::less<>> class base {
+template <typename T, typename Compare = std::less<T>> class base {
 public:
     base() = default;
     explicit base(Compare comp);
@@ -24,7 +24,7 @@ protected:
 };
 
 // Array-based binary heap
-template <typename T, typename Compare = std::less<>, typename Container = std::vector<T>>
+template <typename T, typename Compare = std::less<T>, typename Container = std::vector<T>>
 class priority_queue : virtual public base<T, Compare> {
 public:
     static_assert(
@@ -34,6 +34,8 @@ public:
     static_assert(std::is_same_v<std::random_access_iterator_tag,
                       typename Container::iterator::iterator_category>,
         "random-access container required");
+    
+    
     priority_queue() = default;
     explicit priority_queue(Compare comp);
 

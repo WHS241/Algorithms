@@ -11,7 +11,7 @@ template <typename T, typename Compare> class Fibonacci;
 // node_base:
 // adding an element returns a pointer to the added node
 // pointer is valid until element is removed from heap
-template <typename T, typename Compare = std::less<>> class node_base : public base<T, Compare> {
+template <typename T, typename Compare = std::less<T>> class node_base : public base<T, Compare> {
 public:
     node_base() = default;
     explicit node_base(Compare comp)

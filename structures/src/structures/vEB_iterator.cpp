@@ -1,6 +1,6 @@
 #include <structures/vEB_iterator.h>
 
-#include <structures/van_Emde_Boas.h>
+#include <structures/van_Emde_Boas_tree.h>
 
 bool _vEB_iterator::operator==(const _vEB_iterator& rhs) const noexcept {
     return _tree == rhs._tree && _current == rhs._current;
@@ -32,7 +32,7 @@ _vEB_iterator _vEB_iterator::operator--(int) {
     return temp;
 }
 
-const uint32_t& _vEB_iterator::operator*() const noexcept {
+const _vEB_iterator::reference _vEB_iterator::operator*() const noexcept {
     return _current;
 }
 

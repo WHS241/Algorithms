@@ -9,7 +9,7 @@
 #include "heap_node_base.h"
 
 namespace heap {
-template <typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<T>>
 class binary_heap : public node_base<T, Compare> {
 public:
     typedef typename node_base<T, Compare>::node node;

@@ -9,7 +9,7 @@
 
 namespace tree {
 // A Binary Search Tree (BST) abstract class
-template <typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<T>>
 class binary_search_tree : public binary_tree<T> {
 public:
     binary_search_tree() = default;

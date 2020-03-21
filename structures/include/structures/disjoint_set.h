@@ -19,7 +19,7 @@
  * Efficiency of a good but not linear set union algorithm
  * (1975) doi:10.1145/321879.321884
  */
-template <typename T> class disjoint_set {
+template <typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>> class disjoint_set {
 public:
     disjoint_set() = default;
 
@@ -29,7 +29,7 @@ public:
     void insert(const T& item);
 
     // O(α(n))
-    void union_(const T& first, const T& second);
+    void union_sets(const T& first, const T& second);
     T find(const T& item);
 
     void remove_set(const T& member);
@@ -39,12 +39,12 @@ public:
     uint32_t num_sets() const noexcept;
 
 private:
-    struct t_data {
+    struct _t_data {
         T parent;
         uint32_t size;
     };
-    std::unordered_map<T, t_data> _sets;
-    std::unordered_set<T> _roots;
+    std::unordered_map<T, _t_data, Hash, KeyEqual> _sets;
+    std::unordered_set<T, Hash, KeyEqual> _roots;
 };
 
 #include "src/structures/disjoint_set.cpp"

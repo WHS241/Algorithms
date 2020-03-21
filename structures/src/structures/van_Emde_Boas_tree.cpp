@@ -1,13 +1,8 @@
-#include <structures/van_Emde_Boas.h>
+#include <structures/van_Emde_Boas_tree.h>
 
 #include <cmath>
 
 #include <structures/vEB_iterator.h>
-
-van_Emde_Boas_tree::van_Emde_Boas_tree() noexcept
-    : van_Emde_Boas_tree(0)
-{
-}
 
 van_Emde_Boas_tree::van_Emde_Boas_tree(uint32_t range)
     : _uint_allocator()
@@ -123,17 +118,17 @@ van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(van_Emde_Boas_tree&& rhs) noex
 
         _uint_allocator = std::move(rhs._uint_allocator);
         _tree_allocator = std::move(rhs._tree_allocator);
-        _RANGE = std::move(rhs._RANGE);
-        _size = std::move(rhs._size);
-        _subtrees = std::move(rhs._subtrees);
-        _num_trees = std::move(rhs._num_trees);
-        _subtree_size = std::move(rhs._subtree_size);
-        _init_check = std::move(rhs._init_check);
-        _rev_check = std::move(rhs._rev_check);
-        _check_size = std::move(rhs._check_size);
-        _aux = std::move(rhs._aux);
-        _min = std::move(rhs._min);
-        _max = std::move(rhs._max);
+        std::swap(_RANGE, rhs._RANGE);
+        std::swap(_size, rhs._size);
+        std::swap(_subtrees, rhs._subtrees);
+        std::swap(_num_trees, rhs._num_trees);
+        std::swap(_subtree_size, rhs._subtree_size);
+        std::swap(_init_check, rhs._init_check);
+        std::swap(_rev_check, rhs._rev_check);
+        std::swap(_check_size, rhs._check_size);
+        std::swap(_aux, rhs._aux);
+        std::swap(_min, rhs._min);
+        std::swap(_max, rhs._max);
     }
     return *this;
 }
@@ -152,6 +147,22 @@ van_Emde_Boas_tree::const_iterator van_Emde_Boas_tree::cbegin() const noexcept {
 
 van_Emde_Boas_tree::const_iterator van_Emde_Boas_tree::cend() const noexcept {
     return const_iterator(this, _RANGE);
+}
+
+van_Emde_Boas_tree::reverse_iterator van_Emde_Boas_tree::rbegin() noexcept {
+    return std::make_reverse_iterator(end());
+}
+
+van_Emde_Boas_tree::reverse_iterator van_Emde_Boas_tree::rend() noexcept {
+    return std::make_reverse_iterator(begin());
+}
+
+van_Emde_Boas_tree::const_reverse_iterator van_Emde_Boas_tree::rcbegin() const noexcept {
+    return std::make_reverse_iterator(cend());
+}
+
+van_Emde_Boas_tree::const_reverse_iterator van_Emde_Boas_tree::rcend() const noexcept {
+    return std::make_reverse_iterator(cbegin());
 }
 
 bool van_Emde_Boas_tree::empty() const noexcept {
@@ -201,12 +212,20 @@ std::pair<van_Emde_Boas_tree::iterator, bool> van_Emde_Boas_tree::insert(uint32_
     if(_aux) { // not base case
         uint32_t target = value / _subtree_size;
         uint32_t mod = value % _subtree_size;
-        _create_or_noop(target);
+        bool created = _create_or_noop(target);
+
+        try {
         std::pair<van_Emde_Boas_tree::iterator, bool> sub_result = _subtrees[target].insert(mod);
         if(!sub_result.second)
             return std::make_pair(iterator(this, insert_value), false);
         if(_subtrees[target]._min == _subtrees[target]._max)
             _aux->insert(target);
+        } catch (...) {
+            if (created) {
+                _tree_allocator.destroy(_subtrees + target);
+                --_check_size;
+            }
+        }
     }
     ++_size;
     return std::make_pair(iterator(this, insert_value), true);
@@ -318,12 +337,13 @@ bool van_Emde_Boas_tree::_constructed(uint32_t index) const noexcept {
     return _init_check[index] < _check_size && _rev_check[_init_check[index]] == index;
 }
 
-void van_Emde_Boas_tree::_create_or_noop(uint32_t index) {
+bool van_Emde_Boas_tree::_create_or_noop(uint32_t index) {
     if(_constructed(index))
-        return;
+        return false;
     // edge case; last tree may be of different size
     _tree_allocator.construct(_subtrees + index, ((index == _num_trees - 1) && (_RANGE % _num_trees != 0)) ? _RANGE % _subtree_size : _subtree_size);
     _init_check[index] = _check_size;
     _rev_check[_check_size] = index;
     ++_check_size;
+    return true;
 }

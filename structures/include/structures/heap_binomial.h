@@ -12,7 +12,7 @@ namespace heap {
  * A data structure for manipulating priority queues
  * (1978) doi:10.1145/359460.359478
  */
-template <typename T, typename Compare = std::less<>>
+template <typename T, typename Compare = std::less<T>>
 class binomial : public node_base<T, Compare> {
 public:
     typedef typename node_base<T, Compare>::node node;
