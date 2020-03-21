@@ -7,6 +7,6 @@ template <typename It>
 typename std::iterator_traits<It>::value_type find_majority(It first, It last);
 }
 
-#include <src/sequence/majority.cpp>
+#include "../../src/sequence/majority.tpp"
 
 #endif // SEQUENCE_MAJORITY_H

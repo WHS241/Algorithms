@@ -54,6 +54,6 @@ return -1 if not found
 template <typename RandomIt> uint32_t special_index(RandomIt first, RandomIt last);
 } // namespace Sequence
 
-#include "src/sequence/binary_search.cpp"
+#include "src/sequence/binary_search.tpp"
 
 #endif // !BINARY_SEARCH_H

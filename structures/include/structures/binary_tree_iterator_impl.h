@@ -78,6 +78,6 @@ private:
 };
 }
 
-#include "src/structures/binary_tree_iterator_impl.cpp"
+#include "src/structures/binary_tree_iterator_impl.tpp"
 
 #endif // TREE_ITERATOR_IMPL_H

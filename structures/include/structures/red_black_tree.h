@@ -42,6 +42,6 @@ protected:
 };
 }
 
-#include <src/structures/red_black_tree.cpp>
+#include <src/structures/red_black_tree.tpp>
 
 #endif // RED_BLACK_TREE_H

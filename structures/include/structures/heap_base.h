@@ -63,6 +63,6 @@ private:
 };
 }
 
-#include "src/structures/heap_base.cpp"
+#include "src/structures/heap_base.tpp"
 
 #endif // HEAP_H

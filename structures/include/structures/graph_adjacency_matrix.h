@@ -83,6 +83,6 @@ private:
 };
 }
 
-#include <src/structures/graph_adjacency_matrix.cpp>
+#include <src/structures/graph_adjacency_matrix.tpp>
 
 #endif // ADJACENCY_MATRIX_H

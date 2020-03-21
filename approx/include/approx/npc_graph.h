@@ -20,6 +20,6 @@ template <typename T, bool Weighted>
 std::unordered_map<T, uint32_t> three_color_Wigderson(graph::graph<T, false, Weighted> input);
 }
 
-#include "../../src/approx/npc_graph.cpp"
+#include "../../src/approx/npc_graph.tpp"
 
 #endif // APPROX_GRAPH_H

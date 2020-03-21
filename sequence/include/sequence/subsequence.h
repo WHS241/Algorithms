@@ -80,6 +80,6 @@ namespace {
 } // namespace
 } // namespace Sequence
 
-#include "../../src/sequence/subsequence.cpp"
+#include "../../src/sequence/subsequence.tpp"
 
 #endif // SUBSEQUENCE_H

@@ -53,6 +53,6 @@ private:
 };
 }
 
-#include <src/structures/heap_binary.cpp>
+#include <src/structures/heap_binary.tpp>
 
 #endif // !NODE_BINARY_HEAP_H

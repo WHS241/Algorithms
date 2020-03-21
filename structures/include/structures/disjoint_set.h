@@ -47,6 +47,6 @@ private:
     std::unordered_set<T, Hash, KeyEqual> _roots;
 };
 
-#include "src/structures/disjoint_set.cpp"
+#include "../../src/structures/disjoint_set.tpp"
 
 #endif // UNION_FIND_H

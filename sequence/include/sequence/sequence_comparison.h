@@ -40,6 +40,6 @@ std::vector<instruction> Levenshtein_distance(
     const std::basic_string<CharT>& src, const std::basic_string<CharT>& target);
 } // namespace Sequence
 
-#include "src/sequence/sequence_comparison.cpp"
+#include "src/sequence/sequence_comparison.tpp"
 
 #endif // !STRING_COMP_H

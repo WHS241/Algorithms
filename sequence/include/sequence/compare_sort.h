@@ -57,6 +57,6 @@ namespace {
 } // namespace
 } // namespace Sequence
 
-#include "src/sequence/compare_sort.cpp"
+#include "src/sequence/compare_sort.tpp"
 
 #endif // !COMPARE_SORT_H

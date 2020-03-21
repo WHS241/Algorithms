@@ -21,6 +21,6 @@ public:
 };
 }
 
-#include "src/structures/binary_search_tree_naive.cpp"
+#include "src/structures/binary_search_tree_naive.tpp"
 
 #endif // PRIMITIVE_BINARY_SEARCH_TREE_H

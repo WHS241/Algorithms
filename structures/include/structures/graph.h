@@ -99,6 +99,6 @@ std::ostream& operator<<(std::ostream& os, const graph<T, Directed, Weighted, Ed
 }
 }
 
-#include "src/structures/graph.cpp"
+#include "src/structures/graph.tpp"
 
 #endif // !GRAPH_H

@@ -75,7 +75,7 @@ protected:
 };
 }
 
-#include "src/structures/binary_tree_base.cpp"
-#include "src/structures/binary_tree_iterator.cpp"
+#include "src/structures/binary_tree_base.tpp"
+#include "src/structures/binary_tree_iterator.tpp"
 
 #endif // BINARY_TREE_H

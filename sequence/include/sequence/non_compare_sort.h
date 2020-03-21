@@ -13,6 +13,6 @@ namespace sequence {
 template <typename It> void radix_sort(It first, It last, uint32_t base);
 } // namespace Sequence
 
-#include "src/sequence/non_compare_sort.cpp"
+#include "src/sequence/non_compare_sort.tpp"
 
 #endif // NON_COMPARE_SORT_H

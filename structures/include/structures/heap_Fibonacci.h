@@ -52,6 +52,6 @@ private:
 };
 }
 
-#include <src/structures/heap_Fibonacci.cpp>
+#include <src/structures/heap_Fibonacci.tpp>
 
 #endif // FIBONACCI_HEAP_H

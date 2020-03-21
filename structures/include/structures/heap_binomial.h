@@ -53,6 +53,6 @@ private:
 };
 }
 
-#include <src/structures/heap_binomial.cpp>
+#include <src/structures/heap_binomial.tpp>
 
 #endif // BINOMIAL_HEAP_H

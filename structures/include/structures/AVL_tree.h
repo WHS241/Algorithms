@@ -50,6 +50,6 @@ protected:
 };
 }
 
-#include "src/structures/AVL_tree.cpp"
+#include "src/structures/AVL_tree.tpp"
 
 #endif // !AVL_TREE_H

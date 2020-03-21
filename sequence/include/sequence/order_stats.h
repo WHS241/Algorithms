@@ -28,6 +28,6 @@ typename std::iterator_traits<It>::value_type selection(
     It first, It last, uint32_t rank, Compare compare = Compare(), uint32_t partition_size = 5);
 } // namespace Sequence
 
-#include "src/sequence/order_stats.cpp"
+#include "src/sequence/order_stats.tpp"
 
 #endif // !ORDER_STATISTICS_H

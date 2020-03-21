@@ -39,6 +39,6 @@ protected:
 };
 }
 
-#include "src/structures/binary_search_tree.cpp"
+#include "src/structures/binary_search_tree.tpp"
 
 #endif // BINARY_SEARCH_TREE_H
