@@ -22,16 +22,16 @@ namespace graph_alg {
  * (1983) doi:10.1145/2402.322385
  * Θ(V)
  */
-template <typename T, bool Weighted>
-graph::graph<T, false, Weighted> k_core(graph::graph<T, false, Weighted> src, uint32_t k);
+template <typename T, bool Weighted, typename EdgeType, typename... Args>
+graph::graph<T, false, Weighted, EdgeType, Args...> k_core(graph::graph<T, false, Weighted, EdgeType, Args...> src, uint32_t k);
 
 /**
  * Find the transitive closure of a graph
  * Θ(mn)
  */
-template <typename T, bool Directed, bool Weighted>
-graph::graph<T, Directed, Weighted> transitive_closure(
-    const graph::graph<T, Directed, Weighted>& src);
+template <typename T, bool Directed, bool Weighted, typename... Args>
+graph::graph<T, Directed, Weighted, Args...> transitive_closure(
+    const graph::graph<T, Directed, Weighted, Args...>& src);
 
 /**
  * Chvatal-Bondy closure
@@ -42,8 +42,8 @@ graph::graph<T, Directed, Weighted> transitive_closure(
  * (2004) doi.org/10.1016/S0012-365X(03)00316-9
  * Θ(output size)
  */
-template<typename T, bool Weighted>
-graph::graph<T, false, Weighted> Chvatal_Bondy_closure(graph::graph<T, false, Weighted> src, uint32_t k);
+template <typename T, bool Weighted, typename... Args>
+graph::graph<T, false, Weighted, Args...> Chvatal_Bondy_closure(graph::graph<T, false, Weighted, Args...> src, uint32_t k);
 }
 
 #include "../../src/graph/closure.tpp"
