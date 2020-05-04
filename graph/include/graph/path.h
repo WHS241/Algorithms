@@ -4,7 +4,9 @@
 #include <list>
 #include <unordered_map>
 namespace graph {
-template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual> class graph;
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash,
+    typename KeyEqual>
+class graph;
 }
 
 /*

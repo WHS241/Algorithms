@@ -16,7 +16,8 @@ On each vertex:
 Requirements: F1::operator()(T param) and F2::operator()(T param1, T param2) are
 defined
 */
-template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
+template <typename T, bool Directed, bool Weighted, typename F1 = std::function<void(const T&)>,
+    typename F2 = std::function<void(const T&, const T&)>>
 void depth_first(
     const graph::graph<T, Directed, Weighted>& src, const T& start, F1 on_arrival = [](const T&) {},
     F2 on_backtrack = [](const T& parent, const T& child) {});
@@ -24,7 +25,9 @@ void depth_first(
 /*
 Perform DFS, restarting if necessary
 */
-template <typename T, bool Directed, bool Weighted, typename F1, typename F2, typename F3>
+template <typename T, bool Directed, bool Weighted, typename F1 = std::function<void(const T&)>,
+    typename F2 = std::function<void(const T&, const T&)>,
+    typename F3 = std::function<void(const T&)>>
 void depth_first_forest(
     const graph::graph<T, Directed, Weighted>& src, const T& start, F1 on_arrival = [](const T&) {},
     F2 on_backtrack = [](const T& parent, const T& child) {}, F3 on_finish_root = [](const T&) {});
@@ -33,7 +36,8 @@ void depth_first_forest(
  * Tree-style depth-first
  * Infinite run-time unless DAG or F1/F2 return values
  */
-template <typename T, bool Directed, bool Weighted, typename F1, typename F2>
+template <typename T, bool Directed, bool Weighted, typename F1 = std::function<void(const T&)>,
+    typename F2 = std::function<void(const T&, const T&)>>
 void depth_first_tree(
     const graph::graph<T, Directed, Weighted>& src, const T& start, F1 on_arrival = [](const T&) {},
     F2 on_backtrack = [](const T& parent, const T& child) {});
@@ -46,7 +50,7 @@ On each vertex:
 
 Requirements: F::operator()(T param) is defined
 */
-template <typename T, bool Directed, bool Weighted, typename F>
+template <typename T, bool Directed, bool Weighted, typename F = std::function<void(const T&)>>
 void breadth_first(
     const graph::graph<T, Directed, Weighted>& src, const T& start, F on_visit = [](const T&) {});
 

@@ -34,24 +34,23 @@ TEST_F(AlgorithmTest, TransitiveClosureTest) {
 
 TEST_F(AlgorithmTest, ChvatalBondyTest) {
     for(uint32_t i = 0; i < 100; ++i) {
-        std::cout << "Next" << std::endl;
         graph::graph<int, false, false> input = random_graph<false, false>(engine);
         uint32_t highest_degree = 0;
         for(int v : input.vertices())
             highest_degree = std::max(highest_degree, input.degree(v));
-        std::cout << input << std::endl;
         for(uint32_t j = 0; j < highest_degree; ++j) {
             graph::graph<int, false, false> result = graph_alg::Chvatal_Bondy_closure(input, j);
 
             for(int u : input.vertices()) {
                 for(int v : input.vertices()) {
+                    bool valid = true;
                     if(u != v && result.degree(u) + result.degree(v) >= j) {
-                        if(!result.has_edge(u,v)) {
-                            std::cout << j << "\n" << result << std::endl;
-                        }
-                        EXPECT_TRUE(result.has_edge(u, v));
+                        EXPECT_TRUE(valid = result.has_edge(u, v));
                     } else
                         EXPECT_EQ(input.has_edge(u, v), result.has_edge(u, v));
+                    
+                    if (!valid) 
+                        std::cout << "Error\n" << input << std::endl << j << "\n" << result << std::endl;
                 }
             }
         }

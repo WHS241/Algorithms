@@ -9,8 +9,8 @@
 
 namespace approx {
 
-template <typename T, bool Weighted>
-std::list<T> vertex_cover_edge_double(graph::graph<T, false, Weighted> input)
+template <typename T, bool Weighted, typename... Args>
+std::list<T> vertex_cover_edge_double(graph::graph<T, false, Weighted, Args...> input)
 {
     // Chances are when we use this algorithm we want a lower bound on the optimal size
     // so let's try to run it as badly as possible: select as many vertices as we can.
@@ -82,14 +82,14 @@ std::list<T> vertex_cover_edge_double(graph::graph<T, false, Weighted> input)
     return result;
 }
 
-template <typename T, bool Weighted>
-std::unordered_map<T, uint32_t> three_color_Wigderson(graph::graph<T, false, Weighted> input)
+template <typename T, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+std::unordered_map<T, uint32_t, Hash, KeyEqual> three_color_Wigderson(graph::graph<T, false, Weighted, EdgeType, Hash, KeyEqual> input)
 {
     double bound
         = std::sqrt(2 * input.order()); // determined through balancing: 2n/bound(n) + bound(n) + 1
     std::list<T> candidates;
     uint32_t num_colors = 0;
-    std::unordered_map<T, uint32_t> result;
+    std::unordered_map<T, uint32_t, Hash, KeyEqual> result;
     for (const T& v : input.vertices())
         if (input.degree(v) > bound)
             candidates.push_back(v);
@@ -97,9 +97,9 @@ std::unordered_map<T, uint32_t> three_color_Wigderson(graph::graph<T, false, Wei
         // may have changed
         if (result.find(v) == result.end() && input.degree(v) > bound) {
             std::list<T> neighbors = input.neighbors(v);
-            graph::graph<T, false, Weighted> subgraph
+            graph::graph<T, false, Weighted, EdgeType, Hash, KeyEqual> subgraph
                 = input.generate_induced_subgraph(neighbors.begin(), neighbors.end());
-            std::pair<std::unordered_set<T>, std::unordered_set<T>> sets
+            std::pair<std::unordered_set<T, Hash, KeyEqual>, std::unordered_set<T, Hash, KeyEqual>> sets
                 = graph_alg::verify_bipartite(subgraph);
             // if 3-colorable, the neighbors of a single vertex are two colorable
             // we also know by the bound that there are vertices here

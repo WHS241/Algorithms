@@ -13,9 +13,9 @@ namespace graph_alg {
  *
  * Θ(m+n)
  */
-template <typename T, bool Weighted>
-std::pair<std::unordered_set<T>, std::unordered_set<T>> verify_bipartite(
-    const graph::graph<T, false, Weighted>& input);
+template <typename T, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
+std::pair<std::unordered_set<T, Hash, KeyEqual>, std::unordered_set<T, Hash, KeyEqual>>
+verify_bipartite(const graph::graph<T, false, Weighted, EdgeType, Hash, KeyEqual>& input);
 
 /**
  * On a bipartite graph, find the maximum matching
@@ -34,9 +34,9 @@ std::pair<std::unordered_set<T>, std::unordered_set<T>> verify_bipartite(
  * This algorithm requires names for two dummy vertices to add to the graph during the max-flow
  * portion
  */
-template <typename T, bool Weighted>
+template <typename T, bool Weighted, typename... Args>
 std::list<std::pair<T, T>> maximum_bipartite_matching(
-    const graph::graph<T, false, Weighted>& input, const T& dummy_1, const T& dummy_2);
+    const graph::graph<T, false, Weighted, Args...>& input, const T& dummy_1, const T& dummy_2);
 }
 
 #include "../../src/graph/bipartite.tpp"

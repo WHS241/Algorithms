@@ -90,7 +90,9 @@ std::ostream& operator<<(std::ostream& os, const graph<T, Directed, Weighted, Ed
         std::transform(edges.begin(), edges.end(), std::ostream_iterator<std::string>(os, ", "),
             [](const std::pair<T, EdgeType>& edge) {
                 std::ostringstream builder;
-                builder << '[' << edge.first << "] (" << edge.second << ')';
+                builder << '[' << edge.first << ']';
+                if constexpr (Weighted)
+                    builder << " (" << edge.second << ')';
                 return builder.str();
             });
         os << std::endl;

@@ -7,7 +7,9 @@
 
 // Forward declarations
 namespace graph {
-template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual> class graph;
+template <typename VertexType, bool Directed, bool Weighted, typename EdgeType, typename Hash,
+    typename KeyEqual>
+class graph;
 }
 
 namespace graph_alg {
@@ -23,7 +25,8 @@ namespace graph_alg {
  * Θ(V)
  */
 template <typename T, bool Weighted, typename EdgeType, typename... Args>
-graph::graph<T, false, Weighted, EdgeType, Args...> k_core(graph::graph<T, false, Weighted, EdgeType, Args...> src, uint32_t k);
+graph::graph<T, false, Weighted, EdgeType, Args...> k_core(
+    graph::graph<T, false, Weighted, EdgeType, Args...> src, uint32_t k);
 
 /**
  * Find the transitive closure of a graph
@@ -36,14 +39,15 @@ graph::graph<T, Directed, Weighted, Args...> transitive_closure(
 /**
  * Chvatal-Bondy closure
  * If the sum of the degrees of two vertices exceed k, there should be an edge between them.
- * 
+ *
  * Jeremy Spinrad
  * A note on computing graph closures
  * (2004) doi.org/10.1016/S0012-365X(03)00316-9
  * Θ(output size)
  */
-template <typename T, bool Weighted, typename... Args>
-graph::graph<T, false, Weighted, Args...> Chvatal_Bondy_closure(graph::graph<T, false, Weighted, Args...> src, uint32_t k);
+template <typename T, bool Weighted, typename EdgeType, typename... Args>
+graph::graph<T, false, Weighted, EdgeType, Args...> Chvatal_Bondy_closure(
+    graph::graph<T, false, Weighted, EdgeType, Args...> src, uint32_t k);
 }
 
 #include "../../src/graph/closure.tpp"
