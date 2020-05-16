@@ -15,19 +15,28 @@ namespace tree {
 template <typename T, typename Compare = std::less<T>>
 class AVL_tree : public binary_search_tree<T, Compare> {
 public:
-    AVL_tree() = default;
-    explicit AVL_tree(Compare comp);
+    using typename binary_search_tree<T, Compare>::value_type,
+        typename binary_search_tree<T, Compare>::value_compare,
+        typename binary_search_tree<T, Compare>::iterator,
+        typename binary_search_tree<T, Compare>::const_iterator,
+        typename binary_search_tree<T, Compare>::reverse_iterator,
+        typename binary_search_tree<T, Compare>::const_reverse_iterator,
+        binary_search_tree<T, Compare>::binary_search_tree,
 
-    template <typename It, typename _Compare = Compare,
-        typename _Requires = std::enable_if_t<std::is_default_constructible_v<_Compare>>>
-    AVL_tree(It first, It last);
-    template <typename It> AVL_tree(It first, It last, Compare comp);
+        binary_search_tree<T, Compare>::begin, binary_search_tree<T, Compare>::end,
+        binary_search_tree<T, Compare>::cbegin, binary_search_tree<T, Compare>::cend,
+        binary_search_tree<T, Compare>::rbegin, binary_search_tree<T, Compare>::rend,
+        binary_search_tree<T, Compare>::crbegin, binary_search_tree<T, Compare>::crend,
+
+        binary_search_tree<T, Compare>::empty, binary_search_tree<T, Compare>::size,
+        binary_search_tree<T, Compare>::contains, binary_search_tree<T, Compare>::find,
+        binary_search_tree<T, Compare>::erase;
 
     // Θ(log n)
-    void insert(const T&) override;
+    std::pair<iterator, bool> insert(const T&) override;
 
     // Θ(log n)
-    virtual void remove(typename binary_tree<T>::iterator it);
+    iterator erase(iterator it) override;
 
 protected:
     struct t_node : virtual public binary_tree<T>::node {
@@ -44,9 +53,7 @@ protected:
         uint32_t right_height;
     };
 
-    static t_node* generate(const std::vector<T>&, uint32_t, uint32_t, t_node*);
-
-    void balance_tree(t_node* start) noexcept;
+    void _balance_tree(t_node* start) noexcept;
 };
 }
 

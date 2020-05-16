@@ -4,45 +4,30 @@
 namespace tree {
 
 template <typename T, typename Compare>
-red_black_tree<T, Compare>::red_black_tree(Compare comp)
-    : binary_search_tree<T, Compare>(comp)
-{
-}
-
-template <typename T, typename Compare>
-template <typename It, typename _Compare, typename _Requires>
-red_black_tree<T, Compare>::red_black_tree(It first, It last)
-    : red_black_tree(first, last, Compare()) {};
-
-template <typename T, typename Compare>
-template <typename It>
-red_black_tree<T, Compare>::red_black_tree(It first, It last, Compare comp)
-    : binary_search_tree<T, Compare>()
-{
-    this->_size = 0;
-    for (; first != last; ++first) {
-        insert(*first);
-    }
-}
-
-template <typename T, typename Compare> void red_black_tree<T, Compare>::insert(const T& item)
+std::pair<typename red_black_tree<T, Compare>::iterator, bool> red_black_tree<T, Compare>::insert(
+    const T& item)
 {
     auto* ptr = dynamic_cast<t_node*>(this->_root.get());
     if (ptr == nullptr) {
         auto new_root = new t_node(item, true);
         this->_root.reset(new_root);
         this->_size = 1;
-        return;
+        return { begin(), true };
     }
 
     bool go_left = this->_compare(item, ptr->item);
     auto* next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
     while (next != nullptr) {
         ptr = next;
+
+        if (!this->_allow_duplicates && item == ptr->item)
+            return { this->_make_iterator(ptr, traversal::in_order, false), false };
+
         go_left = this->_compare(item, ptr->item);
         next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
     }
 
+    // add a new node as red
     auto add = new t_node(item, false, ptr);
     if (go_left) {
         ptr->replace_left(add);
@@ -51,12 +36,15 @@ template <typename T, typename Compare> void red_black_tree<T, Compare>::insert(
     }
     ++this->_size;
 
+    std::pair<iterator, bool> result
+        = { this->_make_iterator(add, traversal::in_order, false), true };
+
     // now to balance the tree
     while (add != this->_root.get()) {
         auto parent = dynamic_cast<t_node*>(add->parent);
         // Parent is black: no adjustments needed
         if (parent->is_black)
-            return;
+            return result;
 
         auto grandparent = dynamic_cast<t_node*>(parent->parent);
         auto uncle = dynamic_cast<t_node*>(
@@ -91,26 +79,30 @@ template <typename T, typename Compare> void red_black_tree<T, Compare>::insert(
             grandparent->is_black = false;
             add = dynamic_cast<t_node*>(grandparent->parent);
             add->is_black = true;
-            return;
+            return result;
         }
     }
 
     // if we reach here, add is the new root: set to black
     add->is_black = true;
+    return result;
 }
 
 template <typename T, typename Compare>
-void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
+typename red_black_tree<T, Compare>::iterator red_black_tree<T, Compare>::erase(
+    typename red_black_tree<T, Compare>::iterator it)
 {
     binary_search_tree<T, Compare>::_verify(it);
-    auto node = dynamic_cast<t_node*>(binary_tree<T>::_get_node(it));
+    auto node = dynamic_cast<t_node*>(binary_tree<T>::_s_get_node(it));
     if (node == nullptr)
-        return;
+        return end();
     if (this->_size == 1) {
         this->_root.reset();
         this->_size = 0;
-        return;
+        return end();
     }
+
+    ++it; // return value
 
     // if two children, find successor and swap values
     if (node->left && node->right) {
@@ -136,7 +128,7 @@ void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
         child->parent = nullptr;
         child->is_black = true;
         --this->_size;
-        return;
+        return it;
     }
 
     auto parent = dynamic_cast<t_node*>(node->parent);
@@ -173,7 +165,7 @@ void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
 
         // need to rebalance
         // since parent-node-child has black-height 2, sibling subtree needs at
-        // least one level sibling will never be nullptr
+        // least one level, so sibling will never be nullptr
         auto sibling = dynamic_cast<t_node*>(is_left_child ? parent->right : parent->left);
         auto outer_sibling = dynamic_cast<t_node*>(sibling->left);
         auto inner_sibling = dynamic_cast<t_node*>(sibling->right);
@@ -207,7 +199,7 @@ void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
             }
         }
         if (node == this->_root.get())
-            return;
+            return it;
 
         // red sibling: parent must have been black; rotate and swap
         if (!sibling->is_black) {
@@ -253,6 +245,8 @@ void red_black_tree<T, Compare>::remove(typename binary_tree<T>::iterator it)
             outer_sibling->is_black = true;
         }
     }
+
+    return it;
 }
 
 template <typename T, typename Compare>

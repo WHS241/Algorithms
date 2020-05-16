@@ -5,7 +5,12 @@
 
 namespace tree {
 /**
- * Red black trees
+ * Red-black tree
+ * 1. Each node is marked as red or black
+ * 2. nullptr is black
+ * 3. Red nodes can only have black children
+ * 4. A path from root to any nullptr contains the same number of black nodes
+ *
  * Leonidas Guibas, Robert Sedgewick
  * A Dichromatic Framework for Balanced Trees
  * (1978) doi:10.1109/SFCS.1978.3
@@ -13,19 +18,27 @@ namespace tree {
 template <typename T, typename Compare = std::less<T>>
 class red_black_tree : public binary_search_tree<T, Compare> {
 public:
-    red_black_tree() = default;
-    explicit red_black_tree(Compare comp);
+    using typename binary_search_tree<T, Compare>::value_type,
+        typename binary_search_tree<T, Compare>::value_compare, typename binary_search_tree<T, Compare>::iterator,
+        typename binary_search_tree<T, Compare>::const_iterator,
+        typename binary_search_tree<T, Compare>::reverse_iterator,
+        typename binary_search_tree<T, Compare>::const_reverse_iterator;
+    using binary_search_tree<T, Compare>::binary_search_tree,
 
-    template <typename It, typename _Compare = Compare,
-        typename _Requires = std::enable_if_t<std::is_default_constructible_v<_Compare>>>
-    red_black_tree(It first, It last);
-    template <typename It> red_black_tree(It first, It last, Compare comp);
+        binary_search_tree<T, Compare>::begin, binary_search_tree<T, Compare>::end,
+        binary_search_tree<T, Compare>::cbegin, binary_search_tree<T, Compare>::cend,
+        binary_search_tree<T, Compare>::rbegin, binary_search_tree<T, Compare>::rend,
+        binary_search_tree<T, Compare>::crbegin, binary_search_tree<T, Compare>::crend,
+
+        binary_search_tree<T, Compare>::empty, binary_search_tree<T, Compare>::size,
+        binary_search_tree<T, Compare>::contains, binary_search_tree<T, Compare>::find,
+        binary_search_tree<T, Compare>::erase;
 
     // Θ(log n)
-    void insert(const T&) override;
+    std::pair<iterator, bool> insert(const T&) override;
 
     // Θ(log n)
-    virtual void remove(typename binary_tree<T>::iterator it);
+    iterator erase(iterator it) override;
 
 protected:
     struct t_node : public binary_tree<T>::node {

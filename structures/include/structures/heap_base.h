@@ -13,9 +13,16 @@ public:
     base() = default;
     explicit base(Compare comp);
 
+    // Insert an element into the tree
     virtual void insert(const T&) = 0;
+
+    // Get the root of the heap (the next element that should be "popped")
     virtual T get_root() const = 0;
+
+    // Pop an element from the heap
     virtual T remove_root() = 0;
+
+    // methods related to the heap's size
     virtual uint32_t size() const noexcept = 0;
     virtual bool empty() const noexcept;
 
@@ -24,6 +31,8 @@ protected:
 };
 
 // Array-based binary heap
+// Requirements: Container supports push_back(const T&) and T& operator[](unsigned int x) for 0 <= x
+// < size()
 template <typename T, typename Compare = std::less<T>, typename Container = std::vector<T>>
 class priority_queue : virtual public base<T, Compare> {
 public:
@@ -34,8 +43,7 @@ public:
     static_assert(std::is_same_v<std::random_access_iterator_tag,
                       typename Container::iterator::iterator_category>,
         "random-access container required");
-    
-    
+
     priority_queue() = default;
     explicit priority_queue(Compare comp);
 

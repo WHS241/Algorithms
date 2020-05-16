@@ -100,7 +100,7 @@ binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(binary_heap<T, Compa
 template <typename T, typename Compare>
 typename binary_heap<T, Compare>::node* binary_heap<T, Compare>::add(const T& item)
 {
-    std::unique_ptr<node> new_node(new node(item));
+    std::unique_ptr<node> new_node(this->_s_make_node(item));
 
     if (this->_size == 0) {
         _root = std::move(new_node);

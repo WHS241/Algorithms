@@ -169,7 +169,7 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Dijkstra_part
     // Initialize to self and 0
     std::vector<data> data_map(vertices.size());
     std::transform(
-        vertices.begin(), vertices.end(), data_map.begin(), [&zero](const Vertex& value) {
+        vertices.begin(), vertices.end(), data_map.begin(), [](const Vertex& value) {
             return data { value, value, zero };
         });
 

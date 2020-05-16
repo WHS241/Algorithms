@@ -93,11 +93,12 @@ graph::graph<int, false, Weighted> random_bipartite_graph(
 
     for (uint32_t u : first_set)
         for (uint32_t v : second_set)
-            if (random_bool(gen))
+            if (random_bool(gen)) {
                 if constexpr (Weighted)
                     graph.force_add(u, v, weight(gen));
                 else
                     graph.force_add(u, v);
+            }
 
     return graph;
 }

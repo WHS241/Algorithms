@@ -7,3 +7,4 @@ build/
 cmake-build-debug/
 lib/googletest/*
 out/*
+compile_commands.json

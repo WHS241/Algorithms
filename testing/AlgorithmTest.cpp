@@ -3,8 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include <structures/graph.h>
-#include <graph/closure.h>
+#include <sequence/subsequence.h>
 
 #include "generator.h"
 
@@ -19,41 +18,48 @@ protected:
     }
 };
 
-TEST_F(AlgorithmTest, TransitiveClosureTest) {
-    for(uint32_t i = 0; i < 100; ++i) {
-        graph::graph<int, false, false> input = random_graph<false, false>(engine);
-        graph::graph<int, false, false> closure = graph_alg::transitive_closure(input);
-        for(int& v : input.vertices()) {
-            graph_alg::depth_first(input, v, [&closure, &v](int u) {
-                if(v != u)
-                    EXPECT_TRUE(closure.has_edge(u, v));
-            },[](int, int){});
+TEST_F(AlgorithmTest, LISTest) {
+    for (uint32_t j = 0; j < 100; ++j) {
+        // strictly increasing values
+        std::vector<uint32_t> input(100);
+        
+        uint32_t last = -1;
+        for(uint32_t i = 0; i < 100; ++i) {
+            std::uniform_int_distribution<uint32_t> dist(last + 1, 9901 + i);
+            input[i] = last = dist(engine);
+        }
+
+        // shuffle
+        for(uint32_t i = 0; i < 100; ++i) {
+            std::uniform_int_distribution<uint32_t> index_dist(i, 99);
+            std::swap(input[i], input[index_dist(engine)]);
+        }
+
+        auto result1 = sequence::longest_ordered_subsequence(input.begin(), input.end());
+        auto int_res = sequence::longest_increasing_integer_subsequence(input.begin(), input.end());
+
+        std::list<uint32_t> list_form;
+        std::copy(input.begin(), input.end(), std::back_inserter(list_form));
+
+        auto list_res = sequence::longest_ordered_subsequence(list_form.begin(), list_form.end());
+
+        EXPECT_EQ(result1.size(), int_res.size());
+        EXPECT_EQ(list_res.size(), int_res.size());
+
+        for(auto it = ++result1.begin(); it != result1.end(); ++it) {
+            auto temp(it);
+            --temp;
+            EXPECT_LT(**temp, **it);
+        }
+        for(auto it = ++int_res.begin(); it != int_res.end(); ++it) {
+            auto temp(it);
+            --temp;
+            EXPECT_LT(**temp, **it);
+        }
+        for(auto it = ++list_res.begin(); it != list_res.end(); ++it) {
+            auto temp(it);
+            --temp;
+            EXPECT_LT(**temp, **it);
         }
     }
-}
-
-TEST_F(AlgorithmTest, ChvatalBondyTest) {
-    for(uint32_t i = 0; i < 100; ++i) {
-        graph::graph<int, false, false> input = random_graph<false, false>(engine);
-        uint32_t highest_degree = 0;
-        for(int v : input.vertices())
-            highest_degree = std::max(highest_degree, input.degree(v));
-        for(uint32_t j = 0; j < highest_degree; ++j) {
-            graph::graph<int, false, false> result = graph_alg::Chvatal_Bondy_closure(input, j);
-
-            for(int u : input.vertices()) {
-                for(int v : input.vertices()) {
-                    bool valid = true;
-                    if(u != v && result.degree(u) + result.degree(v) >= j) {
-                        EXPECT_TRUE(valid = result.has_edge(u, v));
-                    } else
-                        EXPECT_EQ(input.has_edge(u, v), result.has_edge(u, v));
-                    
-                    if (!valid) 
-                        std::cout << "Error\n" << input << std::endl << j << "\n" << result << std::endl;
-                }
-            }
-        }
-    }
-
 }

@@ -30,7 +30,7 @@ Fibonacci<T, Compare>::Fibonacci(const Fibonacci<T, Compare>& src)
         std::transform(src._trees.begin(), src._trees.end(), std::back_inserter(_trees),
             [this, &src](const node* root) {
                 std::unique_ptr<node> new_tree(root->_deep_clone());
-                new_tree->_flag = root->_flag;
+                this->_s_set_flag(*new_tree, this->_s_get_flag(*root));
                 if (root == src._min)
                     _min = new_tree.get();
                 return new_tree.release();
@@ -174,7 +174,7 @@ template <typename T, typename Compare> T Fibonacci<T, Compare>::remove_root()
 
         // unmark any roots and find new min
         for (node* root : _trees) {
-            root->_flag = false;
+            this->_s_set_flag(*root, false);
             if (_min == nullptr || this->_compare(**root, **_min))
                 _min = root;
         }
@@ -194,17 +194,17 @@ void Fibonacci<T, Compare>::decrease(typename Fibonacci<T, Compare>::node* targe
         do {
             node* old_parent = target->_parent;
             target->_parent = nullptr;
-            target->_flag = false;
+            this->_s_set_flag(*target, false);
             auto to_remove
                 = std::find(old_parent->_children.begin(), old_parent->_children.end(), target);
             auto to_remove_next = to_remove;
             ++to_remove_next;
             _trees.splice(_trees.end(), old_parent->_children, to_remove, to_remove_next);
             target = old_parent;
-        } while (target->_flag);
+        } while (this->_s_get_flag(*target));
 
         if (target->_parent != nullptr)
-            target->_flag = true;
+            this->_s_set_flag(*target, true);
     }
 }
 

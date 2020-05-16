@@ -38,7 +38,7 @@ graph::graph<Vertex, Directed, true, EdgeWeight, Args...> Ford_Fulkerson(
     typedef graph::graph<Vertex, true, true, EdgeWeight, Args...> flow_graph_type;
 
     static const EdgeWeight zero = EdgeWeight();
-    auto is_zero = [&zero](const EdgeWeight& x) {
+    auto is_zero = [](const EdgeWeight& x) {
         if constexpr (std::is_floating_point_v<EdgeWeight>)
             return std::abs(x) <= 1e-10;
         else

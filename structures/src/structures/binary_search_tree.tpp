@@ -7,25 +7,85 @@
 namespace tree {
 
 template <typename T, typename Compare>
-binary_search_tree<T, Compare>::binary_search_tree(Compare comp)
+template <typename, typename>
+binary_search_tree<T, Compare>::binary_search_tree(bool duplicates)
+    : binary_search_tree<T, Compare>(Compare(), duplicates)
+{
+}
+
+template <typename T, typename Compare>
+binary_search_tree<T, Compare>::binary_search_tree(const Compare& comp, bool duplicates)
     : binary_tree<T>()
-    , _compare(comp) {};
+    , _compare(comp)
+    , _allow_duplicates(duplicates) {};
 
 template <typename T, typename Compare>
 template <typename It, typename _Compare, typename _Requires>
-binary_search_tree<T, Compare>::binary_search_tree(It first, It last)
-    : binary_search_tree(first, last, Compare()) {};
+binary_search_tree<T, Compare>::binary_search_tree(It first, It last, bool duplicates)
+    : binary_search_tree(first, last, Compare(), duplicates) {};
 
 template <typename T, typename Compare>
 template <typename It>
-binary_search_tree<T, Compare>::binary_search_tree(It first, It last, Compare comp)
+binary_search_tree<T, Compare>::binary_search_tree(
+    It first, It last, const Compare& comp, bool duplicates)
     : binary_tree<T>()
     , _compare(comp)
+    , _allow_duplicates(duplicates)
 {
-    std::vector<T> elements(first, last);
-    std::sort(elements.begin(), elements.end(), comp);
-    this->_root.reset(this->_generate(elements, 0, elements.size(), nullptr));
-    this->_size = elements.size();
+    for (; first != last; ++first) {
+        this->insert(*first);
+    }
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::iterator binary_search_tree<T, Compare>::begin()
+{
+    return binary_tree<T>::begin(traversal::in_order);
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::iterator binary_search_tree<T, Compare>::end()
+{
+    return binary_tree<T>::end(traversal::in_order);
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::const_iterator
+binary_search_tree<T, Compare>::cbegin() const
+{
+    return binary_tree<T>::cbegin(traversal::in_order);
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::const_iterator binary_search_tree<T, Compare>::cend() const
+{
+    return binary_tree<T>::cend(traversal::in_order);
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::reverse_iterator binary_search_tree<T, Compare>::rbegin()
+{
+    return std::make_reverse_iterator(end());
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::reverse_iterator binary_search_tree<T, Compare>::rend()
+{
+    return std::make_reverse_iterator(begin());
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::const_reverse_iterator
+binary_search_tree<T, Compare>::crbegin() const
+{
+    return std::make_reverse_iterator(cend());
+}
+
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::const_reverse_iterator
+binary_search_tree<T, Compare>::crend() const
+{
+    return std::make_reverse_iterator(cbegin());
 }
 
 template <typename T, typename Compare>
@@ -35,23 +95,17 @@ bool binary_search_tree<T, Compare>::contains(const T& item) const noexcept
 }
 
 template <typename T, typename Compare>
-typename binary_tree<T>::node* binary_search_tree<T, Compare>::_generate(
-    const std::vector<T>& elements, uint32_t first, uint32_t last,
-    typename binary_tree<T>::node* parent)
+typename binary_search_tree<T, Compare>::iterator binary_search_tree<T, Compare>::find(
+    const T& item)
 {
-    if (first == last) {
-        return nullptr;
-    }
+    return this->_make_iterator(_find(item), traversal::in_order, false);
+}
 
-    uint32_t middle = (first + last) / 2;
-    std::unique_ptr<typename binary_tree<T>::node> root(
-        new typename binary_tree<T>::node(elements[middle], parent));
-
-    if (last - first > 1) {
-        root->replace_left(_generate(elements, first, middle, root.get()));
-        root->replace_right(_generate(elements, middle + 1, last, root.get()));
-    }
-    return root.release();
+template <typename T, typename Compare>
+typename binary_search_tree<T, Compare>::const_iterator binary_search_tree<T, Compare>::find(
+    const T& item) const
+{
+    return this->_make_const_iterator(_find(item), traversal::in_order, false);
 }
 
 template <typename T, typename Compare>
@@ -59,7 +113,7 @@ typename binary_tree<T>::node* binary_search_tree<T, Compare>::_find(const T& it
 {
 
     typename binary_tree<T>::node* current = this->_root.get();
-    while ((current != nullptr) && (current->item != item))
+    while ((current != nullptr) && (_compare(current->item, item) || _compare(item, current->item)))
         current = _compare(item, current->item) ? current->left : current->right;
 
     return current;
@@ -100,14 +154,6 @@ void binary_search_tree<T, Compare>::_rotate(
     } else {
         parent->change_right(new_root);
     }
-}
-
-template <typename T, typename Compare>
-void binary_search_tree<T, Compare>::_verify(typename binary_tree<T>::iterator check)
-{
-    typename binary_tree<T>::node* found = _find(*check);
-    if (found != binary_tree<T>::_get_node(check))
-        throw std::invalid_argument("Not in current tree");
 }
 }
 

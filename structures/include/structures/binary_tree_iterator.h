@@ -21,14 +21,21 @@ public:
     using reference = T&;
     using iterator_category = std::bidirectional_iterator_tag;
 
-    tree_iterator() = delete;
+    using const_pointer = const T*;
+    using const_reference = const T&;
+
+    tree_iterator() = default;
     tree_iterator(const tree_iterator<T>&);
+    tree_iterator& operator=(const tree_iterator<T>&);
+    tree_iterator(tree_iterator<T>&&) = default;
+    tree_iterator& operator=(tree_iterator<T>&&) = default;
+
     bool operator==(const tree_iterator<T>&) const;
     bool operator!=(const tree_iterator<T>&) const;
-    const T& operator*() const;
-    T& operator*();
-    const T* operator->() const;
-    T* operator->();
+    const_reference operator*() const;
+    reference operator*();
+    const_pointer operator->() const;
+    pointer operator->();
 
     tree_iterator& operator++();
     tree_iterator operator++(int);
@@ -36,10 +43,13 @@ public:
     tree_iterator operator--(int);
 
 private:
-    tree_iterator(typename binary_tree<T>::node* root, traversal order);
+    tree_iterator(typename binary_tree<T>::node* root, traversal order, bool entire_subtree,
+        binary_tree<T>* tree);
     typename binary_tree<T>::node* _get_node();
 
     std::unique_ptr<tree_iterator_impl<T>> _impl;
+    traversal _trav;
+    binary_tree<T>* _tree;
     friend class binary_tree<T>;
 };
 
@@ -51,13 +61,16 @@ public:
     using reference = const T&;
     using iterator_category = std::bidirectional_iterator_tag;
 
-    tree_const_iterator() = delete;
+    tree_const_iterator() = default;
     tree_const_iterator(const tree_const_iterator<T>&);
+    tree_const_iterator& operator=(const tree_const_iterator<T>&);
+    tree_const_iterator(tree_const_iterator<T>&&) = default;
+    tree_const_iterator& operator=(tree_const_iterator<T>&&) = default;
 
     bool operator==(const tree_const_iterator<T>&) const;
     bool operator!=(const tree_const_iterator<T>&) const;
-    const T& operator*() const;
-    const T* operator->() const;
+    reference operator*() const;
+    pointer operator->() const;
 
     tree_const_iterator& operator++();
     tree_const_iterator operator++(int);
@@ -65,10 +78,13 @@ public:
     tree_const_iterator operator--(int);
 
 private:
-    tree_const_iterator(typename binary_tree<T>::node* root, traversal order);
-    typename binary_tree<T>::node* _get_node();
+    tree_const_iterator(const typename binary_tree<T>::node* root, traversal order,
+        bool entire_subtree, const binary_tree<T>* tree);
+    const typename binary_tree<T>::node* _get_node();
 
-    std::shared_ptr<tree_iterator_impl<T>> _impl;
+    std::unique_ptr<tree_iterator_impl<T>> _impl;
+    traversal _trav;
+    const binary_tree<T>* _tree;
     friend class binary_tree<T>;
 };
 }

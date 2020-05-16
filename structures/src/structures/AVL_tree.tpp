@@ -5,58 +5,23 @@
 
 namespace tree {
 template <typename T, typename Compare>
-typename AVL_tree<T, Compare>::t_node* AVL_tree<T, Compare>::generate(
-    const std::vector<T>& elements, uint32_t first, uint32_t last,
-    typename AVL_tree<T, Compare>::t_node* parent)
-{
-    if (first == last) {
-        return nullptr;
-    }
-
-    uint32_t middle = (first + last) / 2;
-    std::unique_ptr<t_node> root(new t_node(elements[middle], parent));
-
-    if (last - first > 1) {
-        root->replace_left(generate(elements, first, middle, root.get()));
-        root->replace_right(generate(elements, middle + 1, last, root.get()));
-    }
-
-    return root.release();
-}
-
-template <typename T, typename Compare>
-AVL_tree<T, Compare>::AVL_tree(Compare comp)
-    : binary_search_tree<T, Compare>(comp) {};
-
-template <typename T, typename Compare>
-template <typename It, typename _Compare, typename _Requires>
-AVL_tree<T, Compare>::AVL_tree(It first, It last)
-    : AVL_tree(first, last, Compare()) {};
-
-template <typename T, typename Compare>
-template <typename It>
-AVL_tree<T, Compare>::AVL_tree(It first, It last, Compare comp)
-    : binary_search_tree<T, Compare>(first, last, comp)
-{
-    std::vector<T> elements(first, last);
-    std::sort(elements.begin(), elements.end(), comp);
-    this->_root.reset(generate(elements, 0, elements.size(), nullptr));
-    this->_size = elements.size();
-}
-
-template <typename T, typename Compare> void AVL_tree<T, Compare>::insert(const T& item)
+std::pair<typename AVL_tree<T, Compare>::iterator, bool> AVL_tree<T, Compare>::insert(const T& item)
 {
     t_node* ptr = dynamic_cast<t_node*>(this->_root.get());
     if (ptr == nullptr) {
         this->_root.reset(new t_node(item));
         this->_size = 1;
-        return;
+        return { begin(), true };
     }
 
     bool go_left = this->_compare(item, ptr->item);
     t_node* next = go_left ? dynamic_cast<t_node*>(ptr->left) : dynamic_cast<t_node*>(ptr->right);
     while (next != nullptr) {
         ptr = next;
+        if (!this->_allow_duplicates && !this->_compare(ptr->item, item)
+            && !this->_compare(item, ptr->item))
+            return { this->_make_iterator(ptr, traversal::in_order), false };
+
         go_left = this->_compare(item, ptr->item);
         next = go_left ? dynamic_cast<t_node*>(ptr->left) : dynamic_cast<t_node*>(ptr->right);
     }
@@ -69,11 +34,12 @@ template <typename T, typename Compare> void AVL_tree<T, Compare>::insert(const 
     }
     ++this->_size;
 
-    balance_tree(add);
+    _balance_tree(add);
+    return { this->_make_iterator(add, traversal::in_order), true };
 }
 
 template <typename T, typename Compare>
-void AVL_tree<T, Compare>::balance_tree(typename AVL_tree<T, Compare>::t_node* start) noexcept
+void AVL_tree<T, Compare>::_balance_tree(typename AVL_tree<T, Compare>::t_node* start) noexcept
 {
     enum rotate { left, right, none };
 
@@ -164,17 +130,20 @@ void AVL_tree<T, C>::t_node::replace_right(typename AVL_tree<T, C>::t_node* add)
     delete prev;
 }
 
-template <typename T, typename C> void AVL_tree<T, C>::remove(typename binary_tree<T>::iterator it)
+template <typename T, typename C>
+typename AVL_tree<T, C>::iterator AVL_tree<T, C>::erase(typename AVL_tree<T, C>::iterator it)
 {
     binary_search_tree<T, C>::_verify(it);
-    typename binary_tree<T>::node* node = binary_tree<T>::_get_node(it);
+    typename binary_tree<T>::node* node = binary_tree<T>::_s_get_node(it);
     if (node == nullptr)
-        return;
+        return end();
     if (this->_size == 1) {
         this->_root.reset();
         this->_size = 0;
-        return;
+        return end();
     }
+
+    ++it; // return value
 
     auto parent = dynamic_cast<t_node*>(node->parent);
     bool is_root = parent == nullptr;
@@ -224,13 +193,13 @@ template <typename T, typename C> void AVL_tree<T, C>::remove(typename binary_tr
     // Single child: move up
     if (!node->left) {
         swap_out(dynamic_cast<t_node*>(node->right));
-        balance_tree(parent);
-        return;
+        _balance_tree(parent);
+        return it;
     }
     if (!node->right) {
         swap_out(dynamic_cast<t_node*>(node->left));
-        balance_tree(parent);
-        return;
+        _balance_tree(parent);
+        return it;
     }
 
     // Two children: must determine successor
@@ -242,10 +211,12 @@ template <typename T, typename C> void AVL_tree<T, C>::remove(typename binary_tr
     bool direct_shift(node == successor_parent);
     swap_out(successor);
     if (!direct_shift) {
-        balance_tree(successor_parent);
+        _balance_tree(successor_parent);
     } else {
-        balance_tree(successor);
+        _balance_tree(successor);
     }
+
+    return it;
 }
 
 template <typename T, typename C>

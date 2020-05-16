@@ -92,14 +92,19 @@ typename binary_tree<T>::node* post_order_iterator_impl<T>::s_post_order_start(
 }
 
 template <typename T>
-tree_iterator_impl<T>::tree_iterator_impl(typename binary_tree<T>::node* current)
-    : _current(current)
+tree_iterator_impl<T>::tree_iterator_impl(typename binary_tree<T>::node* current, binary_tree<T>* tree)
+    : _current(current), _container(tree)
 {
 }
 
+template<typename T>
+typename binary_tree<T>::node* tree_iterator_impl<T>::_get_root() {
+    return _container->_root.get();
+}
+
 template <typename T>
-pre_order_iterator_impl<T>::pre_order_iterator_impl(typename binary_tree<T>::node* ptr)
-    : tree_iterator_impl<T>(ptr)
+pre_order_iterator_impl<T>::pre_order_iterator_impl(typename binary_tree<T>::node* ptr, binary_tree<T>* tree)
+    : tree_iterator_impl<T>(ptr, tree)
 {
 }
 
@@ -126,17 +131,21 @@ template <typename T> pre_order_iterator_impl<T>& pre_order_iterator_impl<T>::op
 
 template <typename T> pre_order_iterator_impl<T>& pre_order_iterator_impl<T>::operator--() noexcept
 {
+    if(!this->_current) {
+        this->_current = s_pre_order_end(this->_get_root());
+    } else {
     typename binary_tree<T>::node* parent = this->_current->parent;
     this->_current = (parent && (parent->right == this->_current) && parent->left)
         ? s_pre_order_end(parent->left)
         : parent;
-
+    }
     return *this;
 }
 
 template <typename T>
-in_order_iterator_impl<T>::in_order_iterator_impl(typename binary_tree<T>::node* ptr)
-    : tree_iterator_impl<T>(s_leftmost_descendant(ptr))
+in_order_iterator_impl<T>::in_order_iterator_impl(
+    typename binary_tree<T>::node* ptr, binary_tree<T>* tree, bool entire_tree)
+    : tree_iterator_impl<T>(entire_tree ? s_leftmost_descendant(ptr) : ptr, tree)
 {
 }
 
@@ -157,7 +166,10 @@ template <typename T> in_order_iterator_impl<T>& in_order_iterator_impl<T>::oper
 
 template <typename T> in_order_iterator_impl<T>& in_order_iterator_impl<T>::operator--() noexcept
 {
-    if (this->_current->left) {
+    if (!this->_current) {
+        this->_current = s_rightmost_descendant(this->_get_root());
+    }
+    else if (this->_current->left) {
         this->_current = s_rightmost_descendant(this->_current->left);
     } else {
         typename binary_tree<T>::node* parent = this->_current->parent;
@@ -171,8 +183,9 @@ template <typename T> in_order_iterator_impl<T>& in_order_iterator_impl<T>::oper
 }
 
 template <typename T>
-post_order_iterator_impl<T>::post_order_iterator_impl(typename binary_tree<T>::node* ptr)
-    : tree_iterator_impl<T>(s_post_order_start(ptr))
+post_order_iterator_impl<T>::post_order_iterator_impl(
+    typename binary_tree<T>::node* ptr, binary_tree<T>* tree, bool entire_tree)
+    : tree_iterator_impl<T>(entire_tree ? s_post_order_start(ptr) : ptr, tree)
 {
 }
 
@@ -190,7 +203,10 @@ post_order_iterator_impl<T>& post_order_iterator_impl<T>::operator++() noexcept
 template <typename T>
 post_order_iterator_impl<T>& post_order_iterator_impl<T>::operator--() noexcept
 {
-    if (this->_current->right) {
+    if (!this->_current) {
+        this->_current = this->_get_root();
+    }
+    else if (this->_current->right) {
         this->_current = this->_current->right;
     } else if (this->_current->left) {
         this->_current = this->_current->left;
@@ -210,8 +226,8 @@ post_order_iterator_impl<T>& post_order_iterator_impl<T>::operator--() noexcept
 }
 
 template <typename T>
-level_order_iterator_impl<T>::level_order_iterator_impl(typename binary_tree<T>::node* ptr)
-    : tree_iterator_impl<T>(ptr)
+level_order_iterator_impl<T>::level_order_iterator_impl(typename binary_tree<T>::node* ptr, binary_tree<T>* tree)
+    : tree_iterator_impl<T>(ptr, tree)
     , _buffer()
 {
     _buffer.push_back(ptr);

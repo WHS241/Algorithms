@@ -13,13 +13,15 @@
 namespace graph {
 // 图的邻接矩阵储存表示
 // 空间: O(V^2)
-template <bool Directed, bool Weighted, typename EdgeType> class adjacency_matrix : public impl<Directed, Weighted, EdgeType> {
+template <bool Directed, bool Weighted, typename EdgeWeight>
+class adjacency_matrix : public impl<Directed, Weighted, EdgeWeight> {
 public:
     adjacency_matrix() = default;
 
     virtual ~adjacency_matrix() = default;
 
-    const impl<Directed, Weighted, EdgeType>& copy_from(const impl<Directed, Weighted, EdgeType>&) override;
+    const impl<Directed, Weighted, EdgeWeight>& copy_from(
+        const impl<Directed, Weighted, EdgeWeight>&) override;
 
     // 输出：图的阶
     // O(1)
@@ -31,7 +33,7 @@ public:
 
     // 输出：从start的end的边的长度。
     // O(1)
-    EdgeType edge_cost(const uint32_t& start, const uint32_t& dest) const override;
+    EdgeWeight edge_cost(const uint32_t& start, const uint32_t& dest) const override;
 
     // 输入：结点数
     // 输出：该结点的（出）度
@@ -43,13 +45,13 @@ public:
     // O(V)
     std::list<uint32_t> neighbors(const uint32_t& start) const override;
 
-    std::list<std::pair<uint32_t, EdgeType>> edges(const uint32_t&) const override;
-    std::pair<impl<Directed, Weighted, EdgeType>*, std::vector<uint32_t>> induced_subgraph(
+    std::list<std::pair<uint32_t, EdgeWeight>> edges(const uint32_t&) const override;
+    std::pair<impl<Directed, Weighted, EdgeWeight>*, std::vector<uint32_t>> induced_subgraph(
         const std::list<uint32_t>&) const override;
 
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     // O(1)
-    void set_edge(const uint32_t& start, const uint32_t& dest, const EdgeType& cost) override;
+    void set_edge(const uint32_t& start, const uint32_t& dest, const EdgeWeight& cost) override;
 
     // 加结点
     // 输出：图阶新值
@@ -76,7 +78,7 @@ public:
     void clear() noexcept override;
 
 private:
-    typedef std::pair<bool, EdgeType> _t_matrix_entry;
+    typedef std::pair<bool, EdgeWeight> _t_matrix_entry;
     typedef std::vector<std::vector<_t_matrix_entry>> _t_graph_rep;
 
     _t_graph_rep _graph;

@@ -52,9 +52,21 @@ template <typename T, typename Compare> uint32_t node_base<T, Compare>::size() c
 }
 
 template <typename T, typename Compare>
-typename node_base<T, Compare>::node* node_base<T, Compare>::s_make_node(const T& item)
+typename node_base<T, Compare>::node* node_base<T, Compare>::_s_make_node(const T& item)
 {
     return new node(item);
+}
+
+template <typename T, typename Compare>
+bool node_base<T, Compare>::_s_get_flag(const typename node_base<T, Compare>::node& n)
+{
+    return n._flag;
+}
+
+template <typename T, typename Compare>
+void node_base<T, Compare>::_s_set_flag(typename node_base<T, Compare>::node& n, bool f)
+{
+    n._flag = f;
 }
 }
 

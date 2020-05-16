@@ -42,12 +42,9 @@ public:
         T _value;
         node* _parent;
         std::list<node*> _children;
-        bool _flag {};
+        bool _flag;
 
         friend class node_base<T, Compare>;
-        friend class binary_heap<T, Compare>;
-        friend class binomial<T, Compare>;
-        friend class Fibonacci<T, Compare>;
     };
 
     virtual ~node_base() noexcept = default;
@@ -56,12 +53,14 @@ public:
     void insert(const T& item) override;
     virtual node* add(const T& item) = 0;
 
-    virtual void decrease(node* target, const T& newVal) = 0;
+    // Decrease the value stored in the target pointer
+    // Should throw if new_val is greater
+    virtual void decrease(node* target, const T& new_val) = 0;
 
     uint32_t size() const noexcept override;
 
     // Though not included due to inheritance issues, children should also implement
-    // merge([class]& src) which moves all the values of src into this, emptying src.
+    // merge([class]&& src) which moves all the values of src into this, emptying src.
     // Node pointers should not be invalidated by this merge.
 
 protected:
@@ -70,7 +69,9 @@ protected:
     // children
     node_base(const node_base<T, Compare>& src) = default;
 
-    static node* s_make_node(const T& item);
+    static node* _s_make_node(const T& item);
+    static bool _s_get_flag(const node&);
+    static void _s_set_flag(node&, bool);
 
     uint32_t _size = 0;
 };

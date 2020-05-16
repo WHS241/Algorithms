@@ -1,8 +1,7 @@
 #include <structures/van_Emde_Boas_tree.h>
 
 #include <cmath>
-
-#include <structures/vEB_iterator.h>
+#include <stdexcept>
 
 van_Emde_Boas_tree::van_Emde_Boas_tree(uint32_t range)
     : _uint_allocator()
@@ -13,7 +12,7 @@ van_Emde_Boas_tree::van_Emde_Boas_tree(uint32_t range)
     , _check_size(0)
     , _aux(nullptr)
     , _min(range)
-    , _max(-1)
+    , _max(-1U)
 {
     if (_min == _max)
         throw std::invalid_argument("Invalid range");
@@ -108,10 +107,6 @@ van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(const van_Emde_Boas_tree& rhs)
     return *this;
 }
 
-van_Emde_Boas_tree::van_Emde_Boas_tree(van_Emde_Boas_tree&& src) noexcept : van_Emde_Boas_tree() {
-    *this = std::move(src);
-}
-
 van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(van_Emde_Boas_tree&& rhs) noexcept {
     if(this != &rhs) {
         clear();
@@ -131,38 +126,6 @@ van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(van_Emde_Boas_tree&& rhs) noex
         std::swap(_max, rhs._max);
     }
     return *this;
-}
-
-van_Emde_Boas_tree::iterator van_Emde_Boas_tree::begin() noexcept {
-    return cbegin();
-}
-
-van_Emde_Boas_tree::iterator van_Emde_Boas_tree::end() noexcept {
-    return cend();
-}
-
-van_Emde_Boas_tree::const_iterator van_Emde_Boas_tree::cbegin() const noexcept {
-    return const_iterator(this, _min);
-}
-
-van_Emde_Boas_tree::const_iterator van_Emde_Boas_tree::cend() const noexcept {
-    return const_iterator(this, _RANGE);
-}
-
-van_Emde_Boas_tree::reverse_iterator van_Emde_Boas_tree::rbegin() noexcept {
-    return std::make_reverse_iterator(end());
-}
-
-van_Emde_Boas_tree::reverse_iterator van_Emde_Boas_tree::rend() noexcept {
-    return std::make_reverse_iterator(begin());
-}
-
-van_Emde_Boas_tree::const_reverse_iterator van_Emde_Boas_tree::rcbegin() const noexcept {
-    return std::make_reverse_iterator(cend());
-}
-
-van_Emde_Boas_tree::const_reverse_iterator van_Emde_Boas_tree::rcend() const noexcept {
-    return std::make_reverse_iterator(cbegin());
 }
 
 bool van_Emde_Boas_tree::empty() const noexcept {
@@ -190,17 +153,17 @@ void van_Emde_Boas_tree::clear() noexcept {
     _max = -1;
 }
 
-std::pair<van_Emde_Boas_tree::iterator, bool> van_Emde_Boas_tree::insert(uint32_t insert_value) {
+bool van_Emde_Boas_tree::insert(uint32_t insert_value) {
     uint32_t value = insert_value; // need to do processing
     if(value >= _RANGE)
         throw std::out_of_range(std::to_string(value));
     if(_min == value || _max == value)
-        return std::make_pair(iterator(this, insert_value), false);
+        return false;
     // empty tree
-    if(_max == -1) {
+    if(_max == -1U) {
         _min = _max = value;
         ++_size;
-        return std::make_pair(iterator(this, insert_value), true);
+        return true;
     }
 
     // new min: insert old min into trees
@@ -215,9 +178,9 @@ std::pair<van_Emde_Boas_tree::iterator, bool> van_Emde_Boas_tree::insert(uint32_
         bool created = _create_or_noop(target);
 
         try {
-        std::pair<van_Emde_Boas_tree::iterator, bool> sub_result = _subtrees[target].insert(mod);
-        if(!sub_result.second)
-            return std::make_pair(iterator(this, insert_value), false);
+        bool sub_result = _subtrees[target].insert(mod);
+        if(!sub_result)
+            return false;
         if(_subtrees[target]._min == _subtrees[target]._max)
             _aux->insert(target);
         } catch (...) {
@@ -228,7 +191,7 @@ std::pair<van_Emde_Boas_tree::iterator, bool> van_Emde_Boas_tree::insert(uint32_
         }
     }
     ++_size;
-    return std::make_pair(iterator(this, insert_value), true);
+    return true;
 }
 
 void van_Emde_Boas_tree::erase(uint32_t value) noexcept {
@@ -268,12 +231,6 @@ void van_Emde_Boas_tree::erase(uint32_t value) noexcept {
     --_size;
 }
 
-van_Emde_Boas_tree::iterator van_Emde_Boas_tree::find(const uint32_t& key) const {
-    if(key >= _RANGE)
-        throw std::out_of_range(std::to_string(key));
-    return contains(key) ? iterator(this, key) : cend();
-}
-
 bool van_Emde_Boas_tree::contains(const uint32_t& key) const {
     if(key >= _RANGE)
         throw std::out_of_range(std::to_string(key));
@@ -290,10 +247,18 @@ bool van_Emde_Boas_tree::contains(const uint32_t& key) const {
     return false;
 }
 
-uint32_t van_Emde_Boas_tree::_find_next(uint32_t current) const {
+uint32_t van_Emde_Boas_tree::min() const noexcept {
+    return _min;
+}
+
+uint32_t van_Emde_Boas_tree::max() const noexcept {
+    return _max;
+}
+
+uint32_t van_Emde_Boas_tree::find_next(uint32_t current) const {
     if(current < _min)
         return _min;
-    if(_max == -1 || current >= _max)
+    if(_max == -1U || current >= _max)
         return _RANGE; // no successor; go to end()/cend() value
     
     // base case: current is either min or max, or something non-existent
@@ -303,16 +268,16 @@ uint32_t van_Emde_Boas_tree::_find_next(uint32_t current) const {
     }
     uint32_t target = current / _subtree_size;
     uint32_t mod = current % _subtree_size;
-    if(_constructed(target) && mod < _subtrees[target]._max)
-        return target * _subtree_size + _subtrees[target]._find_next(mod);
+    if(_constructed(target) && _subtrees[target]._max != -1U && mod < _subtrees[target]._max)
+        return target * _subtree_size + _subtrees[target].find_next(mod);
     else {
-        uint32_t next_tree = _aux->_find_next(target);
+        uint32_t next_tree = _aux->find_next(target);
         return next_tree * _subtree_size + _subtrees[next_tree]._min;
     }
 }
 
-uint32_t van_Emde_Boas_tree::_find_prev(uint32_t current) const {
-    if(_max == -1 || current > _max)
+uint32_t van_Emde_Boas_tree::find_prev(uint32_t current) const {
+    if(_max == -1U || current > _max)
         return _max;
     if(current <= _min)
         return -1; // no successor; go to last value
@@ -325,11 +290,11 @@ uint32_t van_Emde_Boas_tree::_find_prev(uint32_t current) const {
     uint32_t target = current / _subtree_size;
     uint32_t mod = current % _subtree_size;
     if(_constructed(target) && mod > _subtrees[target]._min)
-        return target * _subtree_size + _subtrees[target]._find_prev(mod);
+        return target * _subtree_size + _subtrees[target].find_prev(mod);
     else {
-        uint32_t next_tree = _aux->_find_prev(target);
+        uint32_t next_tree = _aux->find_prev(target);
         // if there is no prev in aux, predecessor is the min
-        return next_tree == -1 ? _min : (next_tree * _subtree_size + _subtrees[next_tree]._max);
+        return next_tree == -1U ? _min : (next_tree * _subtree_size + _subtrees[next_tree]._max);
     }
 }
 
@@ -341,7 +306,7 @@ bool van_Emde_Boas_tree::_create_or_noop(uint32_t index) {
     if(_constructed(index))
         return false;
     // edge case; last tree may be of different size
-    _tree_allocator.construct(_subtrees + index, ((index == _num_trees - 1) && (_RANGE % _num_trees != 0)) ? _RANGE % _subtree_size : _subtree_size);
+    _tree_allocator.construct(_subtrees + index, ((index == _num_trees - 1) && (_RANGE % _num_trees != 0)) ? (_RANGE % _subtree_size) : _subtree_size);
     _init_check[index] = _check_size;
     _rev_check[_check_size] = index;
     ++_check_size;
