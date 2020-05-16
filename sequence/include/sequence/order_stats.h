@@ -54,8 +54,7 @@ std::pair<It, It> extrema(It first, It last, Compare compare)
 
     return result;
 }
-template <typename It>
-std::pair<It, It> extrema(It first, It last)
+template <typename It> std::pair<It, It> extrema(It first, It last)
 {
     return extrema(first, last, std::less<>());
 }
@@ -130,10 +129,10 @@ typename std::iterator_traits<It>::value_type selection(
 }
 
 template <typename It, typename Compare>
-typename std::iterator_traits<It>::value_type selection(
-    It first, It last, uint32_t rank) {
-        return selection(first, last, rank, std::less<>());
-    }
+typename std::iterator_traits<It>::value_type selection(It first, It last, uint32_t rank)
+{
+    return selection(first, last, rank, std::less<>());
+}
 } // namespace Sequence
 
 #endif // !ORDER_STATISTICS_H

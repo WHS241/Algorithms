@@ -15,7 +15,9 @@ namespace approx {
 // Provides a vertex cover of size < 2 * optimal
 // Fanica Gavril and Mihalis Yannakakis
 template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
-std::list<Vertex> vertex_cover_edge_double(graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> input) {
+std::list<Vertex> vertex_cover_edge_double(
+    graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> input)
+{
     std::list<Vertex> result;
 
     // Candidate edge: store endpoints and cumulative degree of endpoints
@@ -77,7 +79,7 @@ std::list<Vertex> vertex_cover_edge_double(graph::graph<Vertex, false, Weighted,
         // pop off edges that go between already-added vertices
         while (heap_ptr->get_root().cumul_degree == 0)
             heap_ptr->remove_root();
-        
+
         // add vertices to cover and remove from graph
         input.remove(to_remove.first_end);
         input.remove(to_remove.second_end);
@@ -92,16 +94,18 @@ std::list<Vertex> vertex_cover_edge_double(graph::graph<Vertex, false, Weighted,
 // Colors a 3-colorable graph with n vertices using O(sqrt(n)) colors
 // Avi Wigderson (1983)
 template <typename Vertex, bool Weighted, typename EdgeWeight, typename... MapArgs>
-std::unordered_map<Vertex, uint32_t, MapArgs...> three_color_Wigderson(graph::graph<Vertex, false, Weighted, EdgeWeight, MapArgs...> input) {
+std::unordered_map<Vertex, uint32_t, MapArgs...> three_color_Wigderson(
+    graph::graph<Vertex, false, Weighted, EdgeWeight, MapArgs...> input)
+{
     double bound
         = std::sqrt(2 * input.order()); // determined through balancing: 2n/bound(n) + bound(n) + 1
     std::list<Vertex> candidates;
     uint32_t num_colors = 0;
     std::unordered_map<Vertex, uint32_t, MapArgs...> result;
 
-
-    // If a vertex has a high degree, we two-color its neighbors and throw out the colors and vertices we used
-    // Since we strictly remove vertices, we never get new candidates as algorithm progresses
+    // If a vertex has a high degree, we two-color its neighbors and throw out the colors and
+    // vertices we used Since we strictly remove vertices, we never get new candidates as algorithm
+    // progresses
     for (const Vertex& v : input.vertices())
         if (input.degree(v) > bound)
             candidates.push_back(v);
@@ -111,8 +115,9 @@ std::unordered_map<Vertex, uint32_t, MapArgs...> three_color_Wigderson(graph::gr
             std::list<Vertex> neighbors = input.neighbors(v);
             graph::graph<Vertex, false, Weighted, EdgeWeight, MapArgs...> subgraph
                 = input.generate_induced_subgraph(neighbors.begin(), neighbors.end());
-            std::pair<std::unordered_set<Vertex, MapArgs...>, std::unordered_set<Vertex, MapArgs...>> sets
-                = graph_alg::verify_bipartite(subgraph);
+            std::pair<std::unordered_set<Vertex, MapArgs...>,
+                std::unordered_set<Vertex, MapArgs...>>
+                sets = graph_alg::verify_bipartite(subgraph);
 
             // if 3-colorable, the neighbors of a single vertex are two colorable
             // we also know by the bound that there are vertices here

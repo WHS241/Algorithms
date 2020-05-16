@@ -1,8 +1,8 @@
 #ifndef BINARY_SEARCH_H
 #define BINARY_SEARCH_H
 
-#include <functional>
 #include <cstdint>
+#include <functional>
 
 /*
 All algorithms require random access iterators for Θ(log n)
@@ -85,8 +85,7 @@ RandomIt find_min_in_cyclic(RandomIt first, RandomIt last, Compare comp)
     --last;
     return comp(*first, *last) ? first : last;
 }
-template <typename RandomIt, typename T>
-RandomIt find_min_in_cyclic(RandomIt first, RandomIt last)
+template <typename RandomIt, typename T> RandomIt find_min_in_cyclic(RandomIt first, RandomIt last)
 {
     return find_min_in_cyclic(first, last, std::less<T>());
 }

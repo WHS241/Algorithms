@@ -144,16 +144,14 @@ std::list<It> longest_ordered_subsequence(It first, It last, Compare comp)
         std::vector<uint32_t> predecessor(num_elements);
 
         typedef std::pair<It, uint32_t> T;
-        
+
         std::vector<T> it_tracker(num_elements);
-        auto compare = [&comp](const T& x, const T& y) {
-            return comp(*x.first, *y.first);
-        };
+        auto compare = [&comp](const T& x, const T& y) { return comp(*x.first, *y.first); };
 
         tree::red_black_tree<T, decltype(compare)> tree(compare);
 
-        for(uint32_t i = 0; first != last; ++first, ++i) {
-            it_tracker[i] = {first, i};
+        for (uint32_t i = 0; first != last; ++first, ++i) {
+            it_tracker[i] = { first, i };
             auto current = tree.insert(it_tracker[i]).first;
             if (current == tree.begin()) {
                 predecessor[i] = i;
@@ -162,38 +160,37 @@ std::list<It> longest_ordered_subsequence(It first, It last, Compare comp)
                 predecessor[i] = (--temp)->second;
             }
 
-            if (++current != tree.end()) 
+            if (++current != tree.end())
                 tree.erase(current);
         }
 
         std::list<It> result;
         auto tracer = *tree.rbegin();
-        while(predecessor[tracer.second] != tracer.second) {
+        while (predecessor[tracer.second] != tracer.second) {
             result.push_front(tracer.first);
             tracer = it_tracker[predecessor[tracer.second]];
         }
         result.push_front(tracer.first);
         return result;
-/*
-        // transfer to something with random access iterators
-        std::vector<typename std::iterator_traits<It>::value_type> buffer(first, last);
-        auto tempResult = longest_ordered_subsequence(buffer.begin(), buffer.end(), comp);
+        /*
+                // transfer to something with random access iterators
+                std::vector<typename std::iterator_traits<It>::value_type> buffer(first, last);
+                auto tempResult = longest_ordered_subsequence(buffer.begin(), buffer.end(), comp);
 
-        // convert to input iterators
-        std::list<It> result;
-        auto lastTemp = buffer.begin();
-        std::transform(tempResult.begin(), tempResult.end(), std::back_inserter(result),
-            [&first, &lastTemp](auto it) {
-                std::advance(first, it - lastTemp);
-                lastTemp = it;
-                return first;
-            });
-        return result;
-        */
+                // convert to input iterators
+                std::list<It> result;
+                auto lastTemp = buffer.begin();
+                std::transform(tempResult.begin(), tempResult.end(), std::back_inserter(result),
+                    [&first, &lastTemp](auto it) {
+                        std::advance(first, it - lastTemp);
+                        lastTemp = it;
+                        return first;
+                    });
+                return result;
+                */
     }
 }
-template <typename It>
-std::list<It> longest_ordered_subsequence(It first, It last)
+template <typename It> std::list<It> longest_ordered_subsequence(It first, It last)
 {
     return longest_ordered_subsequence(first, last, std::less<>());
 }
@@ -203,7 +200,9 @@ Specialized version for integral types
 Uses van Emde Boas tree
 For n numbers where max - min = M, O(n log log M)
 */
-template <typename It, typename _Requires = std::enable_if_t<std::is_integral_v<typename std::iterator_traits<It>::value_type>, void>>
+template <typename It,
+    typename _Requires
+    = std::enable_if_t<std::is_integral_v<typename std::iterator_traits<It>::value_type>, void>>
 std::list<It> longest_increasing_integer_subsequence(It first, It last)
 {
     if (first == last) {
@@ -218,16 +217,16 @@ std::list<It> longest_increasing_integer_subsequence(It first, It last)
     std::vector<It> it_tracker(num_elements);
     std::vector<uint32_t> predecessor(num_elements);
 
-    for(uint32_t i = 0; first != last; ++first, ++i) {
+    for (uint32_t i = 0; first != last; ++first, ++i) {
         it_tracker[i] = first;
-        auto it = vEB.insert({*first - *bounds.first, i}).first;
+        auto it = vEB.insert({ *first - *bounds.first, i }).first;
         if (it == vEB.begin()) {
             predecessor[i] = i;
         } else {
             auto temp(it);
             predecessor[i] = (--temp)->second;
         }
-        if (++it != vEB.end()) 
+        if (++it != vEB.end())
             vEB.erase(it);
     }
 

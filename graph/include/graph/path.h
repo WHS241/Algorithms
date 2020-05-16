@@ -168,10 +168,9 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Dijkstra_part
     // Keep track of where the shortest path comes from and what the cost is
     // Initialize to self and 0
     std::vector<data> data_map(vertices.size());
-    std::transform(
-        vertices.begin(), vertices.end(), data_map.begin(), [](const Vertex& value) {
-            return data { value, value, zero };
-        });
+    std::transform(vertices.begin(), vertices.end(), data_map.begin(), [](const Vertex& value) {
+        return data { value, value, zero };
+    });
 
     // the heap structure used here determines the runtime of the algorithm
     // must be a node_base

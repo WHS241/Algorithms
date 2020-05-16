@@ -18,19 +18,20 @@ protected:
     }
 };
 
-TEST_F(AlgorithmTest, LISTest) {
+TEST_F(AlgorithmTest, LISTest)
+{
     for (uint32_t j = 0; j < 100; ++j) {
         // strictly increasing values
         std::vector<uint32_t> input(100);
-        
+
         uint32_t last = -1;
-        for(uint32_t i = 0; i < 100; ++i) {
+        for (uint32_t i = 0; i < 100; ++i) {
             std::uniform_int_distribution<uint32_t> dist(last + 1, 9901 + i);
             input[i] = last = dist(engine);
         }
 
         // shuffle
-        for(uint32_t i = 0; i < 100; ++i) {
+        for (uint32_t i = 0; i < 100; ++i) {
             std::uniform_int_distribution<uint32_t> index_dist(i, 99);
             std::swap(input[i], input[index_dist(engine)]);
         }
@@ -46,17 +47,17 @@ TEST_F(AlgorithmTest, LISTest) {
         EXPECT_EQ(result1.size(), int_res.size());
         EXPECT_EQ(list_res.size(), int_res.size());
 
-        for(auto it = ++result1.begin(); it != result1.end(); ++it) {
+        for (auto it = ++result1.begin(); it != result1.end(); ++it) {
             auto temp(it);
             --temp;
             EXPECT_LT(**temp, **it);
         }
-        for(auto it = ++int_res.begin(); it != int_res.end(); ++it) {
+        for (auto it = ++int_res.begin(); it != int_res.end(); ++it) {
             auto temp(it);
             --temp;
             EXPECT_LT(**temp, **it);
         }
-        for(auto it = ++list_res.begin(); it != list_res.end(); ++it) {
+        for (auto it = ++list_res.begin(); it != list_res.end(); ++it) {
             auto temp(it);
             --temp;
             EXPECT_LT(**temp, **it);

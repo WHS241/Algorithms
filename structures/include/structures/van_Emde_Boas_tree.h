@@ -38,7 +38,7 @@ public:
     uint32_t max() const noexcept;
 
     // the important methods for vEB trees
-    // Θ(log log _RANGE)
+    // Θ(log log max_size())
     uint32_t find_next(uint32_t current) const;
     uint32_t find_prev(uint32_t current) const;
 

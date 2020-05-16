@@ -39,5 +39,4 @@ template <typename It> void radix_sort(It first, It last, uint32_t base)
 }
 } // namespace Sequence
 
-
 #endif // NON_COMPARE_SORT_H

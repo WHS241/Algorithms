@@ -47,7 +47,8 @@ private:
 
 template <typename T> class in_order_iterator_impl : public tree_iterator_impl<T> {
 public:
-    in_order_iterator_impl(typename binary_tree<T>::node* current, binary_tree<T>* tree, bool entire_tree);
+    in_order_iterator_impl(
+        typename binary_tree<T>::node* current, binary_tree<T>* tree, bool entire_tree);
     in_order_iterator_impl& operator++() noexcept;
     in_order_iterator_impl& operator--() noexcept;
 
@@ -60,7 +61,8 @@ private:
 
 template <typename T> class post_order_iterator_impl : public tree_iterator_impl<T> {
 public:
-    post_order_iterator_impl(typename binary_tree<T>::node* current, binary_tree<T>* tree, bool entire_tree);
+    post_order_iterator_impl(
+        typename binary_tree<T>::node* current, binary_tree<T>* tree, bool entire_tree);
     post_order_iterator_impl& operator++() noexcept;
     post_order_iterator_impl& operator--() noexcept;
 

@@ -19,7 +19,8 @@ template <typename T, typename Compare = std::less<T>>
 class red_black_tree : public binary_search_tree<T, Compare> {
 public:
     using typename binary_search_tree<T, Compare>::value_type,
-        typename binary_search_tree<T, Compare>::value_compare, typename binary_search_tree<T, Compare>::iterator,
+        typename binary_search_tree<T, Compare>::value_compare,
+        typename binary_search_tree<T, Compare>::iterator,
         typename binary_search_tree<T, Compare>::const_iterator,
         typename binary_search_tree<T, Compare>::reverse_iterator,
         typename binary_search_tree<T, Compare>::const_reverse_iterator;

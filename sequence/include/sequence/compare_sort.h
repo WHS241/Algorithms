@@ -1,8 +1,8 @@
 #ifndef COMPARE_SORT_H
 #define COMPARE_SORT_H
 
-#include <list>
 #include <functional>
+#include <list>
 #include <random>
 
 #include <structures/heap>
@@ -51,8 +51,8 @@ void mergesort(ForwardIt first, ForwardIt last, Compare compare)
     std::copy(it1, first_half.end(), first);
     std::copy(it2, second_half.end(), first);
 }
-template <typename ForwardIt>
-void mergesort(ForwardIt first, ForwardIt last) {
+template <typename ForwardIt> void mergesort(ForwardIt first, ForwardIt last)
+{
     mergesort(first, last, std::less<>());
 }
 
@@ -127,10 +127,7 @@ void quicksort(BiDirIt first, BiDirIt last, Compare compare)
     quicksort(first, partition_index, compare);
     quicksort(++partition_index, last, compare);
 }
-template <typename BiDirIt>
-void quicksort(BiDirIt first, BiDirIt last) {
-    quicksort(first, last);
-}
+template <typename BiDirIt> void quicksort(BiDirIt first, BiDirIt last) { quicksort(first, last); }
 
 /*
 Heapsort
@@ -197,10 +194,7 @@ template <typename It, typename Compare> void heapsort(It first, It last, Compar
         std::generate(first, last, [&heap]() { return heap.remove_root(); });
     }
 }
-template <typename It>
-void heapsort(It first, It last) {
-    heapsort(first, last, std::less<>());
-}
+template <typename It> void heapsort(It first, It last) { heapsort(first, last, std::less<>()); }
 
 } // namespace Sequence
 
