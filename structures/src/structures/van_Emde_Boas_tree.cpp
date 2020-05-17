@@ -8,7 +8,7 @@ van_Emde_Boas_tree::van_Emde_Boas_tree(uint32_t range)
     , _tree_allocator()
     , _RANGE(range)
     , _size(0)
-    , _num_trees(std::round(std::sqrt((double)range)))
+    , _num_trees(static_cast<uint32_t>(std::round(std::sqrt(range))))
     , _check_size(0)
     , _aux(nullptr)
     , _min(range)
@@ -279,7 +279,7 @@ uint32_t van_Emde_Boas_tree::find_prev(uint32_t current) const
     if (_max == -1U || current > _max)
         return _max;
     if (current <= _min)
-        return -1; // no successor; go to last value
+        return -1U; // no successor; go to last value
 
     // base case: current is either min or max, or something non-existent
     // only max case is not covered above

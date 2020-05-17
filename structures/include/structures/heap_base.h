@@ -71,6 +71,6 @@ private:
 };
 }
 
-#include "src/structures/heap_base.tpp"
+#include "../../src/structures/heap_base.tpp"
 
 #endif // HEAP_H

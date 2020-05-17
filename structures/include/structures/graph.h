@@ -123,6 +123,6 @@ using unweighted_graph = graph<Vertex, Directed, false, bool, Args...>;
 
 }
 
-#include "src/structures/graph.tpp"
+#include "../../src/structures/graph.tpp"
 
 #endif // !GRAPH_H

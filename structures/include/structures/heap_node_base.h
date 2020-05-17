@@ -77,6 +77,6 @@ protected:
 };
 }
 
-#include <src/structures/heap_node_base.tpp>
+#include "../../src/structures/heap_node_base.tpp"
 
 #endif // !NODE_HEAP_H

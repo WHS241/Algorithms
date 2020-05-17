@@ -63,6 +63,6 @@ protected:
 };
 }
 
-#include "src/structures/binary_search_tree.tpp"
+#include "../../src/structures/binary_search_tree.tpp"
 
 #endif // BINARY_SEARCH_TREE_H

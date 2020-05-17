@@ -89,6 +89,6 @@ private:
 };
 }
 
-#include <src/structures/graph_adjacency_list.tpp>
+#include "../../src/structures/graph_adjacency_list.tpp"
 
 #endif // CS_3250_ADJACENCYLIST_H

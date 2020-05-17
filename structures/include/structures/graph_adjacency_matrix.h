@@ -85,6 +85,6 @@ private:
 };
 }
 
-#include <src/structures/graph_adjacency_matrix.tpp>
+#include "../../src/structures/graph_adjacency_matrix.tpp"
 
 #endif // ADJACENCY_MATRIX_H

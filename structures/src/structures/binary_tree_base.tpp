@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include <include/structures/binary_tree_iterator.h>
+#include <structures/binary_tree_iterator.h>
 
 namespace tree {
 

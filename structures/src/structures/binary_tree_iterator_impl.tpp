@@ -1,7 +1,7 @@
 #ifndef TREE_ITERATOR_IMPL_CPP
 #define TREE_ITERATOR_IMPL_CPP
 
-#include <include/structures/binary_tree_base.h>
+#include <structures/binary_tree_base.h>
 #include <structures/binary_tree_base.h>
 
 namespace tree {
