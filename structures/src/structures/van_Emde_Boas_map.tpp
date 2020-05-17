@@ -329,24 +329,29 @@ typename van_Emde_Boas_map<T>::iterator van_Emde_Boas_map<T>::erase(
 
 template <typename T>
 typename van_Emde_Boas_map<T>::iterator van_Emde_Boas_map<T>::erase(
-    typename van_Emde_Boas_map<T>::iterator first, typename van_Emde_Boas_map<T>::iterator last) {
-        while (first != last) {
-            first = erase(first);
-        }
-        return last;
+    typename van_Emde_Boas_map<T>::iterator first, typename van_Emde_Boas_map<T>::iterator last)
+{
+    while (first != last) {
+        first = erase(first);
     }
+    return last;
+}
 
 template <typename T>
 typename van_Emde_Boas_map<T>::iterator van_Emde_Boas_map<T>::erase(
-    typename van_Emde_Boas_map<T>::const_iterator first, typename van_Emde_Boas_map<T>::const_iterator last) {
-        while (first != last) {
-            first = erase(first);
-        }
-        return iterator(this, last._curr_index);
+    typename van_Emde_Boas_map<T>::const_iterator first,
+    typename van_Emde_Boas_map<T>::const_iterator last)
+{
+    while (first != last) {
+        first = erase(first);
     }
+    return iterator(this, last._curr_index);
+}
 
 template <typename T>
-typename van_Emde_Boas_map<T>::size_type van_Emde_Boas_map<T>::erase(const typename van_Emde_Boas_map<T>::key_type& key) {
+typename van_Emde_Boas_map<T>::size_type van_Emde_Boas_map<T>::erase(
+    const typename van_Emde_Boas_map<T>::key_type& key)
+{
     if (_tree.contains(key)) {
         _allocator.destroy(_elements + key);
         _tree.erase(key);
@@ -355,42 +360,53 @@ typename van_Emde_Boas_map<T>::size_type van_Emde_Boas_map<T>::erase(const typen
     return 0U;
 }
 
-template <typename T>
-void van_Emde_Boas_map<T>::swap(van_Emde_Boas_map<T>& other) {
+template <typename T> void van_Emde_Boas_map<T>::swap(van_Emde_Boas_map<T>& other)
+{
     std::swap(_tree, other._tree);
     std::swap(_elements, other._elements);
 }
 
-template<typename T>
-typename van_Emde_Boas_map<T>::mapped_type& van_Emde_Boas_map<T>::at(const typename van_Emde_Boas_map<T>::key_type& key) {
+template <typename T>
+typename van_Emde_Boas_map<T>::mapped_type& van_Emde_Boas_map<T>::at(
+    const typename van_Emde_Boas_map<T>::key_type& key)
+{
     return const_cast<mapped_type&>(static_cast<const van_Emde_Boas_map<T>*>(this)->at(key));
 }
 
-template<typename T>
-const typename van_Emde_Boas_map<T>::mapped_type& van_Emde_Boas_map<T>::at(const typename van_Emde_Boas_map<T>::key_type& key) const {
+template <typename T>
+const typename van_Emde_Boas_map<T>::mapped_type& van_Emde_Boas_map<T>::at(
+    const typename van_Emde_Boas_map<T>::key_type& key) const
+{
     valid_check(key);
     return _elements[key].second;
 }
 
 template <typename T>
-typename van_Emde_Boas_map<T>::mapped_type& van_Emde_Boas_map<T>::operator[](const typename van_Emde_Boas_map<T>::key_type& key) {
+typename van_Emde_Boas_map<T>::mapped_type& van_Emde_Boas_map<T>::operator[](
+    const typename van_Emde_Boas_map<T>::key_type& key)
+{
     if (!_tree.contains(key))
-        insert({key, mapped_type()});
+        insert({ key, mapped_type() });
     return _elements[key].second;
 }
 
 template <typename T>
-typename van_Emde_Boas_map<T>::iterator van_Emde_Boas_map<T>::find(const typename van_Emde_Boas_map<T>::key_type& key) {
+typename van_Emde_Boas_map<T>::iterator van_Emde_Boas_map<T>::find(
+    const typename van_Emde_Boas_map<T>::key_type& key)
+{
     return _tree.contains(key) ? iterator(this, key) : end();
 }
 
 template <typename T>
-typename van_Emde_Boas_map<T>::const_iterator van_Emde_Boas_map<T>::find(const typename van_Emde_Boas_map<T>::key_type& key) const {
+typename van_Emde_Boas_map<T>::const_iterator van_Emde_Boas_map<T>::find(
+    const typename van_Emde_Boas_map<T>::key_type& key) const
+{
     return _tree.contains(key) ? iterator(this, key) : cend();
 }
 
 template <typename T>
-void van_Emde_Boas_map<T>::valid_check(const typename van_Emde_Boas_map<T>::key_type& key) const {
+void van_Emde_Boas_map<T>::valid_check(const typename van_Emde_Boas_map<T>::key_type& key) const
+{
     if (!_tree.contains(key))
         throw std::out_of_range("van Emde Boas");
 }

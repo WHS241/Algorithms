@@ -12,7 +12,7 @@ namespace heap {
 template <typename T, typename Compare = std::less<T>>
 class binary_heap : public node_base<T, Compare> {
 public:
-    typedef typename node_base<T, Compare>::node node;
+    using typename node_base<T, Compare>::node, typename node_base<T, Compare>::node_wrapper;
 
     binary_heap() = default;
     explicit binary_heap(Compare comp);
@@ -30,7 +30,7 @@ public:
     binary_heap& operator=(binary_heap<T, Compare>&&) noexcept;
 
     // Θ(log n)
-    virtual node* add(const T&);
+    virtual node_wrapper add(const T&);
 
     // Θ(1)
     virtual T get_root() const;
@@ -39,7 +39,7 @@ public:
     virtual T remove_root();
 
     // Θ(log n)
-    void decrease(node* target, const T& new_val);
+    void decrease(node_wrapper target, const T& new_val);
 
     // Θ(n)
     // Binary heap merging currently will invalidate all previous Node*
@@ -47,7 +47,7 @@ public:
 
 private:
     void _bubble_down(node* parent, bool use_left_child) noexcept;
-    static std::list<T> s_data(const node*);
+    static std::list<T> _s_data(const node*);
 
     std::unique_ptr<node> _root;
 };

@@ -101,15 +101,15 @@ Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(Fibonacci<T, Compare>&& 
 }
 
 template <typename T, typename Compare>
-typename Fibonacci<T, Compare>::node* Fibonacci<T, Compare>::add(const T& item)
+typename Fibonacci<T, Compare>::node_wrapper Fibonacci<T, Compare>::add(const T& item)
 {
-    std::unique_ptr<node> new_node(this->s_make_node(item));
+    std::unique_ptr<node> new_node(this->_s_make_node(item));
     _trees.push_back(new_node.get());
     if (_min == nullptr || this->_compare(item, **_min))
         _min = new_node.get();
 
     ++this->_size;
-    return new_node.release();
+    return node_wrapper(new_node.release());
 }
 
 template <typename T, typename Compare> T Fibonacci<T, Compare>::get_root() const
@@ -183,8 +183,11 @@ template <typename T, typename Compare> T Fibonacci<T, Compare>::remove_root()
 }
 
 template <typename T, typename Compare>
-void Fibonacci<T, Compare>::decrease(typename Fibonacci<T, Compare>::node* target, const T& new_val)
+void Fibonacci<T, Compare>::decrease(
+    typename Fibonacci<T, Compare>::node_wrapper target_wrapper, const T& new_val)
 {
+    node* target = this->_s_extract_node(target_wrapper);
+
     **target = new_val;
     if (this->_compare(new_val, **_min))
         _min = target;

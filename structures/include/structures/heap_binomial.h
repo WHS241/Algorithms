@@ -15,7 +15,7 @@ namespace heap {
 template <typename T, typename Compare = std::less<T>>
 class binomial : public node_base<T, Compare> {
 public:
-    typedef typename node_base<T, Compare>::node node;
+    using typename node_base<T, Compare>::node, typename node_base<T, Compare>::node_wrapper;
 
     binomial() = default;
     explicit binomial(Compare comp);
@@ -32,7 +32,7 @@ public:
     binomial& operator=(binomial<T, Compare>&& rhs) noexcept;
 
     // Θ(log n)
-    virtual node* add(const T&);
+    virtual node_wrapper add(const T&);
 
     // Θ(1)
     virtual T get_root() const;
@@ -41,7 +41,7 @@ public:
     virtual T remove_root();
 
     // Θ(log n)
-    void decrease(node* target, const T& new_value);
+    void decrease(node_wrapper target, const T& new_value);
 
     // Θ(log n)
     void merge(binomial<T, Compare>&);

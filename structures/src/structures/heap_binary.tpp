@@ -21,7 +21,7 @@ binary_heap<T, Compare>::binary_heap(It first, It last, Compare comp)
 {
     this->_size = std::distance(first, last);
     if (first != last) {
-        _root.reset(this->s_make_node(*first));
+        _root.reset(this->_s_make_node(*first));
         ++first;
         std::queue<node*> node_queue; // for adding elements
         std::stack<node*> node_stack; // for the bubble down
@@ -34,7 +34,7 @@ binary_heap<T, Compare>::binary_heap(It first, It last, Compare comp)
             if (!parent->_children.empty())
                 node_queue.pop();
 
-            node* new_node = this->s_make_node(*first);
+            node* new_node = this->_s_make_node(*first);
             new_node->_parent = parent;
             parent->_children.push_back(new_node);
             node_queue.push(new_node);
@@ -98,14 +98,14 @@ binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(binary_heap<T, Compa
 }
 
 template <typename T, typename Compare>
-typename binary_heap<T, Compare>::node* binary_heap<T, Compare>::add(const T& item)
+typename binary_heap<T, Compare>::node_wrapper binary_heap<T, Compare>::add(const T& item)
 {
     std::unique_ptr<node> new_node(this->_s_make_node(item));
 
     if (this->_size == 0) {
         _root = std::move(new_node);
         ++this->_size;
-        return _root.get();
+        return node_wrapper(_root.get());
     }
     // use a stack of bools to determine the direction to go to parent
     std::stack<bool> go_left;
@@ -135,7 +135,7 @@ typename binary_heap<T, Compare>::node* binary_heap<T, Compare>::add(const T& it
             break;
     }
 
-    return ptr;
+    return node_wrapper(ptr);
 }
 
 template <typename T, typename Compare>
@@ -144,8 +144,8 @@ void binary_heap<T, Compare>::merge(binary_heap<T, Compare>& src)
     if (this == &src)
         return;
 
-    std::list<T> dataset = s_data(this->_root.get());
-    dataset.splice(dataset.end(), s_data(src._root.get()));
+    std::list<T> dataset = _s_data(this->_root.get());
+    dataset.splice(dataset.end(), _s_data(src._root.get()));
     *this = binary_heap(dataset.begin(), dataset.end(), this->_compare);
     src._root.reset();
     src._size = 0;
@@ -217,8 +217,9 @@ template <typename T, typename Compare> T binary_heap<T, Compare>::remove_root()
 
 template <typename T, typename Compare>
 void binary_heap<T, Compare>::decrease(
-    typename binary_heap<T, Compare>::node* target, const T& new_val)
+    typename binary_heap<T, Compare>::node_wrapper target_wrapper, const T& new_val)
 {
+    node* target = this->_s_extract_node(target_wrapper);
     if (this->_compare(**target, new_val))
         throw std::invalid_argument("Increasing key");
 
@@ -266,13 +267,13 @@ void binary_heap<T, Compare>::_bubble_down(
 }
 
 template <typename T, typename Compare>
-std::list<T> binary_heap<T, Compare>::s_data(const node* root)
+std::list<T> binary_heap<T, Compare>::_s_data(const node* root)
 {
     std::list<T> result;
     if (root != nullptr) {
         result.push_back(**root);
         for (node* child : root->_children)
-            result.splice(result.end(), s_data(child));
+            result.splice(result.end(), _s_data(child));
     }
 
     return result;

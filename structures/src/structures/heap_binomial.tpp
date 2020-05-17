@@ -112,15 +112,15 @@ binomial<T, Compare>& binomial<T, Compare>::operator=(binomial<T, Compare>&& rhs
 }
 
 template <typename T, typename Compare>
-typename binomial<T, Compare>::node* binomial<T, Compare>::add(const T& item)
+typename binomial<T, Compare>::node_wrapper binomial<T, Compare>::add(const T& item)
 {
     binomial<T, Compare> temp(this->_compare);
-    std::unique_ptr<node> add_node(this->s_make_node(item));
+    std::unique_ptr<node> add_node(this->_s_make_node(item));
     temp._size = 1;
     temp._trees.push_back(add_node.get());
     temp._min = add_node.get();
     merge(temp);
-    return add_node.release();
+    return node_wrapper(add_node.release());
 }
 
 template <typename T, typename Compare> T binomial<T, Compare>::get_root() const
@@ -193,8 +193,10 @@ template <typename T, typename Compare> T binomial<T, Compare>::remove_root()
 }
 
 template <typename T, typename Compare>
-void binomial<T, Compare>::decrease(typename binomial<T, Compare>::node* target, const T& new_value)
+void binomial<T, Compare>::decrease(
+    typename binomial<T, Compare>::node_wrapper target_wrapper, const T& new_value)
 {
+    node* target = this->_s_extract_node(target_wrapper);
     if (this->_compare(**target, new_value))
         throw std::invalid_argument("Increasing key");
 

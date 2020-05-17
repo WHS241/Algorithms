@@ -41,6 +41,19 @@ typename node_base<T, Compare>::node* node_base<T, Compare>::node::_deep_clone()
     return clone.release();
 }
 
+template <typename T, typename Compare>
+node_base<T, Compare>::node_wrapper::node_wrapper(typename node_base<T, Compare>::node* n) noexcept
+    : _node(n)
+{
+}
+
+template <typename T, typename Compare>
+const typename node_base<T, Compare>::node*
+node_base<T, Compare>::node_wrapper::get() const noexcept
+{
+    return _node;
+}
+
 template <typename T, typename Compare> void node_base<T, Compare>::insert(const T& item)
 {
     this->add(item);
@@ -49,6 +62,13 @@ template <typename T, typename Compare> void node_base<T, Compare>::insert(const
 template <typename T, typename Compare> uint32_t node_base<T, Compare>::size() const noexcept
 {
     return _size;
+}
+
+template <typename T, typename Compare>
+typename node_base<T, Compare>::node* node_base<T, Compare>::_s_extract_node(
+    typename node_base<T, Compare>::node_wrapper& wrapper) noexcept
+{
+    return wrapper._node;
 }
 
 template <typename T, typename Compare>

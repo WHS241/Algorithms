@@ -7,6 +7,8 @@
 
 #include <set>
 
+#include <sequence/order_stats.h>
+
 #include <structures/disjoint_set.h>
 #include <structures/graph.h>
 #include <structures/heap>
@@ -25,106 +27,78 @@ namespace graph_alg {
  * (1926) Práce Mor. Přírodověd. Spol. V Brně III
  * Θ(E log V)
  */
-template <typename Vertex, typename EdgeWeight, typename... Args, typename VertexComp>
-graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Boruvka(
-    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input, VertexComp comp)
-{
-    std::vector<Vertex> input_vertices = input.vertices();
-    uint32_t num_input_components = connected_components(input).size();
-
-    graph::graph<Vertex, false, true, EdgeWeight, Args...> result;
-    for (Vertex& vertex : input_vertices) {
-        result.add_vertex(vertex);
-    }
-
-    struct edge_info {
-        Vertex start;
-        Vertex terminal;
-        EdgeWeight weight;
-        uint32_t analogue;
-    };
-
-    auto order_verts = [&comp](std::pair<Vertex, Vertex>& vert_pair) {
-        if (comp(vert_pair.second, vert_pair.first)) {
-            std::swap(vert_pair.first, vert_pair.second);
-        }
-    };
-
-    for (std::list<std::unordered_set<Vertex, Args...>> current_components
-         = connected_components(result);
-         current_components.size() != num_input_components;
-         current_components = connected_components(result)) {
-        // O(log V iterations)
-
-        // contain a list of edges to add
-        std::vector<edge_info> to_add(current_components.size(),
-            edge_info({ input_vertices.front(), input_vertices.front(), EdgeWeight(), -1 }));
-
-        // determine which component each vertex is a member of
-        std::unordered_map<Vertex, uint32_t, Args...> member_of;
-        uint32_t i = 0;
-        for (const std::unordered_set<Vertex, Args...>& comp : current_components) {
-            for (const Vertex& v : comp)
-                member_of[v] = i;
-            ++i;
-        }
-
-        for (const Vertex& v : input_vertices) {
-            for (const std::pair<Vertex, EdgeWeight>& edge : input.edges(v)) {
-                uint32_t first_comp(member_of[edge.first]), second_comp(member_of[v]);
-                if (first_comp != second_comp) {
-                    edge_info &first_edge = to_add[first_comp], &second_edge = to_add[second_comp];
-                    std::pair<Vertex, Vertex> curr_pair({ edge.first, v }),
-                        first_pair({ first_edge.start, first_edge.terminal }),
-                        second_pair({ second_edge.start, second_edge.terminal });
-                    order_verts(curr_pair);
-                    order_verts(first_pair);
-                    order_verts(second_pair);
-                    // Compare edge to first to see if we should swap it out
-                    if (first_edge.start == first_edge.terminal // assign if no edge found yet
-                        || edge.second < first_edge.weight // smaller-weight edge
-                        || (edge.second == first_edge.weight // tiebreaker: compare vertices
-                            && !comp(first_pair.first, curr_pair.first)
-                            && (comp(curr_pair.first, first_pair.first)
-                                || comp(curr_pair.second, first_pair.second)))) {
-                        first_edge = { edge.first, v, edge.second, second_comp };
-                    }
-
-                    // same for second
-                    if (second_edge.start == second_edge.terminal
-                        || edge.second < second_edge.weight
-                        || (edge.second == second_edge.weight
-                            && !comp(second_pair.first, curr_pair.first)
-                            && (comp(curr_pair.first, second_pair.first)
-                                || comp(curr_pair.second, second_pair.second)))) {
-                        second_edge = { v, edge.first, edge.second, first_comp };
-                    }
-                }
-            }
-        }
-
-        // add the edges we found
-        for (const edge_info& e : to_add) {
-            // check existence
-            if (e.start != e.terminal) {
-                edge_info& e2 = to_add[e.analogue];
-                // don't double add
-                if (!(e.start == e2.terminal && e.terminal == e2.start
-                        && e.analogue < e2.analogue)) {
-                    result.force_add(e.start, e.terminal, e.weight);
-                }
-            }
-        }
-    }
-
-    return result;
-}
 template <typename Vertex, typename EdgeWeight, typename... Args>
 graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Boruvka(
     const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
 {
-    return minimum_spanning_Boruvka(input, std::less<Vertex>());
+    struct edge_info {
+        Vertex start;
+        Vertex terminal;
+        EdgeWeight weight;
+    };
+
+    std::vector<Vertex> input_vertices = input.vertices();
+    uint32_t num_input_components = connected_components(input).size();
+
+    graph::graph<Vertex, false, true, EdgeWeight, Args...> result;
+    disjoint_set<Vertex, Args...> tree_components;
+    std::unordered_map<Vertex, std::list<std::pair<Vertex, EdgeWeight>>, Args...>
+        mutable_list; // need to be able to iterate through and delete edges quickly
+
+    for (Vertex& v : input_vertices) {
+        result.add_vertex(v);
+        tree_components.insert(v);
+        mutable_list[v] = input.edges(v);
+    }
+
+    while (tree_components.num_sets() > num_input_components) {
+        std::unordered_map<Vertex, edge_info, Args...> to_add;
+        for (const Vertex& v : input_vertices) {
+            // Each iteration, add shortest edge out of every subtree
+            // Since we iterate over all vertices every time, depth of UNION-FIND tree<=3
+            // So find() is essentially constant
+            Vertex component_root = tree_components.find(v);
+            std::list<std::pair<Vertex, EdgeWeight>>& edge_list = mutable_list[v];
+
+            for (auto it = edge_list.begin(); it != edge_list.end();)
+                if (component_root == tree_components.find(it->first))
+                    it = edge_list.erase(it);
+                else
+                    ++it;
+
+            if (!mutable_list[v].empty()) {
+                std::pair<Vertex, EdgeWeight> least_weight_edge = *std::min_element(
+                    edge_list.begin(), edge_list.end(),
+                    [](const std::pair<Vertex, EdgeWeight>& x,
+                        const std::pair<Vertex, EdgeWeight>& y) { return x.second < y.second; });
+                edge_info candidate { v, least_weight_edge.first, least_weight_edge.second };
+
+                // check that it is the smallest out of current set so far
+                if (to_add.find(component_root) == to_add.end()
+                    || candidate.weight < to_add[component_root].weight)
+                    to_add[component_root] = std::move(candidate);
+            }
+        }
+
+        // add edges and update connected components
+        for (const std::pair<Vertex, edge_info>& candidate : to_add)
+            if (tree_components.find(candidate.second.start)
+                != tree_components.find(candidate.second.terminal)) {
+                result.force_add(
+                    candidate.second.start, candidate.second.terminal, candidate.second.weight);
+                tree_components.union_sets(candidate.second.start, candidate.second.terminal);
+            }
+    }
+    return result;
 }
+/*
+template <typename Vertex, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Boruvka(
+    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
+{
+    return minimum_spanning_Boruvka(input, [&input](const Vertex& u, const Vertex& v){ return
+input.get_translation().at(u) < input.get_translation().at(v); });
+}*/
 
 /*
  * Vojtěch Jarník
@@ -174,9 +148,10 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Prim(
 
     // the heap structure used here determines the runtime of the algorithm
     // must be a node_base
+    typedef typename heap::node_base<edge, decltype(compare)>::node_wrapper node_wrapper;
     typedef typename heap::node_base<edge, decltype(compare)>::node node;
     heap::Fibonacci<edge, decltype(compare)> heap(compare);
-    std::unordered_map<Vertex, node*, Args...> tracker;
+    std::unordered_map<Vertex, node_wrapper, Args...> tracker;
 
     auto it1 = vertices.begin();
     for (edge& vertex_data : data_map)
@@ -197,8 +172,8 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Prim(
         for (const Vertex& neighbor : input.neighbors(to_add.current)) {
             auto it = tracker.find(neighbor);
             if (it != tracker.end()) {
-                node* ptr = it->second;
-                const node& current_node = *ptr;
+                node_wrapper ptr = it->second;
+                const node& current_node = *ptr.get();
                 double edge_cost = input.edge_cost(to_add.current, neighbor);
 
                 if (current_node->current == current_node->from // unvisited vertex
@@ -273,6 +248,170 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Kruskal(
         }
     }
 
+    return result;
+}
+
+/*
+ * Andrew Chi-Chih Yao (姚期智)
+ * An O(|E|loglog|V|) algorithm for finding minimum spanning trees
+ * (1975) doi:10.1016/0020-0190(75)90056-3
+ */
+template <typename Vertex, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
+    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
+{
+
+    if (input.order()
+        < 3) // as long as there are no multi-edges, any graph with <= 2 vertices is its own MST
+        return input;
+
+    typedef std::list<std::pair<Vertex, EdgeWeight>> edge_list;
+
+    std::vector<Vertex> input_vertices = input.vertices();
+
+    // Improvement comes from partial-sorting each adjacency list into log V levels
+    std::unordered_map<Vertex, std::vector<edge_list>, Args...> leveled_edges;
+    uint32_t num_levels = static_cast<uint32_t>(std::round(std::log(input.order())));
+    if (num_levels == 0)
+        ++num_levels;
+
+    for (const Vertex& v : input_vertices) {
+        // Divide-and-conquer to partial sort: Find the middle cutoff, then partition to split the
+        // levels Keep track of which levels the current group contains, add to final set if only
+        // one level remains
+        std::vector<edge_list> final_levels(num_levels);
+
+        // On each pair, first.first is lowest level, first.second is highest, second is the actual
+        // list
+        std::list<std::pair<std::pair<uint32_t, uint32_t>, edge_list>> processor;
+
+        processor.push_back({ { 0, num_levels - 1 }, input.edges(v) });
+        uint32_t current_vertex_degree = input.degree(v);
+
+        while (!processor.empty()) {
+            std::pair<std::pair<uint32_t, uint32_t>, edge_list> current
+                = std::move(processor.front());
+            processor.pop_front();
+            if (current.first.first == current.first.second) {
+                final_levels[current.first.first] = std::move(current.second);
+            } else {
+                uint32_t split = (current.first.first + current.first.second) / 2;
+                std::pair<std::pair<uint32_t, uint32_t>, edge_list> next_1(
+                    { { current.first.first, split }, edge_list() }),
+                    next_2({ { split + 1, current.first.second }, edge_list() });
+                uint32_t cutoff_point = (current_vertex_degree * (split + 1)) / num_levels
+                    - (current_vertex_degree * current.first.first) / num_levels;
+
+                if (cutoff_point != current.second.size()) {
+                    std::pair<Vertex, EdgeWeight> pivot = sequence::selection(
+                        current.second.begin(), current.second.end(), cutoff_point,
+                        [](const std::pair<Vertex, EdgeWeight>& x,
+                            const std::pair<Vertex, EdgeWeight>& y) {
+                            return x.second < y.second;
+                        });
+
+                    // Partition current list based on our median, skip any that are equal to the
+                    // pivot
+                    for (auto it = current.second.begin(); it != current.second.end();) {
+                        if (it->second == pivot.second) {
+                            ++it;
+                        } else {
+                            auto temp(it++);
+                            if (temp->second < pivot.second)
+                                next_1.second.splice(next_1.second.end(), current.second, temp);
+                            else
+                                next_2.second.splice(next_2.second.end(), current.second, temp);
+                        }
+                    }
+
+                    // For ones that are equal, split so that the groups are roughly proportional to
+                    // the number of edges they should have
+                    double expected_ratio = static_cast<double>(split - current.first.first + 1)
+                        / (current.first.second - split);
+                    for (auto it = current.second.begin(); it != current.second.end();) {
+                        auto temp(it++);
+                        if (next_1.second.size() < expected_ratio * next_2.second.size())
+                            next_1.second.splice(next_1.second.end(), current.second, temp);
+                        else
+                            next_2.second.splice(next_2.second.end(), current.second, temp);
+                    }
+                } else {
+                    // we're just pushing everything into one
+                    next_1.second.splice(next_1.second.end(), current.second);
+                }
+                processor.push_back(std::move(next_1));
+                processor.push_back(std::move(next_2));
+            }
+        }
+
+        leveled_edges.insert(std::make_pair(v, std::move(final_levels)));
+    }
+
+    // Preprocessing done: only look at lowest non-discarded level on each vertex
+    struct edge_info {
+        Vertex start;
+        Vertex terminal;
+        EdgeWeight weight;
+    };
+
+    uint32_t num_input_components = connected_components(input).size();
+
+    graph::graph<Vertex, false, true, EdgeWeight, Args...> result;
+    disjoint_set<Vertex, Args...> tree_components;
+    std::unordered_map<Vertex, uint32_t, Args...> current_level;
+
+    for (Vertex& v : input_vertices) {
+        result.add_vertex(v);
+        tree_components.insert(v);
+        current_level[v] = 0;
+    }
+
+    while (tree_components.num_sets() > num_input_components) {
+        std::unordered_map<Vertex, edge_info, Args...> to_add;
+        for (const Vertex& v : input_vertices) {
+            // Each iteration, add shortest edge out of every subtree
+            // Since we iterate over all vertices every time, depth of UNION-FIND tree<=3
+            // So find() is essentially constant
+            Vertex component_root = tree_components.find(v);
+            std::vector<edge_list>& edge_list = leveled_edges.at(v);
+            edge_info candidate;
+            bool found_edge = false;
+            uint32_t& level = current_level[v];
+
+            while (!found_edge && level < num_levels) {
+                for (auto it = edge_list[level].begin(); it != edge_list[level].end();)
+                    if (component_root == tree_components.find(it->first)) {
+                        it = edge_list[level].erase(it);
+                    } else {
+                        if (!found_edge) {
+                            found_edge = true;
+                            candidate = { v, it->first, it->second };
+                        } else if (it->second < candidate.weight) {
+                            candidate = { v, it->first, it->second };
+                        }
+                        ++it;
+                    }
+
+                if (!found_edge) // need to go to the next level
+                    ++level;
+            }
+
+            // compare with what we have for this component, assuming we have an edge
+            if (found_edge
+                && (to_add.find(component_root) == to_add.end()
+                    || candidate.weight < to_add[component_root].weight))
+                to_add[component_root] = std::move(candidate);
+        }
+
+        // add edges and update connected components
+        for (const std::pair<Vertex, edge_info>& candidate : to_add)
+            if (tree_components.find(candidate.second.start)
+                != tree_components.find(candidate.second.terminal)) {
+                result.force_add(
+                    candidate.second.start, candidate.second.terminal, candidate.second.weight);
+                tree_components.union_sets(candidate.second.start, candidate.second.terminal);
+            }
+    }
     return result;
 }
 }

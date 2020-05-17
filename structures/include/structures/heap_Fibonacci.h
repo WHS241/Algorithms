@@ -14,7 +14,7 @@ Fibonacci Heaps And Their Uses In Improved Network Optimization Algorithms
 template <typename T, typename Compare = std::less<T>>
 class Fibonacci : public node_base<T, Compare> {
 public:
-    typedef typename node_base<T, Compare>::node node;
+    using typename node_base<T, Compare>::node, typename node_base<T, Compare>::node_wrapper;
 
     Fibonacci() = default;
     Fibonacci(Compare comp);
@@ -31,7 +31,7 @@ public:
     Fibonacci& operator=(Fibonacci<T, Compare>&& rhs) noexcept;
 
     // Θ(1)
-    virtual node* add(const T&);
+    virtual node_wrapper add(const T&);
 
     // Θ(1)
     virtual T get_root() const;
@@ -40,7 +40,7 @@ public:
     virtual T remove_root();
 
     // amortized Θ(1)
-    void decrease(node* target, const T& new_val);
+    void decrease(node_wrapper target, const T& new_val);
 
     // Θ(1)
     void merge(Fibonacci<T, Compare>&);

@@ -26,6 +26,8 @@ public:
         node& operator=(const node&) = delete;
         const T& operator*() const;
         const T* operator->() const;
+        T& operator*();
+        T* operator->();
 
     private:
         node() = default;
@@ -36,14 +38,22 @@ public:
             , _flag(false) {};
         node* _deep_clone() const;
 
-        T& operator*();
-        T* operator->();
-
         T _value;
         node* _parent;
         std::list<node*> _children;
         bool _flag;
 
+        friend class node_base<T, Compare>;
+        friend class Fibonacci<T, Compare>;
+    };
+
+    class node_wrapper {
+    public:
+        node_wrapper(node* = nullptr) noexcept;
+        const node* get() const noexcept;
+
+    private:
+        node* _node;
         friend class node_base<T, Compare>;
     };
 
@@ -51,11 +61,11 @@ public:
 
     // Inserting with add returns a pointer to the corresponding value
     void insert(const T& item) override;
-    virtual node* add(const T& item) = 0;
+    virtual node_wrapper add(const T& item) = 0;
 
     // Decrease the value stored in the target pointer
     // Should throw if new_val is greater
-    virtual void decrease(node* target, const T& new_val) = 0;
+    virtual void decrease(node_wrapper target, const T& new_val) = 0;
 
     uint32_t size() const noexcept override;
 
@@ -69,6 +79,7 @@ protected:
     // children
     node_base(const node_base<T, Compare>& src) = default;
 
+    static node* _s_extract_node(node_wrapper&) noexcept;
     static node* _s_make_node(const T& item);
     static bool _s_get_flag(const node&);
     static void _s_set_flag(node&, bool);
