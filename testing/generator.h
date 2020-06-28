@@ -8,7 +8,7 @@ template <bool Directed, bool Weighted>
 graph::graph<int, Directed, Weighted> random_graph(
     std::mt19937_64& gen, bool cyclic = true, graph::graph_type type = graph::adj_list)
 {
-    std::uniform_int_distribution<uint32_t> dist(0, 100);
+    std::uniform_int_distribution<uint32_t> dist(0, 20);
     std::uniform_real_distribution<double> weight(0, 1000);
 
     auto num_vertices = dist(gen);
