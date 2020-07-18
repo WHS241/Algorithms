@@ -36,7 +36,7 @@ script:
     # Build main and tests
     - mkdir build
     - cd build
-    - cmake .. 
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
     - make
     - ../bin/testing
 

@@ -84,3 +84,94 @@ TEST_F(AlgorithmTest, Matrix_Test) {
     }
 
 }
+
+TEST_F(AlgorithmTest, Dynamic_Matrix_Test) {
+    dynamic_matrix<int> test = {{0,1, 2}, {3,4,5}};
+    dynamic_matrix<int> test_2 = {{4,5,8, 9,10,12},{13,14,15, 1,5,4}, {8,-1, 4,8,0,2}};
+    dynamic_matrix<int> exp = {{29, 12, 23, 17, 5, 8},{104, 66, 104, 71, 50, 62}};
+
+    dynamic_matrix<int> result = test * test_2;
+    if (result != exp) {
+
+            for(std::size_t j = 0; j < 2; ++j) {
+                for(std::size_t k = 0; k < 3; ++k)
+                    std::cout << test[j][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            for(std::size_t j = 0; j < 3; ++j) {
+                for(std::size_t k = 0; k < 6; ++k)
+                    std::cout << test_2[j][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            for(std::size_t j = 0; j < 2; ++j) {
+                for(std::size_t k = 0; k < 6; ++k)
+                    std::cout << exp[j][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            for(std::size_t j = 0; j < 2; ++j) {
+                for(std::size_t k = 0; k < 6; ++k)
+                    std::cout << result[j][k] << " ";
+                std::cout << std::endl;
+            }
+    }
+    
+    ASSERT_EQ(test * test_2, exp);
+
+    std::uniform_int_distribution<std::size_t> gen(1, 100);
+    for (int i = 0; i < 100; ++i) {
+        std::size_t m = gen(engine);
+        std::size_t n = gen(engine);
+        std::size_t p = gen(engine);
+        dynamic_matrix<std::size_t> lhs(m, n);
+        dynamic_matrix<std::size_t> rhs(n, p);
+        for(std::size_t j = 0; j < m; ++j)
+            for(std::size_t k = 0; k < n; ++k) 
+                lhs[j][k] = gen(engine);
+
+        for(std::size_t j = 0; j < n; ++j)
+            for(std::size_t k = 0; k < p; ++k)
+                rhs[j][k] = gen(engine);
+
+        dynamic_matrix<std::size_t> brute_force(m, p);
+        for(std::size_t j = 0; j < m; ++j)
+            for(std::size_t k = 0; k < p; ++k) {
+                brute_force[j][k] = 0;
+
+                for(std::size_t l = 0; l < n; ++l)
+                    brute_force[j][k] += lhs[j][l] * rhs[l][k];
+            }
+        
+        dynamic_matrix<std::size_t> Strassen_result = lhs * rhs;
+        EXPECT_EQ(brute_force, Strassen_result);
+        if(brute_force != Strassen_result) {
+            for(std::size_t j = 0; j < m; ++j) {
+                for(std::size_t k = 0; k < n; ++k)
+                    std::cout << lhs[j][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            for(std::size_t j = 0; j < n; ++j) {
+                for(std::size_t k = 0; k < p; ++k)
+                    std::cout << rhs[j][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            for(std::size_t j = 0; j < m; ++j) {
+                for(std::size_t k = 0; k < p; ++k)
+                    std::cout << brute_force[j][k] << " ";
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+            for(std::size_t j = 0; j < m; ++j) {
+                for(std::size_t k = 0; k < p; ++k)
+                    std::cout << Strassen_result[j][k] << " ";
+                std::cout << std::endl;
+            }
+            break;
+        }
+    }
+
+}
