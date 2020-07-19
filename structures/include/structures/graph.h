@@ -47,6 +47,8 @@ public:
     virtual std::list<Vertex> neighbors(const Vertex& start) const;
     virtual std::list<std::pair<Vertex, EdgeWeight>> edges(const Vertex&) const;
 
+    // get the graph type
+    virtual graph_type get_type() const;
     // return a new graph with the same data in a different representation
     virtual graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual> convert(
         graph_type target) const;

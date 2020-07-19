@@ -65,7 +65,7 @@ std::list<uint32_t> adjacency_matrix<Directed, Weighted, EdgeWeight>::neighbors(
 {
     std::list<uint32_t> result;
     for (uint32_t i = 0; i < _graph.size(); ++i)
-        if (!_graph[start][i].first)
+        if (_graph[start][i].first)
             result.push_back(i);
 
     return result;
@@ -78,7 +78,7 @@ std::list<std::pair<uint32_t, EdgeType>> adjacency_matrix<Directed, Weighted, Ed
 
     std::list<std::pair<uint32_t, EdgeType>> result;
     for (uint32_t i = 0; i < _graph.size(); ++i)
-        if (!_graph[start][i].first)
+        if (_graph[start][i].first)
             result.emplace_back(i, _graph[start][i].second);
 
     return result;

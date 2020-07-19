@@ -264,7 +264,7 @@ template <typename T> void van_Emde_Boas_map<T>::clear() noexcept
 {
     for (uint32_t i = _tree.min();; i = _tree.find_next(i)) {
         _allocator.destroy(_elements + i);
-        if (i == _tree.max())
+        if (i == _tree.max_size())
             break;
     }
     _tree.clear();

@@ -5,13 +5,10 @@
 
 #include <gtest/gtest.h>
 
-#include <structures/dynamic_matrix.h>
 #include <structures/graph.h>
-#include <structures/matrix.h>
 
-#include <graph/components.h>
-#include <graph/path.h>
-#include <graph/spanning_tree.h>
+#include <graph/closure.h>
+#include <graph/order_dimension.h>
 
 #include "generator.h"
 
@@ -26,152 +23,68 @@ protected:
     }
 };
 
-TEST_F(AlgorithmTest, Matrix_Test) {
-    matrix<int, 2, 3> test = {std::array<int, 3>{0,1, 2}, std::array<int, 3>{3,4,5}};
-    matrix<int, 3, 6> test_2 = {std::array<int, 6>{4,5,8, 9,10,12},std::array<int, 6>{13,14,15, 1,5,4}, std::array<int, 6>{8,-1, 4,8,0,2}};
-    matrix<int,2,6> result = {std::array<int, 6>{29, 12, 23, 17, 5, 8},std::array<int, 6>{104, 66, 104, 71, 50, 62}};
-    EXPECT_EQ(test * test_2, result);
-
-    std::uniform_int_distribution<int> gen(-10, 10);
-    matrix<int, 71, 85> input_a;
-    matrix<int, 85, 43> input_b;
-    for(uint32_t i = 0; i < 50; ++i) {
-        for(uint32_t j = 0; j < 71; ++j)
-            for(uint32_t k = 0; k < 85; ++k) 
-                input_a[j][k] = gen(engine);
-
-        for(uint32_t j = 0; j < 85; ++j)
-            for(uint32_t k = 0; k < 43; ++k)
-                input_b[j][k] = gen(engine);
-
-        matrix<int, 71, 43> brute_res;
-        for(uint32_t j = 0; j < 71; ++j)
-            for(uint32_t k = 0; k < 43; ++k) {
-                brute_res[j][k] = 0;
-
-                for(uint32_t l = 0; l < 85; ++l)
-                    brute_res[j][k] += input_a[j][l] * input_b[l][k];
-            }
-
-        matrix<int, 71, 43> Strassen_result = input_a * input_b;
-        EXPECT_EQ(brute_res, Strassen_result);
-        if(brute_res != Strassen_result) {
-            for(uint32_t j = 0; j < 71; ++j) {
-                for(uint32_t k = 0; k < 85; ++k)
-                    std::cout << input_a[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(uint32_t j = 0; j < 85; ++j) {
-                for(uint32_t k = 0; k < 43; ++k)
-                    std::cout << input_b[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(uint32_t j = 0; j < 71; ++j) {
-                for(uint32_t k = 0; k < 43; ++k)
-                    std::cout << brute_res[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(uint32_t j = 0; j < 71; ++j) {
-                for(uint32_t k = 0; k < 43; ++k)
-                    std::cout << Strassen_result[j][k] << " ";
-                std::cout << std::endl;
-            }
-
-        }
-    }
-
-}
-
-TEST_F(AlgorithmTest, Dynamic_Matrix_Test) {
-    dynamic_matrix<int> test = {{0,1, 2}, {3,4,5}};
-    dynamic_matrix<int> test_2 = {{4,5,8, 9,10,12},{13,14,15, 1,5,4}, {8,-1, 4,8,0,2}};
-    dynamic_matrix<int> exp = {{29, 12, 23, 17, 5, 8},{104, 66, 104, 71, 50, 62}};
-
-    dynamic_matrix<int> result = test * test_2;
-    if (result != exp) {
-
-            for(std::size_t j = 0; j < 2; ++j) {
-                for(std::size_t k = 0; k < 3; ++k)
-                    std::cout << test[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(std::size_t j = 0; j < 3; ++j) {
-                for(std::size_t k = 0; k < 6; ++k)
-                    std::cout << test_2[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(std::size_t j = 0; j < 2; ++j) {
-                for(std::size_t k = 0; k < 6; ++k)
-                    std::cout << exp[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(std::size_t j = 0; j < 2; ++j) {
-                for(std::size_t k = 0; k < 6; ++k)
-                    std::cout << result[j][k] << " ";
-                std::cout << std::endl;
-            }
-    }
-    
-    ASSERT_EQ(test * test_2, exp);
-
-    std::uniform_int_distribution<std::size_t> gen(1, 100);
+TEST_F(AlgorithmTest, Transitive_Closure_Test) {
     for (int i = 0; i < 100; ++i) {
-        std::size_t m = gen(engine);
-        std::size_t n = gen(engine);
-        std::size_t p = gen(engine);
-        dynamic_matrix<std::size_t> lhs(m, n);
-        dynamic_matrix<std::size_t> rhs(n, p);
-        for(std::size_t j = 0; j < m; ++j)
-            for(std::size_t k = 0; k < n; ++k) 
-                lhs[j][k] = gen(engine);
+        graph::graph<int, true, false> input = random_graph<true, false>(engine, false);
+        graph::graph<int, true, false> closure = graph_alg::transitive_closure(input);
+        EXPECT_TRUE(graph_alg::is_transitive_closure(closure));
 
-        for(std::size_t j = 0; j < n; ++j)
-            for(std::size_t k = 0; k < p; ++k)
-                rhs[j][k] = gen(engine);
-
-        dynamic_matrix<std::size_t> brute_force(m, p);
-        for(std::size_t j = 0; j < m; ++j)
-            for(std::size_t k = 0; k < p; ++k) {
-                brute_force[j][k] = 0;
-
-                for(std::size_t l = 0; l < n; ++l)
-                    brute_force[j][k] += lhs[j][l] * rhs[l][k];
-            }
-        
-        dynamic_matrix<std::size_t> Strassen_result = lhs * rhs;
-        EXPECT_EQ(brute_force, Strassen_result);
-        if(brute_force != Strassen_result) {
-            for(std::size_t j = 0; j < m; ++j) {
-                for(std::size_t k = 0; k < n; ++k)
-                    std::cout << lhs[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(std::size_t j = 0; j < n; ++j) {
-                for(std::size_t k = 0; k < p; ++k)
-                    std::cout << rhs[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(std::size_t j = 0; j < m; ++j) {
-                for(std::size_t k = 0; k < p; ++k)
-                    std::cout << brute_force[j][k] << " ";
-                std::cout << std::endl;
-            }
-            std::cout << std::endl;
-            for(std::size_t j = 0; j < m; ++j) {
-                for(std::size_t k = 0; k < p; ++k)
-                    std::cout << Strassen_result[j][k] << " ";
-                std::cout << std::endl;
-            }
-            break;
+        dynamic_matrix<int> input_matrix(input.order(), input.order(), 0), closure_matrix(input.order(), input.order(), 0);
+        for (int v : input.vertices()) {
+            for (int w : input.neighbors(v))
+                input_matrix[v][w] = 1;
+            for (int w : closure.neighbors(v))
+                closure_matrix[v][w] = 1;
         }
+        EXPECT_EQ(input_matrix == closure_matrix, graph_alg::is_transitive_closure(input));
     }
-
 }
+
+TEST_F(AlgorithmTest, Order_Dimension_Test) {
+    graph::unweighted_graph<std::string, true> input(graph::graph_type::adj_matrix);
+    std::initializer_list<std::string> vertices = { 
+        "u12", "u13", "u1a", "u1b", "u21", "u23", "u2a", "u2b", "u31", "u32", "u3a", "u3b", 
+        "v12", "v13", "v1a", "v1b", "v21", "v23", "v2a", "v2b", "v31", "v32", "v3a", "v3b"
+    };
+    std::list<std::pair<std::string, std::string>> relations = {
+        {"u1a", "v12"}, {"u1a", "v13"}, {"u1a", "v1b"}, {"u2a", "v21"}, {"u2a", "v23"}, {"u2a", "v2b"}, {"u3a", "v31"}, {"u3a", "v32"}, {"u3a", "v3b"},
+        {"u1b", "v12"}, {"u1b", "v13"}, {"u1b", "v1a"}, {"u2b", "v21"}, {"u2b", "v23"}, {"u2b", "v2a"}, {"u3b", "v31"}, {"u3b", "v32"}, {"u3b", "v3a"},
+
+        {"u12", "v13"}, {"u12", "v1a"}, {"u12", "v1b"}, {"u12", "v23"}, {"u12", "v2a"}, {"u12", "v2b"}, {"u12", "v31"}, {"u12", "v32"}, {"u12", "v3a"}, {"u12", "v3b"},
+        {"u21", "v13"}, {"u21", "v1a"}, {"u21", "v1b"}, {"u21", "v23"}, {"u21", "v2a"}, {"u21", "v2b"}, {"u21", "v31"}, {"u21", "v32"}, {"u21", "v3a"}, {"u21", "v3b"},
+        {"u23", "v13"}, {"u23", "v1a"}, {"u23", "v1b"}, {"u23", "v2a"}, {"u23", "v2b"}, {"u23", "v31"}, {"u23", "v3a"}, {"u23", "v3b"},
+        {"u32", "v13"}, {"u32", "v1a"}, {"u32", "v1b"}, {"u32", "v2a"}, {"u32", "v2b"}, {"u32", "v31"}, {"u32", "v3a"}, {"u32", "v3b"},
+        {"u13", "v1a"}, {"u13", "v1b"}, {"u13", "v2a"}, {"u13", "v2b"}, {"u13", "v3a"}, {"u13", "v3b"},
+        {"u31", "v1a"}, {"u31", "v1b"}, {"u31", "v2a"}, {"u31", "v2b"}, {"u31", "v3a"}, {"u31", "v3b"},
+        {"u12", "v21"}, {"u21", "v12"}, {"u23", "v32"}, {"u32", "v23"}, {"u13", "v31"}, {"u31", "v13"},
+        {"u12", "u23"}, {"u12", "u32"}, {"u12", "u13"}, {"u12", "u31"}, {"u21", "u23"}, {"u21", "u32"}, {"u21", "u13"}, {"u21", "u31"},
+        {"u23", "u13"}, {"u23", "u31"}, {"u32", "u13"}, {"u32", "u31"}
+    };
+
+    for (const std::string& v : vertices)
+        input.add_vertex(v);
+    for (const std::pair<std::string, std::string>& edge: relations)
+        input.force_add(edge.first, edge.second);
+
+    ASSERT_TRUE(graph_alg::is_transitive_closure(input));
+    std::initializer_list<std::string> gen[3] = {
+        {"u1a", "u1b", "u21", "v12", "u12", "u23", "u32", "u31", "v13", "u13", "v1a", "v1b", "u2b", "v2a", "u2a", "v2b", "v21", "v23", "u3a", "v3b", "u3b", "v3a", "v31", "v32"},
+        {"u2a", "u2b", "u12", "v21", "u21", "u32", "v23", "u23", "u13", "u31", "v2a", "v2b", "u3b", "v3a", "u3a", "v3b", "v32", "v31", "u1a", "v1b", "u1b", "v1a", "v13", "v12"},
+        {"u3a", "u3b", "u12", "u21", "u23", "v32", "u32", "u13", "v31", "u31", "v3a", "v3b", "u1b", "v1a", "u1a", "v1b", "v12", "v13", "u2a", "v2b", "u2b", "v2a", "v23", "v21"}
+    };
+
+    graph::unweighted_graph<std::string, true> result = graph_alg::three_dimensional_transitive_reduction(gen[0].begin(), gen[0].end(), gen[1].begin(), gen[1].end(), gen[2].begin(), gen[2].end());
+
+    EXPECT_TRUE(graph_alg::is_transitive_reduction(result));
+    graph::unweighted_graph<std::string, true> new_closure = graph_alg::transitive_closure(result);
+    for (const std::string& u : new_closure.vertices())
+        for (const std::string& v : new_closure.vertices()) {
+            if (new_closure.has_edge(u, v) != input.has_edge(u, v)) {
+                std::cout << u << " " << v << std::endl;
+                std::cout << new_closure << std::endl;
+                std::cout << input << std::endl;
+            }
+            ASSERT_EQ(new_closure.has_edge(u, v), input.has_edge(u, v));
+        }
+} 
+        

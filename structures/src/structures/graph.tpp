@@ -140,6 +140,14 @@ graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>::edges(const Verte
 
 template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
     typename KeyEqual>
+graph_type graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>::get_type() const {
+    if (dynamic_cast<const adjacency_matrix<Directed, Weighted, EdgeWeight>*>(_impl.get()))
+        return adj_matrix;
+    return adj_list;
+}
+
+template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
+    typename KeyEqual>
 graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>
 graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>::convert(graph_type type) const
 {

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 
+#include <structures/dynamic_matrix.h>
 #include <structures/graph.h>
 
 #include "search.h"
@@ -54,7 +55,7 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> k_core(
  * Θ(mn)
  */
 template <typename Vertex, bool Directed, bool Weighted, typename... Args>
-graph::graph<Vertex, Directed, Weighted, Args...> transitive_closure(
+graph::graph<Vertex, Directed, false, Args...> transitive_closure(
     const graph::graph<Vertex, Directed, Weighted, Args...>& src)
 {
     // Strategy: From each vertex, find all reachable vertices
@@ -212,6 +213,43 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure
         throw;
     }
 }
+
+/*
+ * Check if a graph is transitively oriented
+ * O(M(n)), M(n) is matrix multiplication
+ */
+template <typename Vertex, bool Weighted, typename... Args>
+bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& src) {
+    dynamic_matrix<int> adj_matrix(src.order(), src.order(), 0);
+    for (const Vertex& v : src.vertices()) {
+        adj_matrix[src.get_translation().at(v)][src.get_translation().at(v)] = 1;
+        for (const Vertex& w : src.neighbors(v))
+            adj_matrix[src.get_translation().at(v)][src.get_translation().at(w)] = 1;
+    }
+    dynamic_matrix<int> path_matrix = adj_matrix * adj_matrix;
+    for (std::size_t i = 0; i < src.order(); ++i)
+        for (std::size_t j = 0; j < src.order(); ++j)
+            if((adj_matrix[i][j] == 0) != (path_matrix[i][j] == 0))
+                return false;
+    return true;
+}
+
+template <typename Vertex, bool Weighted, typename... Args>
+bool is_transitive_reduction(const graph::graph<Vertex, true, Weighted, Args...>& src) {
+    dynamic_matrix<int> adj_matrix(src.order(), src.order(), 0);
+    for (const Vertex& v : src.vertices()) {
+        adj_matrix[src.get_translation().at(v)][src.get_translation().at(v)] = 1;
+        for (const Vertex& w : src.neighbors(v))
+            adj_matrix[src.get_translation().at(v)][src.get_translation().at(w)] = 1;
+    }
+    dynamic_matrix<int> path_matrix = adj_matrix * adj_matrix;
+    for (std::size_t i = 0; i < src.order(); ++i)
+        for (std::size_t j = 0; j < src.order(); ++j)
+            if (i != j && path_matrix[i][j] > 2)
+                return false;
+    return true;
+}
+
 }
 
 #endif // GRAPH_CLOSURE_H
