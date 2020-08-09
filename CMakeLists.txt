@@ -28,8 +28,9 @@ include(gtest.cmake)
 set(ALGEBRA_ALG_ROOT ${PROJECT_SOURCE_DIR}/algebra CACHE STRING "Algebraic algorithms source root")
 set(SEQUENCE_ALGORITHM_ROOT ${PROJECT_SOURCE_DIR}/sequence CACHE STRING "Sequence algorithm source root")
 set(DATA_STRUCTURES_ROOT ${PROJECT_SOURCE_DIR}/structures CACHE STRING "Data structures source root")
-set(GRAPH_ALG_ROOT ./graph CACHE STRING "Graph algorithms source root")
-set(APPROX_ALG_ROOT ./approx CACHE STRING "Approximation algorithms source root")
+set(GRAPH_ALG_ROOT ${PROJECT_SOURCE_DIR}/graph CACHE STRING "Graph algorithms source root")
+set(APPROX_ALG_ROOT ${PROJECT_SOURCE_DIR}/approx CACHE STRING "Approximation algorithms source root")
+set(SPECIAL_CASE_ALG_ROOT ${PROJECT_SOURCE_DIR}/special_case CACHE STRING "Special case source root")
 
 include_directories(SYSTEM
 	${ALGEBRA_ALG_ROOT}/include
@@ -37,6 +38,7 @@ include_directories(SYSTEM
     ${DATA_STRUCTURES_ROOT}/include
 	${GRAPH_ALG_ROOT}/include
 	${APPROX_ALG_ROOT}/include
+    ${SPECIAL_CASE_ALG_ROOT}/include
 )
 
 set(ALGEBRA_SOURCES

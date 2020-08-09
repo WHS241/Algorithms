@@ -219,7 +219,8 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure
  * O(M(n)), M(n) is matrix multiplication
  */
 template <typename Vertex, bool Weighted, typename... Args>
-bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& src) {
+bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& src)
+{
     dynamic_matrix<int> adj_matrix(src.order(), src.order(), 0);
     for (const Vertex& v : src.vertices()) {
         adj_matrix[src.get_translation().at(v)][src.get_translation().at(v)] = 1;
@@ -229,13 +230,14 @@ bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& 
     dynamic_matrix<int> path_matrix = adj_matrix * adj_matrix;
     for (std::size_t i = 0; i < src.order(); ++i)
         for (std::size_t j = 0; j < src.order(); ++j)
-            if((adj_matrix[i][j] == 0) != (path_matrix[i][j] == 0))
+            if ((adj_matrix[i][j] == 0) != (path_matrix[i][j] == 0))
                 return false;
     return true;
 }
 
 template <typename Vertex, bool Weighted, typename... Args>
-bool is_transitive_reduction(const graph::graph<Vertex, true, Weighted, Args...>& src) {
+bool is_transitive_reduction(const graph::graph<Vertex, true, Weighted, Args...>& src)
+{
     dynamic_matrix<int> adj_matrix(src.order(), src.order(), 0);
     for (const Vertex& v : src.vertices()) {
         adj_matrix[src.get_translation().at(v)][src.get_translation().at(v)] = 1;
