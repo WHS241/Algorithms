@@ -170,6 +170,30 @@ void adjacency_list<Directed, Weighted, EdgeWeight>::force_add(
 }
 
 template <bool Directed, bool Weighted, typename EdgeWeight>
+void adjacency_list<Directed, Weighted, EdgeWeight>::sanitize() {
+    std::allocator<uint32_t> alloc;
+    uint32_t counter = 0;
+    uint32_t num_vert = order();
+    uint32_t array_size = 2 * num_vert * num_vert;
+    uint32_t* tracker = alloc.allocate(array_size);
+        for (uint32_t i = 0; i < num_vert; ++i) {
+            _graph[i].remove_if([&i, &num_vert, &counter, &tracker, &array_size](const std::pair<uint32_t, EdgeWeight>& e) {
+                uint32_t j = e.first;
+                if (i == j) 
+                    return true;
+                
+                uint32_t pos = i * num_vert + j;
+                if (tracker[pos] < counter && tracker[array_size - tracker[pos]] == pos)
+                    return true;
+                tracker[pos] = ++counter;
+                tracker[array_size - counter] = pos;
+                return false;
+            });
+        }
+        alloc.deallocate(tracker, array_size);
+}
+
+template <bool Directed, bool Weighted, typename EdgeWeight>
 uint32_t adjacency_list<Directed, Weighted, EdgeWeight>::add_vertex()
 {
     _graph.emplace_back();

@@ -232,6 +232,13 @@ void graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>::force_add(
     }
 }
 
+template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
+    typename KeyEqual>
+void graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>::sanitize() {
+    if (_type == adj_list)
+        dynamic_cast<adjacency_list<Directed, Weighted, EdgeWeight>*>(_impl.get())->sanitize();
+}
+
 template <typename Vertex, bool Directed, bool Weighted, typename EdgeType, typename Hash,
     typename KeyEqual>
 uint32_t graph<Vertex, Directed, Weighted, EdgeType, Hash, KeyEqual>::add_vertex(const Vertex& name)

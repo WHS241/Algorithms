@@ -31,14 +31,17 @@ set(DATA_STRUCTURES_ROOT ${PROJECT_SOURCE_DIR}/structures CACHE STRING "Data str
 set(GRAPH_ALG_ROOT ${PROJECT_SOURCE_DIR}/graph CACHE STRING "Graph algorithms source root")
 set(APPROX_ALG_ROOT ${PROJECT_SOURCE_DIR}/approx CACHE STRING "Approximation algorithms source root")
 set(SPECIAL_CASE_ALG_ROOT ${PROJECT_SOURCE_DIR}/special_case CACHE STRING "Special case source root")
+set(NP_COMPLETE_ROOT ${PROJECT_SOURCE_DIR}/npc CACHE STRING "NP-complete source root")
 
 include_directories(SYSTEM
+    util/include
 	${ALGEBRA_ALG_ROOT}/include
 	${SEQUENCE_ALGORITHM_ROOT}/include
     ${DATA_STRUCTURES_ROOT}/include
 	${GRAPH_ALG_ROOT}/include
 	${APPROX_ALG_ROOT}/include
     ${SPECIAL_CASE_ALG_ROOT}/include
+    ${NP_COMPLETE_ROOT}/include
 )
 
 set(ALGEBRA_SOURCES

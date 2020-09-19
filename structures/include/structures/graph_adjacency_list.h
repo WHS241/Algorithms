@@ -56,6 +56,9 @@ public:
     // multigraph或已知无边时使用；不查edge是不是已经存在
     // O(1)
     void force_add(const uint32_t& start, const uint32_t& dest, const EdgeWeight& cost);
+    // 把multigraph改成graph
+    // O(m + allocation)
+    void sanitize();
 
     // 加结点
     // 输出：图阶新值

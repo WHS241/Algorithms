@@ -67,6 +67,9 @@ public:
     // force add an edge, even if edge already exists
     virtual void force_add(
         const Vertex& start, const Vertex& dest, const EdgeWeight& cost = EdgeWeight());
+    // sanitize the graph after repetitive force_add calls
+    virtual void sanitize();
+
     // add a new vertex with degree 0 and the given name
     // returns new size
     virtual uint32_t add_vertex(const Vertex& name);
