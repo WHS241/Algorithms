@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include <structures/graph.h>
+#include <structures/partitioner.h>
 
 // Recursive helpers for DFS
 template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
@@ -207,6 +208,25 @@ void breadth_first(
             }
         }
     }
+}
+
+template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+std::list<Vertex> generate_lex_bfs(
+    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph,
+    const Vertex& final_vertex)
+{
+    if (graph.get_translation().find(final_vertex) == graph.get_translation().end())
+        throw std::out_of_range("Does not contain given vertex");
+
+    partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...> setup_device(graph);
+}
+
+template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+std::list<Vertex> generate_lex_bfs(
+    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph)
+{
+    return graph.order() == 0 ? std::list<Vertex>()
+                              : generate_lex_bfs(graph, graph.get_translation().begin()->first);
 }
 
 /*

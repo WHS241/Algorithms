@@ -4,7 +4,8 @@
 #include <list>
 #include <utility>
 
-std::list<std::list<std::pair<int,bool>>> read_CNF(std::istream& in) {
+std::list<std::list<std::pair<int, bool>>> read_CNF(std::istream& in)
+{
     std::string line;
     std::getline(in, line);
 
@@ -22,7 +23,7 @@ std::list<std::list<std::pair<int,bool>>> read_CNF(std::istream& in) {
         tokens[i] = line.substr(last + 1, next - last - 1);
         last = next;
     }
-    
+
     std::size_t num_clauses = std::stoi(tokens[3]);
 
     std::list<std::list<std::pair<int, bool>>> ret_val;
@@ -46,4 +47,3 @@ std::list<std::list<std::pair<int,bool>>> read_CNF(std::istream& in) {
 }
 
 #endif // CNF_READ_H
-

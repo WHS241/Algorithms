@@ -215,7 +215,8 @@ bool cert_set_cover(
             });
     };
 
-    auto equal_check = [](const std::unordered_set<T, Hash, KeyEqual>& x, std::unordered_set<T, Hash, KeyEqual> y) -> bool {
+    auto equal_check = [](const std::unordered_set<T, Hash, KeyEqual>& x,
+                           std::unordered_set<T, Hash, KeyEqual> y) -> bool {
         if (x.size() != y.size())
             return false;
 
@@ -227,8 +228,8 @@ bool cert_set_cover(
         return true;
     };
 
-
-    return cert.size() <= instance.second && equal_check(union_sets(cert), union_sets(instance.first));
+    return cert.size() <= instance.second
+        && equal_check(union_sets(cert), union_sets(instance.first));
 }
 
 /*
@@ -277,8 +278,8 @@ bool cert_feedback_vertex(
  * Each edge is a pair of vertices (x, y), where x->y is the edge represented
  */
 template <typename T, typename It, bool Weighted, typename EdgeType,
-    typename
-    = std::enable_if_t<std::is_same_v<std::pair<T, T>, typename std::iterator_traits<It>::value_type>>,
+    typename = std::enable_if_t<
+        std::is_same_v<std::pair<T, T>, typename std::iterator_traits<It>::value_type>>,
     typename... Args>
 bool cert_feedback_edge(
     const std::pair<graph::graph<T, true, Weighted, EdgeType, Args...>, std::size_t>& instance,

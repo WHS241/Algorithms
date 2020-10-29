@@ -10,8 +10,8 @@
 
 #include <structures/graph.h>
 
-#include <util/pair_hash.h>
 #include <util/key_eq_wrapper.h>
+#include <util/pair_hash.h>
 
 namespace NP_complete {
 
@@ -86,7 +86,7 @@ std::pair<std::vector<std::vector<int>>, std::vector<int>> SAT_to_Integer_Progra
 }
 
 /*
- * CNF-SAT -> Clique 
+ * CNF-SAT -> Clique
  *
  * Richard M. Karp (credited to Stephen A. Cook and Raymond Reiter)
  * Reducibility Among Combinatorial Problems
@@ -94,32 +94,40 @@ std::pair<std::vector<std::vector<int>>, std::vector<int>> SAT_to_Integer_Progra
  * (1972)
  */
 template <typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
-std::pair<graph::unweighted_graph<std::pair<T, std::size_t>, false, util::pair_hash<T, std::size_t, Hash>, util::key_eq_wrapper<T, std::size_t, KeyEqual>>, std::size_t> SAT_to_Clique(
-    std::list<std::list<std::pair<T, bool>>> expr, Hash = Hash(), KeyEqual = KeyEqual()) {
-    std::pair<graph::unweighted_graph<std::pair<T, std::size_t>, false, util::pair_hash<T, std::size_t, Hash>, util::key_eq_wrapper<T, std::size_t, KeyEqual>>, std::size_t> ret_val;
+std::pair<
+    graph::unweighted_graph<std::pair<T, std::size_t>, false, util::pair_hash<T, std::size_t, Hash>,
+        util::key_eq_wrapper<T, std::size_t, KeyEqual>>,
+    std::size_t>
+SAT_to_Clique(std::list<std::list<std::pair<T, bool>>> expr, Hash = Hash(), KeyEqual = KeyEqual())
+{
+    std::pair<
+        graph::unweighted_graph<std::pair<T, std::size_t>, false,
+            util::pair_hash<T, std::size_t, Hash>, util::key_eq_wrapper<T, std::size_t, KeyEqual>>,
+        std::size_t>
+        ret_val;
 
     // sanitize: remove duplicate literals and always-true clauses
     expr.remove_if([](std::list<std::pair<T, bool>>& clause) {
-            std::unordered_map<T, bool, Hash, KeyEqual> values;
-            for (auto it = clause.begin(); it != clause.end();) {
-                if (values.find(it->first) == values.end()) {
-                    values.insert(*it);
-                    ++it;
-                } else if (values.at(it->first) == it->second) {
-                    it = clause.erase(it);
-                } else {
-                    return true;
-                }
+        std::unordered_map<T, bool, Hash, KeyEqual> values;
+        for (auto it = clause.begin(); it != clause.end();) {
+            if (values.find(it->first) == values.end()) {
+                values.insert(*it);
+                ++it;
+            } else if (values.at(it->first) == it->second) {
+                it = clause.erase(it);
+            } else {
+                return true;
             }
-            return false;
-            });
-    
+        }
+        return false;
+    });
+
     ret_val.second = expr.size();
 
     std::size_t i = 0;
     for (const std::list<std::pair<T, bool>>& clause : expr) {
         for (const std::pair<T, bool>& literal : clause)
-            ret_val.first.add_vertex({literal.first, i});
+            ret_val.first.add_vertex({ literal.first, i });
         ++i;
     }
 
@@ -131,7 +139,7 @@ std::pair<graph::unweighted_graph<std::pair<T, std::size_t>, false, util::pair_h
             for (++it2; it2 != expr.end(); ++it2, ++j)
                 for (const std::pair<T, bool>& literal2 : *it2)
                     if (literal1.first != literal2.first || literal1.second == literal2.second)
-                        ret_val.first.force_add({literal1.first, i}, {literal2.first, j});
+                        ret_val.first.force_add({ literal1.first, i }, { literal2.first, j });
         }
     }
 
@@ -141,9 +149,10 @@ std::pair<graph::unweighted_graph<std::pair<T, std::size_t>, false, util::pair_h
 /*
  * Clique -> Independent Set
  */
-template <typename T, bool Weighted,
-    typename... Args>
-std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> Clique_to_Independent_Set(const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance) {
+template <typename T, bool Weighted, typename... Args>
+std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> Clique_to_Independent_Set(
+    const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance)
+{
     std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> result(instance);
 
     std::vector<T> vertices = result.first.vertices();
@@ -163,7 +172,9 @@ std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> Clique_to_Inde
  * Adapted from Karp
  */
 template <typename T, bool Weighted, typename... Args>
-std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> Independent_Set_to_Vertex_Cover(const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance) {
+std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> Independent_Set_to_Vertex_Cover(
+    const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance)
+{
     return std::make_pair(instance.first, instance.first.order() - instance.second);
 }
 
@@ -176,23 +187,33 @@ std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t> Independent_Se
  * (1972)
  */
 template <typename T, bool Weighted, typename Edge, typename Hash, typename KeyEqual>
-    std::pair<std::vector<std::unordered_set<std::pair<T, T>, util::pair_hash_unordered<T, Hash>, util::key_eq_unordered<T, KeyEqual>>>, std::size_t> Vertex_Cover_to_Set_Cover(const std::pair<graph::graph<T, false, Weighted, Edge, Hash, KeyEqual>, std::size_t>& input) {
-        std::pair<std::vector<std::unordered_set<std::pair<T, T>, util::pair_hash_unordered<T, Hash>, util::key_eq_unordered<T, KeyEqual>>>, std::size_t> result;
+std::pair<std::vector<std::unordered_set<std::pair<T, T>, util::pair_hash_unordered<T, Hash>,
+              util::key_eq_unordered<T, KeyEqual>>>,
+    std::size_t>
+Vertex_Cover_to_Set_Cover(
+    const std::pair<graph::graph<T, false, Weighted, Edge, Hash, KeyEqual>, std::size_t>& input)
+{
+    std::pair<std::vector<std::unordered_set<std::pair<T, T>, util::pair_hash_unordered<T, Hash>,
+                  util::key_eq_unordered<T, KeyEqual>>>,
+        std::size_t>
+        result;
 
-        result.second = input.second;
+    result.second = input.second;
 
-        for (const T& u : input.first.vertices()) {
-            std::unordered_set<std::pair<T, T>, util::pair_hash_unordered<T, Hash>, util::key_eq_unordered<T, KeyEqual>> current_set;
-            for (const T& v : input.first.neighbors(u))
-                current_set.insert({u, v});
-            result.first.push_back(std::move(current_set));
-        }
-
-        return result;
+    for (const T& u : input.first.vertices()) {
+        std::unordered_set<std::pair<T, T>, util::pair_hash_unordered<T, Hash>,
+            util::key_eq_unordered<T, KeyEqual>>
+            current_set;
+        for (const T& v : input.first.neighbors(u))
+            current_set.insert({ u, v });
+        result.first.push_back(std::move(current_set));
     }
 
+    return result;
+}
+
 /*
- * Vertex Cover -> Feedback Vertex Set 
+ * Vertex Cover -> Feedback Vertex Set
  *
  * Richard M. Karp
  * Reducibility Among Combinatorial Problems
@@ -200,22 +221,24 @@ template <typename T, bool Weighted, typename Edge, typename Hash, typename KeyE
  * (1972)
  */
 template <typename T, bool Weighted, typename... Args>
-std::pair<graph::graph<T, true, Weighted, Args...>, std::size_t> Vertex_Cover_to_Feedback_Vertex(const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& input) {
+std::pair<graph::graph<T, true, Weighted, Args...>, std::size_t> Vertex_Cover_to_Feedback_Vertex(
+    const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& input)
+{
     std::pair<graph::graph<T, true, Weighted, Args...>, std::size_t> result;
     result.second = input.second;
 
-    for(const T& v : input.first.vertices())
+    for (const T& v : input.first.vertices())
         result.first.add_vertex(v);
 
     for (const T& u : input.first.vertices())
         for (const T& v : input.first.neighbors(u))
             result.first.force_add(u, v);
-    
+
     return result;
 }
 
 /*
- * Vertex Cover -> Feedback Edge Set 
+ * Vertex Cover -> Feedback Edge Set
  *
  * Richard M. Karp (co-credited to Eugene L. Lawler)
  * Reducibility Among Combinatorial Problems
@@ -223,14 +246,22 @@ std::pair<graph::graph<T, true, Weighted, Args...>, std::size_t> Vertex_Cover_to
  * (1972)
  */
 template <typename T, bool Weighted, typename Edge, typename Hash, typename KeyEqual>
-std::pair<graph::graph<std::pair<T, bool>, true, Weighted, Edge, util::pair_hash<T, bool, Hash>, util::key_eq_wrapper<T, bool, KeyEqual>>, std::size_t> Vertex_Cover_to_Feedback_Edge(const std::pair<graph::graph<T, false, Weighted, Edge, Hash, KeyEqual>, std::size_t>& input) {
-    std::pair<graph::graph<std::pair<T, bool>, true, Weighted, Edge, util::pair_hash<T, bool, Hash>, util::key_eq_wrapper<T, bool, KeyEqual>>, std::size_t> result;
+std::pair<graph::graph<std::pair<T, bool>, true, Weighted, Edge, util::pair_hash<T, bool, Hash>,
+              util::key_eq_wrapper<T, bool, KeyEqual>>,
+    std::size_t>
+Vertex_Cover_to_Feedback_Edge(
+    const std::pair<graph::graph<T, false, Weighted, Edge, Hash, KeyEqual>, std::size_t>& input)
+{
+    std::pair<graph::graph<std::pair<T, bool>, true, Weighted, Edge, util::pair_hash<T, bool, Hash>,
+                  util::key_eq_wrapper<T, bool, KeyEqual>>,
+        std::size_t>
+        result;
 
     result.second = input.second;
-    
+
     // false -> in, true -> out
 
-    for(const T& v : input.first.vertices()) {
+    for (const T& v : input.first.vertices()) {
         result.first.add_vertex(std::make_pair(v, false));
         result.first.add_vertex(std::make_pair(v, true));
         result.first.force_add(std::make_pair(v, false), std::make_pair(v, true));
@@ -242,23 +273,25 @@ std::pair<graph::graph<std::pair<T, bool>, true, Weighted, Edge, util::pair_hash
     return result;
 }
 
-template <typename T, typename Hash = std::hash<T>>
-struct VC_DHC_hash {
+template <typename T, typename Hash = std::hash<T>> struct VC_DHC_hash {
     std::hash<std::size_t> hash_1;
-    Hash hash_2; 
-    std::size_t operator()(const std::tuple<std::size_t, std::size_t, T, T>& vertex) const {
-        return util::asym_combine_hash(util::asym_combine_hash(hash_1(std::get<0>(vertex)), hash_1(std::get<1>(vertex))), util::asym_combine_hash(hash_2(std::get<2>(vertex)), hash_2(std::get<3>(vertex))));
+    Hash hash_2;
+    std::size_t operator()(const std::tuple<std::size_t, std::size_t, T, T>& vertex) const
+    {
+        return util::asym_combine_hash(
+            util::asym_combine_hash(hash_1(std::get<0>(vertex)), hash_1(std::get<1>(vertex))),
+            util::asym_combine_hash(hash_2(std::get<2>(vertex)), hash_2(std::get<3>(vertex))));
     }
 };
 
-template <typename T, typename KeyEqual = std::equal_to<T>>
-struct VC_DHC_eq {
+template <typename T, typename KeyEqual = std::equal_to<T>> struct VC_DHC_eq {
     KeyEqual key_eq;
-    bool operator()(const std::tuple<std::size_t, std::size_t, T, T>& lhs, const std::tuple<std::size_t, std::size_t, T, T>& rhs) const {
-        return (std::get<0>(lhs) == std::get<0>(rhs)) &&
-               (std::get<1>(lhs) == std::get<1>(rhs)) &&
-               key_eq(std::get<2>(lhs), std::get<2>(rhs)) &&
-               key_eq(std::get<3>(lhs), std::get<3>(rhs));
+    bool operator()(const std::tuple<std::size_t, std::size_t, T, T>& lhs,
+        const std::tuple<std::size_t, std::size_t, T, T>& rhs) const
+    {
+        return (std::get<0>(lhs) == std::get<0>(rhs)) && (std::get<1>(lhs) == std::get<1>(rhs))
+            && key_eq(std::get<2>(lhs), std::get<2>(rhs))
+            && key_eq(std::get<3>(lhs), std::get<3>(rhs));
     }
 };
 
@@ -271,16 +304,22 @@ struct VC_DHC_eq {
  * (1972)
  */
 template <typename T, bool Weighted, typename EdgeType, typename Hash, typename KeyEqual>
-graph::graph<std::tuple<std::size_t, std::size_t, T, T>, true, Weighted, EdgeType, VC_DHC_hash<T, Hash>, VC_DHC_eq<T, KeyEqual>> Vertex_Cover_to_DHC(const std::pair<graph::graph<T, false, Weighted, EdgeType, Hash, KeyEqual>, std::size_t>& input) {
+graph::graph<std::tuple<std::size_t, std::size_t, T, T>, true, Weighted, EdgeType,
+    VC_DHC_hash<T, Hash>, VC_DHC_eq<T, KeyEqual>>
+Vertex_Cover_to_DHC(
+    const std::pair<graph::graph<T, false, Weighted, EdgeType, Hash, KeyEqual>, std::size_t>& input)
+{
     typedef std::tuple<std::size_t, std::size_t, T, T> DHC_vertex;
-    graph::graph<DHC_vertex, true, Weighted, EdgeType, VC_DHC_hash<T, Hash>, VC_DHC_eq<T, KeyEqual>> result;
-    
-    for(std::size_t i = 0; i < input.second; ++i)
+    graph::graph<DHC_vertex, true, Weighted, EdgeType, VC_DHC_hash<T, Hash>, VC_DHC_eq<T, KeyEqual>>
+        result;
+
+    for (std::size_t i = 0; i < input.second; ++i)
         result.add_vertex(DHC_vertex(i, 0, T(), T()));
 
     if (input.second > 1U)
         for (std::size_t i = 0; i < input.second; ++i)
-            result.force_add(DHC_vertex(i, 0, T(), T()), DHC_vertex((i + 1) % input.second, 0, T(), T()));
+            result.force_add(
+                DHC_vertex(i, 0, T(), T()), DHC_vertex((i + 1) % input.second, 0, T(), T()));
 
     std::vector<T> vertices = input.first.vertices();
     for (const T& u : vertices) {
@@ -327,8 +366,13 @@ graph::graph<std::tuple<std::size_t, std::size_t, T, T>, true, Weighted, EdgeTyp
  * (1972)
  */
 template <typename T, bool Weighted, typename EdgeWeight, typename Hash, typename KeyEqual>
-graph::graph<std::pair<T, short>, false, Weighted, EdgeWeight, util::pair_hash<T, short, Hash>, util::key_eq_wrapper<T, short, KeyEqual>> DHC_to_UHC(const graph::graph<T, true, Weighted, EdgeWeight, Hash, KeyEqual>& input) {
-    graph::graph<std::pair<T, short>, false, Weighted, EdgeWeight, util::pair_hash<T, short, Hash>, util::key_eq_wrapper<T, short, KeyEqual>> result;
+graph::graph<std::pair<T, short>, false, Weighted, EdgeWeight, util::pair_hash<T, short, Hash>,
+    util::key_eq_wrapper<T, short, KeyEqual>>
+DHC_to_UHC(const graph::graph<T, true, Weighted, EdgeWeight, Hash, KeyEqual>& input)
+{
+    graph::graph<std::pair<T, short>, false, Weighted, EdgeWeight, util::pair_hash<T, short, Hash>,
+        util::key_eq_wrapper<T, short, KeyEqual>>
+        result;
 
     for (const T& v : input.vertices()) {
         for (short i = 0; i < 3; ++i)
