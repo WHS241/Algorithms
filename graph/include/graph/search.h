@@ -213,12 +213,32 @@ void breadth_first(
 template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
 std::list<Vertex> generate_lex_bfs(
     const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph,
-    const Vertex& final_vertex)
+    const Vertex& first_vertex)
 {
-    if (graph.get_translation().find(final_vertex) == graph.get_translation().end())
+    if (graph.get_translation().find(first_vertex) == graph.get_translation().end())
         throw std::out_of_range("Does not contain given vertex");
 
     partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...> setup_device(graph);
+    std::list<Vertex> result;
+    setup_device.remove_vertex(first_vertex);
+    result.push_back(first_vertex);
+
+    while (result.size() != graph.order()) {
+        // Partition on last vertex added
+        auto ptrs = setup_device.partition(result.back(), false);
+        setup_device.clean(ptrs);
+
+        const std::list<Vertex>& next_set = setup_device.get_all().front();
+
+        // Doesn't matter which one we pick
+        Vertex next = next_set.back();
+        result.push_back(next);
+
+        // Don't want to repeat vertices
+        setup_device.remove_vertex(next);
+    }
+
+    return result;
 }
 
 template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>

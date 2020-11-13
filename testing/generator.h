@@ -6,13 +6,11 @@
 
 template <bool Directed, bool Weighted>
 graph::graph<int, Directed, Weighted> random_graph(
-    std::mt19937_64& gen, bool cyclic = true, graph::graph_type type = graph::adj_list)
+    std::mt19937_64& gen, bool cyclic, graph::graph_type type, std::size_t num_vertices)
 {
-    std::uniform_int_distribution<uint32_t> dist(0, 20);
-    std::uniform_real_distribution<double> weight(0, 1000);
-
-    auto num_vertices = dist(gen);
     graph::graph<int, Directed, Weighted> graph(type);
+
+    std::uniform_real_distribution<double> weight(0, 1000);
 
     if (Directed && cyclic) {
         for (uint32_t i = 0; i < num_vertices; ++i)
@@ -52,6 +50,16 @@ graph::graph<int, Directed, Weighted> random_graph(
     }
 
     return graph;
+}
+
+template <bool Directed, bool Weighted>
+graph::graph<int, Directed, Weighted> random_graph(
+    std::mt19937_64& gen, bool cyclic = true, graph::graph_type type = graph::adj_list)
+{
+    std::uniform_int_distribution<std::size_t> dist(0, 20);
+
+    std::size_t num_vertices = dist(gen);
+    return random_graph<Directed, Weighted>(gen, cyclic, type, num_vertices);
 }
 
 std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine)

@@ -3,11 +3,11 @@
 
 namespace special_case {
 
-    /*
-     * Verify a CNF-SAT is 2-SAT.
-     * Returns true if the instance is 2-SAT
-     */
-    bool is_2_SAT();
+/*
+ * Verify a CNF-SAT is 2-SAT.
+ * Returns true if the instance is 2-SAT
+ */
+bool is_2_SAT();
 }
 
 #endif // SPECIAL_CASE_MODEL_GEN_H

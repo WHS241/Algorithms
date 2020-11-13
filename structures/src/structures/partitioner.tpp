@@ -73,10 +73,19 @@ void partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::clean() noexc
 }
 
 template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+void partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::clean(const std::unordered_set<typename partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::set_ptr, util::it_hash<typename partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::set_ptr>>& to_check) {
+    for (set_ptr it : to_check)
+        if (it->empty())
+            sets.erase(it);
+}
+
+template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
 void partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::remove_vertex(const Vertex& v) noexcept {
     if (set_ptrs.find(v) != set_ptrs.end()) {
         auto& ptrs = set_ptrs[v];
         ptrs.first->erase(ptrs.second);
+        if (ptrs.first->empty())
+            sets.erase(ptrs.first);
         set_ptrs.erase(v);
     }
 }
@@ -89,6 +98,11 @@ void partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::add_back(cons
     std::list<Vertex> new_set;
     new_set.push_back(v);
     sets.push_back(new_set);
+}
+
+template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+const std::list<std::list<Vertex>>& partitioner<Vertex, Directed, Weighted, EdgeWeight, Args...>::get_all() const {
+    return sets;
 }
 
 #endif // PARTITIONER_TPP

@@ -103,7 +103,8 @@ std::list<std::pair<Vertex, Vertex>> maximum_bipartite_matching(
     for (const Vertex& v : sets.second)
         flow_graph.force_add(translation.at(v), dummy_2, EDGE_FLOW);
 
-    graph::graph<uint32_t, true, true, uint32_t> flow_result = Dinitz(flow_graph, dummy_1, dummy_2);
+    graph::graph<uint32_t, true, true, uint32_t> flow_result
+        = Dinic_max_flow(flow_graph, dummy_1, dummy_2);
     std::list<std::pair<Vertex, Vertex>> result;
     for (const Vertex& v : sets.first) {
         std::list<uint32_t> neighbors = flow_result.neighbors(
