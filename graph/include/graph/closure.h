@@ -22,10 +22,9 @@ namespace graph_alg {
  * (1983) doi:10.1145/2402.322385
  * Θ(V)
  */
-template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
-graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> k_core(
-    graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> src, uint32_t k)
-{
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>
+  k_core(graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> src, uint32_t k) {
     // Since we are strictly removing edges, if a vertex falls below
     // threshold, we know it has to go
     std::unordered_map<Vertex, uint32_t, Args...> degree;
@@ -54,10 +53,9 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> k_core(
  * Find the transitive closure of a graph
  * Θ(mn)
  */
-template <typename Vertex, bool Directed, bool Weighted, typename... Args>
-graph::graph<Vertex, Directed, false, Args...> transitive_closure(
-    const graph::graph<Vertex, Directed, Weighted, Args...>& src)
-{
+template<typename Vertex, bool Directed, bool Weighted, typename... Args>
+graph::graph<Vertex, Directed, false, Args...>
+  transitive_closure(const graph::graph<Vertex, Directed, Weighted, Args...>& src) {
     // Strategy: From each vertex, find all reachable vertices
     graph::graph<Vertex, Directed, Weighted, Args...> result;
     std::vector<Vertex> vertices = src.vertices();
@@ -86,10 +84,10 @@ graph::graph<Vertex, Directed, false, Args...> transitive_closure(
  * (2004) doi.org/10.1016/S0012-365X(03)00316-9
  * Θ(output size)
  */
-template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
-graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure(
-    graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> src, uint32_t k)
-{
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>
+  Chvatal_Bondy_closure(graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> src,
+                        uint32_t k) {
     uint32_t num_edges = 0;
     uint32_t *check_array, *check_stack;
     uint8_t* contains_edge;
@@ -142,11 +140,11 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure
         std::list<std::pair<bucket_vert, bucket_vert>> to_add;
 
         // Using space-initialization: returns 0 if uninitialized, contents if initialized
-        auto check_entry
-            = [check_array, check_stack, contains_edge, num_edges](uint32_t pos) -> uint8_t {
+        auto check_entry = [check_array, check_stack, contains_edge,
+                            num_edges](uint32_t pos) -> uint8_t {
             return (check_array[pos] < num_edges && check_stack[check_array[pos]] == pos)
-                ? contains_edge[pos]
-                : 0;
+                     ? contains_edge[pos]
+                     : 0;
         };
 
         // go through the buckets and find vertices whose degree exceed threshold and are not yet
@@ -157,8 +155,7 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure
                     for (auto it2 = bucketed_vertices[j].begin();
                          it != it2 && it2 != bucketed_vertices[j].end(); ++it2)
                         if (!check_entry(*it * src.order() + *it2))
-                            to_add.emplace_back(
-                                bucket_vert({ *it, it }), bucket_vert({ *it2, it2 }));
+                            to_add.emplace_back(bucket_vert({*it, it}), bucket_vert({*it2, it2}));
 
         // actually add edges
         while (!to_add.empty()) {
@@ -183,22 +180,23 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure
             // update
             uint32_t new_degree = src.degree(vertices[next.first.value]);
             bucketed_vertices[new_degree].splice(bucketed_vertices[new_degree].end(),
-                bucketed_vertices[new_degree - 1], next.first.pos);
+                                                 bucketed_vertices[new_degree - 1], next.first.pos);
             if (k >= new_degree)
                 for (auto it = bucketed_vertices[k - new_degree].begin();
                      it != bucketed_vertices[k - new_degree].end(); ++it)
                     if (it != next.first.pos && !check_entry(*it * src.order() + next.first.value))
-                        to_add.emplace_back(next.first, bucket_vert({ *it, it }));
+                        to_add.emplace_back(next.first, bucket_vert({*it, it}));
 
             new_degree = src.degree(next.second.value);
             bucketed_vertices[new_degree].splice(bucketed_vertices[new_degree].end(),
-                bucketed_vertices[new_degree - 1], next.second.pos);
+                                                 bucketed_vertices[new_degree - 1],
+                                                 next.second.pos);
             if (k >= new_degree)
                 for (auto it = bucketed_vertices[k - new_degree].begin();
                      it != bucketed_vertices[k - new_degree].end(); ++it)
-                    if (it != next.second.pos
-                        && !check_entry(*it * src.order() + next.second.value))
-                        to_add.emplace_back(next.second, bucket_vert({ *it, it }));
+                    if (it != next.second.pos &&
+                        !check_entry(*it * src.order() + next.second.value))
+                        to_add.emplace_back(next.second, bucket_vert({*it, it}));
         }
 
         check_allocator.deallocate(check_array, allocate_size);
@@ -218,9 +216,8 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...> Chvatal_Bondy_closure
  * Check if a graph is transitively oriented
  * O(M(n)), M(n) is matrix multiplication
  */
-template <typename Vertex, bool Weighted, typename... Args>
-bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& src)
-{
+template<typename Vertex, bool Weighted, typename... Args>
+bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& src) {
     dynamic_matrix<int> adj_matrix(src.order(), src.order(), 0);
     for (const Vertex& v : src.vertices()) {
         adj_matrix[src.get_translation().at(v)][src.get_translation().at(v)] = 1;
@@ -235,9 +232,8 @@ bool is_transitive_closure(const graph::graph<Vertex, true, Weighted, Args...>& 
     return true;
 }
 
-template <typename Vertex, bool Weighted, typename... Args>
-bool is_transitive_reduction(const graph::graph<Vertex, true, Weighted, Args...>& src)
-{
+template<typename Vertex, bool Weighted, typename... Args>
+bool is_transitive_reduction(const graph::graph<Vertex, true, Weighted, Args...>& src) {
     dynamic_matrix<int> adj_matrix(src.order(), src.order(), 0);
     for (const Vertex& v : src.vertices()) {
         adj_matrix[src.get_translation().at(v)][src.get_translation().at(v)] = 1;
@@ -252,6 +248,6 @@ bool is_transitive_reduction(const graph::graph<Vertex, true, Weighted, Args...>
     return true;
 }
 
-}
+} // namespace graph_alg
 
 #endif // GRAPH_CLOSURE_H

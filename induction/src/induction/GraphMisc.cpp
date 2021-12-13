@@ -8,9 +8,8 @@
 
 #include <structures/graph.h>
 
-template <typename T, bool Weighted>
-T induction::celebrity(const graph::graph<T, true, Weighted>& src)
-{
+template<typename T, bool Weighted>
+T induction::celebrity(const graph::graph<T, true, Weighted>& src) {
     if (src.order() == 0)
         throw std::invalid_argument("Empty");
 

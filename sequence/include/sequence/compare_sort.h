@@ -18,9 +18,8 @@ namespace sequence {
  Θ(n log n) worst case
  Θ(n) extra space
  */
-template <typename ForwardIt, typename Compare>
-void mergesort(ForwardIt first, ForwardIt last, Compare compare)
-{
+template<typename ForwardIt, typename Compare>
+void mergesort(ForwardIt first, ForwardIt last, Compare compare) {
     // base case
     if (first == last)
         return;
@@ -37,7 +36,7 @@ void mergesort(ForwardIt first, ForwardIt last, Compare compare)
 
     // merge sub-solutions
     std::list<typename std::iterator_traits<ForwardIt>::value_type> first_half(first, temp),
-        second_half(temp, last);
+      second_half(temp, last);
     auto it1 = first_half.begin(), it2 = second_half.begin();
     while (it1 != first_half.end() && it2 != second_half.end()) {
         if (compare(*it1, *it2)) {
@@ -51,8 +50,7 @@ void mergesort(ForwardIt first, ForwardIt last, Compare compare)
     std::copy(it1, first_half.end(), first);
     std::copy(it2, second_half.end(), first);
 }
-template <typename ForwardIt> void mergesort(ForwardIt first, ForwardIt last)
-{
+template<typename ForwardIt> void mergesort(ForwardIt first, ForwardIt last) {
     mergesort(first, last, std::less<>());
 }
 
@@ -61,9 +59,8 @@ template <typename ForwardIt> void mergesort(ForwardIt first, ForwardIt last)
  Used for quicksort and selection
  Returns an iterator pointing to the partition value
  */
-template <typename BiDirIt, typename Compare>
-BiDirIt partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compare)
-{
+template<typename BiDirIt, typename Compare>
+BiDirIt partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compare) {
     // setup for partition
     std::iter_swap(partition, first);
     auto forward_it(first), backward_it(last);
@@ -73,12 +70,12 @@ BiDirIt partition(BiDirIt first, BiDirIt last, BiDirIt partition, Compare compar
 
     // partition: on each pass, find two values that need to be swapped
     while (true) {
-        while (((processed_last && forward_it != backward_it)
-                   || (!processed_last && forward_it != last))
-            && compare(*forward_it, *first))
+        while (((processed_last && forward_it != backward_it) ||
+                (!processed_last && forward_it != last)) &&
+               compare(*forward_it, *first))
             ++forward_it;
-        if ((processed_last && forward_it == backward_it)
-            || (!processed_last && forward_it == last)) {
+        if ((processed_last && forward_it == backward_it) ||
+            (!processed_last && forward_it == last)) {
             break;
         }
 
@@ -107,9 +104,8 @@ Algorithm 64: Quicksort
 Θ(n^2) worst case, Θ(n log n) expected case
 Θ(1) extra space
 */
-template <typename BiDirIt, typename Compare>
-void quicksort(BiDirIt first, BiDirIt last, Compare compare)
-{
+template<typename BiDirIt, typename Compare>
+void quicksort(BiDirIt first, BiDirIt last, Compare compare) {
     static std::random_device rd;
     static std::mt19937_64 engine(rd());
     // base case
@@ -127,7 +123,9 @@ void quicksort(BiDirIt first, BiDirIt last, Compare compare)
     quicksort(first, partition_index, compare);
     quicksort(++partition_index, last, compare);
 }
-template <typename BiDirIt> void quicksort(BiDirIt first, BiDirIt last) { quicksort(first, last); }
+template<typename BiDirIt> void quicksort(BiDirIt first, BiDirIt last) {
+    quicksort(first, last, std::less<>());
+}
 
 /*
 Heapsort
@@ -138,14 +136,13 @@ Algorithm 232: Heapsort
 Θ(n log n) worst case
 Θ(1) extra space for random access iterators, Θ(n) for any other type
 */
-template <typename It, typename Compare> void heapsort(It first, It last, Compare compare)
-{
+template<typename It, typename Compare> void heapsort(It first, It last, Compare compare) {
     if (first == last)
         return;
 
     // Random access: can sort without extra space
     if constexpr (std::is_same_v<typename std::iterator_traits<It>::iterator_category,
-                      std::random_access_iterator_tag>) {
+                                 std::random_access_iterator_tag>) {
         typedef typename std::iterator_traits<It>::difference_type diff_type;
         diff_type distance = last - first;
 
@@ -190,12 +187,14 @@ template <typename It, typename Compare> void heapsort(It first, It last, Compar
         }
     } else {
         heap::priority_queue<typename std::iterator_traits<It>::value_type, Compare> heap(
-            first, last, compare);
+          first, last, compare);
         std::generate(first, last, [&heap]() { return heap.remove_root(); });
     }
 }
-template <typename It> void heapsort(It first, It last) { heapsort(first, last, std::less<>()); }
+template<typename It> void heapsort(It first, It last) {
+    heapsort(first, last, std::less<>());
+}
 
-} // namespace Sequence
+} // namespace sequence
 
 #endif // !COMPARE_SORT_H

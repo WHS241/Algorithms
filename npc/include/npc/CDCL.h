@@ -12,15 +12,15 @@
 #include <util/it_hash.h>
 
 namespace NP_complete {
-template <typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
-std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
-    std::list<std::list<std::pair<T, bool>>> expr, Hash hash = Hash(), KeyEqual key_eq = KeyEqual())
-{
+template<typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
+std::unordered_map<T, bool, Hash, KeyEqual>
+  SAT_solver_CDCL(std::list<std::list<std::pair<T, bool>>> expr, Hash hash = Hash(),
+                  KeyEqual key_eq = KeyEqual()) {
     typedef typename std::list<std::list<std::pair<T, bool>>>::iterator clause_ptr;
 
     std::unordered_map<T, bool, Hash, KeyEqual> result(1, hash, key_eq), no_res(result);
     std::unordered_map<T, std::unordered_set<clause_ptr, util::it_hash<clause_ptr>>, Hash, KeyEqual>
-        clause_map(1, hash, key_eq);
+      clause_map(1, hash, key_eq);
     std::unordered_map<T, std::size_t, Hash, KeyEqual> step_map(1, hash, key_eq);
     std::unordered_map<T, clause_ptr, Hash, KeyEqual> forced_by(1, hash, key_eq);
     std::unordered_set<clause_ptr, util::it_hash<clause_ptr>> satisfied_clauses;
@@ -36,51 +36,51 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
 
     // Propagate the forced_variables; returns true if successful, returns false and sets conflict
     // if not
-    auto propagate
-        = [&forced_variables, &satisfied_clauses, &clause_map, &conflict, &step_map_clause, &result,
-              &step_map, &forced_by, &expr](std::size_t step_num) {
-              while (!forced_variables.empty()) {
-                  std::pair<std::pair<T, bool>, clause_ptr> next = forced_variables.front();
-                  forced_variables.pop_front();
+    auto propagate = [&forced_variables, &satisfied_clauses, &clause_map, &conflict,
+                      &step_map_clause, &result, &step_map, &forced_by,
+                      &expr](std::size_t step_num) {
+        while (!forced_variables.empty()) {
+            std::pair<std::pair<T, bool>, clause_ptr> next = forced_variables.front();
+            forced_variables.pop_front();
 
-                  if (result.find(next.first.first) != result.end()) {
-                      if (result.at(next.first.first) != next.first.second) {
-                          conflict = { next.first.first, next.second };
-                          return false;
-                      }
-                  } else {
-                      result[next.first.first] = next.first.second;
-                      step_map[next.first.first] = step_num;
-                      if (next.second != expr.end()) {
-                          step_map_clause[next.second] = step_num;
-                          satisfied_clauses.insert(next.second);
-                      }
-                      forced_by[next.first.first] = next.second;
+            if (result.find(next.first.first) != result.end()) {
+                if (result.at(next.first.first) != next.first.second) {
+                    conflict = {next.first.first, next.second};
+                    return false;
+                }
+            } else {
+                result[next.first.first] = next.first.second;
+                step_map[next.first.first] = step_num;
+                if (next.second != expr.end()) {
+                    step_map_clause[next.second] = step_num;
+                    satisfied_clauses.insert(next.second);
+                }
+                forced_by[next.first.first] = next.second;
 
-                      const T& current = next.first.first;
-                      for (clause_ptr ptr : clause_map[current]) {
-                          if (satisfied_clauses.find(ptr) == satisfied_clauses.end()) {
-                              std::list<std::pair<T, bool>> unset;
-                              for (const std::pair<T, bool>& literal : *ptr) {
-                                  if (result.find(literal.first) == result.end())
-                                      unset.push_back(literal);
-                                  else if (result.at(literal.first) == literal.second) {
-                                      satisfied_clauses.insert(ptr);
-                                      step_map_clause[ptr] = step_num;
-                                      unset.clear();
-                                      break;
-                                  }
-                              }
+                const T& current = next.first.first;
+                for (clause_ptr ptr : clause_map[current]) {
+                    if (satisfied_clauses.find(ptr) == satisfied_clauses.end()) {
+                        std::list<std::pair<T, bool>> unset;
+                        for (const std::pair<T, bool>& literal : *ptr) {
+                            if (result.find(literal.first) == result.end())
+                                unset.push_back(literal);
+                            else if (result.at(literal.first) == literal.second) {
+                                satisfied_clauses.insert(ptr);
+                                step_map_clause[ptr] = step_num;
+                                unset.clear();
+                                break;
+                            }
+                        }
 
-                              if (unset.size() == 1)
-                                  forced_variables.emplace_back(unset.front(), ptr);
-                          }
-                      }
-                  }
-              }
+                        if (unset.size() == 1)
+                            forced_variables.emplace_back(unset.front(), ptr);
+                    }
+                }
+            }
+        }
 
-              return true;
-          };
+        return true;
+    };
 
     // Sanitize: Each variable occurs at most once a clause, a clause x + x' is always satisfiable
     // and can be removed
@@ -128,8 +128,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
     // Get rid of the inversed set variables: changing them is guaranteed unsatisfiable
     // Also get rid of satisfied clauses
     for (const std::pair<T, bool>& setting : result) {
-        std::unordered_set<clause_ptr, util::it_hash<clause_ptr>>& curr_clauses
-            = clause_map.at(setting.first);
+        std::unordered_set<clause_ptr, util::it_hash<clause_ptr>>& curr_clauses =
+          clause_map.at(setting.first);
         for (auto clause_it_ptr = curr_clauses.begin(); clause_it_ptr != curr_clauses.end();) {
             clause_ptr clause_it = *clause_it_ptr;
             bool erase = false;
@@ -139,8 +139,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
                         erase = true;
                         break;
                     } else {
-                        if (clause_map.find(it->first != setting.first && it->first)
-                            != clause_map.end())
+                        if (clause_map.find(it->first != setting.first && it->first) !=
+                            clause_map.end())
                             clause_map[it->first].erase(clause_it);
                         it = clause_it->erase(it);
                     }
@@ -174,10 +174,10 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
         // No unsatisfiable clauses/conflicts
         if (satisfied_clauses.find(it) == satisfied_clauses.end()) {
             // Find an unset variable and set it
-            std::pair<T, bool> curr_literal
-                = *std::find_if(it->begin(), it->end(), [&result](const std::pair<T, bool>& x) {
-                      return result.find(x.first) == result.end();
-                  });
+            std::pair<T, bool> curr_literal =
+              *std::find_if(it->begin(), it->end(), [&result](const std::pair<T, bool>& x) {
+                  return result.find(x.first) == result.end();
+              });
             steps.emplace_back(it, curr_literal.first);
             forced_variables.emplace_back(curr_literal, expr.end());
 
@@ -207,8 +207,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
                             }
                     }
                 }
-                std::list<std::pair<T, bool>> new_clause(
-                    new_clause_gen.begin(), new_clause_gen.end());
+                std::list<std::pair<T, bool>> new_clause(new_clause_gen.begin(),
+                                                         new_clause_gen.end());
                 expr.push_back(new_clause);
 
                 // Update the clause_map
@@ -218,11 +218,12 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
 
                 // clause generated, now to determine where to backtrack to
                 std::vector<std::size_t> assign_steps(new_clause.size());
-                std::transform(new_clause.begin(), new_clause.end(), assign_steps.begin(),
-                    [&step_map](const std::pair<T, bool>& lit) { return step_map.at(lit.first); });
+                std::transform(
+                  new_clause.begin(), new_clause.end(), assign_steps.begin(),
+                  [&step_map](const std::pair<T, bool>& lit) { return step_map.at(lit.first); });
                 std::sort(assign_steps.begin(), assign_steps.end());
-                std::size_t back_track_level
-                    = (assign_steps.size() == 1) ? 0 : assign_steps[assign_steps.size() - 2];
+                std::size_t back_track_level =
+                  (assign_steps.size() == 1) ? 0 : assign_steps[assign_steps.size() - 2];
 
                 // Backtrack
                 for (auto it = step_map.begin(); it != step_map.end();) {
@@ -250,8 +251,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
                     for (const std::pair<T, bool>& req : forced_singles)
                         result.insert(req);
 
-                    if (result.find(new_clause.front().first) != result.end()
-                        && result.at(new_clause.front().first) != new_clause.front().second)
+                    if (result.find(new_clause.front().first) != result.end() &&
+                        result.at(new_clause.front().first) != new_clause.front().second)
                         // Contradiction between single clauses
                         return no_res;
 
@@ -266,8 +267,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
 
                     for (const std::pair<T, bool>& setting : result) {
                         if (clause_map.find(setting.first) != clause_map.end()) {
-                            std::unordered_set<clause_ptr, util::it_hash<clause_ptr>>& curr_clauses
-                                = clause_map.at(setting.first);
+                            std::unordered_set<clause_ptr, util::it_hash<clause_ptr>>&
+                              curr_clauses = clause_map.at(setting.first);
                             for (auto clause_it_ptr = curr_clauses.begin();
                                  clause_it_ptr != curr_clauses.end();) {
                                 clause_ptr clause_it = *clause_it_ptr;
@@ -278,8 +279,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
                                             erase = true;
                                             break;
                                         } else {
-                                            if (it->first != setting.first
-                                                && clause_map.find(it->first) != clause_map.end())
+                                            if (it->first != setting.first &&
+                                                clause_map.find(it->first) != clause_map.end())
                                                 clause_map[it->first].erase(clause_it);
                                             it = clause_it->erase(it);
                                         }
@@ -290,8 +291,8 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
 
                                 if (erase) {
                                     for (const std::pair<T, bool>& lit : *clause_it)
-                                        if (lit.first != setting.first
-                                            && clause_map.find(lit.first) != clause_map.end())
+                                        if (lit.first != setting.first &&
+                                            clause_map.find(lit.first) != clause_map.end())
                                             clause_map[lit.first].erase(clause_it);
                                     expr.erase(clause_it);
                                     clause_it_ptr = curr_clauses.erase(clause_it_ptr);
@@ -320,7 +321,7 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
     }
 
     for (const std::pair<T, std::unordered_set<clause_ptr, util::it_hash<clause_ptr>>>& var :
-        clause_map)
+         clause_map)
         if (result.find(var.first) == result.end())
             result[var.first] = true;
 
@@ -330,6 +331,6 @@ std::unordered_map<T, bool, Hash, KeyEqual> SAT_solver_CDCL(
 
     return result;
 }
-}
+} // namespace NP_complete
 
 #endif // NPC_CNF_CDCL_H

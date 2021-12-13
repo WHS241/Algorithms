@@ -2,14 +2,14 @@
 #define ALLOCATION_TRACKER_H
 
 class AllocationTracker {
-public:
+    public:
     AllocationTracker() { ++_count; };
     AllocationTracker(const AllocationTracker&) { ++_count; };
     ~AllocationTracker() { --_count; };
     static uint32_t count() { return _count; };
     bool operator<(const AllocationTracker&) const { return false; };
 
-private:
+    private:
     static uint32_t _count;
 };
 

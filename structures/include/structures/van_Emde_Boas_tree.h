@@ -13,8 +13,8 @@ Preserving order in a forest in less than logarithmic time
 Currently not exception-safe
 */
 class van_Emde_Boas_tree {
-public:
-    explicit van_Emde_Boas_tree(uint32_t range = 0);
+    public:
+    explicit van_Emde_Boas_tree(std::size_t range = 0);
 
     ~van_Emde_Boas_tree() noexcept;
     van_Emde_Boas_tree(const van_Emde_Boas_tree&);
@@ -23,52 +23,52 @@ public:
     van_Emde_Boas_tree& operator=(van_Emde_Boas_tree&&) noexcept;
 
     bool empty() const noexcept;
-    uint32_t size() const noexcept;
-    uint32_t max_size() const noexcept;
+    std::size_t size() const noexcept;
+    std::size_t max_size() const noexcept;
 
     void clear() noexcept;
 
     // Θ(log log max_size())
-    bool insert(uint32_t value);
-    void erase(uint32_t key) noexcept;
+    bool insert(std::size_t value);
+    void erase(std::size_t key) noexcept;
 
-    bool contains(const uint32_t& key) const;
+    bool contains(const std::size_t& key) const;
 
-    uint32_t min() const noexcept;
-    uint32_t max() const noexcept;
+    std::size_t min() const noexcept;
+    std::size_t max() const noexcept;
 
     // the important methods for vEB trees
     // Θ(log log max_size())
-    uint32_t find_next(uint32_t current) const;
-    uint32_t find_prev(uint32_t current) const;
+    std::size_t find_next(std::size_t current) const;
+    std::size_t find_prev(std::size_t current) const;
 
-private:
+    private:
     // determines if subtree index has been constructed
-    bool _constructed(uint32_t index) const noexcept;
+    bool _constructed(std::size_t index) const noexcept;
     // construct subtree at index if non-existent; return true if we did construct
-    bool _create_or_noop(uint32_t index);
+    bool _create_or_noop(std::size_t index);
 
     // for allocating memory
-    std::allocator<uint32_t> _uint_allocator;
+    std::allocator<std::size_t> _uint_allocator;
     std::allocator<van_Emde_Boas_tree> _tree_allocator;
 
-    uint32_t _RANGE; // stores values 0 to _RANGE - 1
-    uint32_t _size; // num values currently stored
+    std::size_t _RANGE; // stores values 0 to _RANGE - 1
+    std::size_t _size;  // num values currently stored
 
     van_Emde_Boas_tree* _subtrees;
-    uint32_t _num_trees;
-    uint32_t _subtree_size; // size of every tree, except possibly final
+    std::size_t _num_trees;
+    std::size_t _subtree_size; // size of every tree, except possibly final
 
     // space-initialization trick
-    uint32_t* _init_check;
-    uint32_t* _rev_check;
-    uint32_t _check_size;
+    std::size_t* _init_check;
+    std::size_t* _rev_check;
+    std::size_t _check_size;
 
     // keep track of the _subtrees
     van_Emde_Boas_tree* _aux;
 
-    uint32_t _min;
-    uint32_t _max;
+    std::size_t _min;
+    std::size_t _max;
 };
 
 #endif // VAN_EMDE_BOAS_TREE_H

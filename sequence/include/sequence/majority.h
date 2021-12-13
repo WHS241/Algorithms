@@ -5,9 +5,8 @@
 #include <stdexcept>
 
 namespace sequence {
-template <typename It>
-typename std::iterator_traits<It>::value_type find_majority(It first, It last)
-{
+template<typename It>
+typename std::iterator_traits<It>::value_type find_majority(It first, It last) {
     if (first == last)
         throw std::invalid_argument("Empty container");
 
@@ -39,6 +38,6 @@ typename std::iterator_traits<It>::value_type find_majority(It first, It last)
         throw std::invalid_argument("No majority");
     return values.front();
 }
-}
+} // namespace sequence
 
 #endif // SEQUENCE_MAJORITY_H

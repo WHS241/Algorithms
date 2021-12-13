@@ -3,17 +3,16 @@
 #include <cmath>
 #include <stdexcept>
 
-van_Emde_Boas_tree::van_Emde_Boas_tree(uint32_t range)
-    : _uint_allocator()
-    , _tree_allocator()
-    , _RANGE(range)
-    , _size(0)
-    , _num_trees(static_cast<uint32_t>(std::round(std::sqrt(range))))
-    , _check_size(0)
-    , _aux(nullptr)
-    , _min(range)
-    , _max(-1U)
-{
+van_Emde_Boas_tree::van_Emde_Boas_tree(std::size_t range) :
+    _uint_allocator(),
+    _tree_allocator(),
+    _RANGE(range),
+    _size(0),
+    _num_trees(static_cast<std::size_t>(std::round(std::sqrt(range)))),
+    _check_size(0),
+    _aux(nullptr),
+    _min(range),
+    _max(-1U) {
     if (_min == _max)
         throw std::invalid_argument("Invalid range");
 
@@ -39,14 +38,13 @@ van_Emde_Boas_tree::van_Emde_Boas_tree(uint32_t range)
         ++_subtree_size;
 }
 
-van_Emde_Boas_tree::~van_Emde_Boas_tree() noexcept
-{
+van_Emde_Boas_tree::~van_Emde_Boas_tree() noexcept {
     delete _aux;
     _aux = nullptr;
 
     // only need to free the ones we created; stored in _rev_check
-    for (uint32_t i = 0; i < _check_size; ++i)
-        _tree_allocator.destroy(_subtrees + _rev_check[i]);
+    for (std::size_t i = 0; i < _check_size; ++i)
+        std::destroy_at(_subtrees + _rev_check[i]);
     if (_num_trees > 1) {
         _uint_allocator.deallocate(_rev_check, _num_trees);
         _uint_allocator.deallocate(_init_check, _num_trees);
@@ -54,17 +52,16 @@ van_Emde_Boas_tree::~van_Emde_Boas_tree() noexcept
     }
 }
 
-van_Emde_Boas_tree::van_Emde_Boas_tree(const van_Emde_Boas_tree& src)
-    : _uint_allocator(src._uint_allocator)
-    , _tree_allocator(src._tree_allocator)
-    , _RANGE(src._RANGE)
-    , _size(src._size)
-    , _num_trees(src._num_trees)
-    , _subtree_size(src._subtree_size)
-    , _check_size(0)
-    , _min(src._min)
-    , _max(src._max)
-{
+van_Emde_Boas_tree::van_Emde_Boas_tree(const van_Emde_Boas_tree& src) :
+    _uint_allocator(src._uint_allocator),
+    _tree_allocator(src._tree_allocator),
+    _RANGE(src._RANGE),
+    _size(src._size),
+    _num_trees(src._num_trees),
+    _subtree_size(src._subtree_size),
+    _check_size(0),
+    _min(src._min),
+    _max(src._max) {
     bool threw_in_sub = false;
     if (_num_trees != 1) {
         try {
@@ -78,16 +75,16 @@ van_Emde_Boas_tree::van_Emde_Boas_tree(const van_Emde_Boas_tree& src)
                 _rev_check[_check_size] = src._rev_check[_check_size];
                 _init_check[_rev_check[_check_size]] = src._init_check[_rev_check[_check_size]];
                 threw_in_sub = true;
-                _tree_allocator.construct(
-                    _subtrees + _rev_check[_check_size], src._subtrees[_rev_check[_check_size]]);
+                std::construct_at(_subtrees + _rev_check[_check_size],
+                                          src._subtrees[_rev_check[_check_size]]);
                 threw_in_sub = false;
             }
         } catch (...) {
             delete _aux;
             if (threw_in_sub)
                 --_check_size;
-            for (uint32_t i = 0; i < _check_size; ++i)
-                _tree_allocator.destroy(_subtrees + _rev_check[i]);
+            for (std::size_t i = 0; i < _check_size; ++i)
+                std::destroy_at(_subtrees + _rev_check[i]);
 
             if (_rev_check)
                 _uint_allocator.deallocate(_rev_check, _num_trees);
@@ -100,8 +97,7 @@ van_Emde_Boas_tree::van_Emde_Boas_tree(const van_Emde_Boas_tree& src)
     }
 }
 
-van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(const van_Emde_Boas_tree& rhs)
-{
+van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(const van_Emde_Boas_tree& rhs) {
     if (this != &rhs) {
         van_Emde_Boas_tree temp(rhs);
         *this = std::move(temp);
@@ -109,8 +105,7 @@ van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(const van_Emde_Boas_tree& rhs)
     return *this;
 }
 
-van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(van_Emde_Boas_tree&& rhs) noexcept
-{
+van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(van_Emde_Boas_tree&& rhs) noexcept {
     if (this != &rhs) {
         clear();
 
@@ -131,19 +126,24 @@ van_Emde_Boas_tree& van_Emde_Boas_tree::operator=(van_Emde_Boas_tree&& rhs) noex
     return *this;
 }
 
-bool van_Emde_Boas_tree::empty() const noexcept { return _size == 0; }
+bool van_Emde_Boas_tree::empty() const noexcept {
+    return _size == 0;
+}
 
-uint32_t van_Emde_Boas_tree::size() const noexcept { return _size; }
+std::size_t van_Emde_Boas_tree::size() const noexcept {
+    return _size;
+}
 
-uint32_t van_Emde_Boas_tree::max_size() const noexcept { return _RANGE; }
+std::size_t van_Emde_Boas_tree::max_size() const noexcept {
+    return _RANGE;
+}
 
-void van_Emde_Boas_tree::clear() noexcept
-{
+void van_Emde_Boas_tree::clear() noexcept {
     if (_aux) {
         _aux->clear();
     }
     if (_num_trees > 1)
-        for (uint32_t i = 0; i < _check_size; ++i)
+        for (std::size_t i = 0; i < _check_size; ++i)
             _subtrees[_rev_check[i]].clear();
 
     _size = 0;
@@ -151,9 +151,8 @@ void van_Emde_Boas_tree::clear() noexcept
     _max = -1U;
 }
 
-bool van_Emde_Boas_tree::insert(uint32_t insert_value)
-{
-    uint32_t value = insert_value; // need to do processing
+bool van_Emde_Boas_tree::insert(std::size_t insert_value) {
+    std::size_t value = insert_value; // need to do processing
     if (value >= _RANGE)
         throw std::out_of_range(std::to_string(value));
     if (_min == value || _max == value)
@@ -172,8 +171,8 @@ bool van_Emde_Boas_tree::insert(uint32_t insert_value)
     if (value > _max)
         _max = value;
     if (_aux) { // not base case
-        uint32_t target = value / _subtree_size;
-        uint32_t mod = value % _subtree_size;
+        std::size_t target = value / _subtree_size;
+        std::size_t mod = value % _subtree_size;
         bool created = _create_or_noop(target);
 
         try {
@@ -184,7 +183,7 @@ bool van_Emde_Boas_tree::insert(uint32_t insert_value)
                 _aux->insert(target);
         } catch (...) {
             if (created) {
-                _tree_allocator.destroy(_subtrees + target);
+                std::destroy_at(_subtrees + target);
                 --_check_size;
             }
         }
@@ -193,8 +192,7 @@ bool van_Emde_Boas_tree::insert(uint32_t insert_value)
     return true;
 }
 
-void van_Emde_Boas_tree::erase(uint32_t value) noexcept
-{
+void van_Emde_Boas_tree::erase(std::size_t value) noexcept {
     if (!contains(value))
         return;
     if (_min == value && _max == value) // only element
@@ -219,8 +217,8 @@ void van_Emde_Boas_tree::erase(uint32_t value) noexcept
         _min = _aux->_min * _subtree_size + _subtrees[_aux->_min]._min;
         value = _min;
     }
-    uint32_t target = value / _subtree_size;
-    uint32_t mod = value % _subtree_size;
+    std::size_t target = value / _subtree_size;
+    std::size_t mod = value % _subtree_size;
     _subtrees[target].erase(mod);
 
     // remove from aux if empty
@@ -231,16 +229,15 @@ void van_Emde_Boas_tree::erase(uint32_t value) noexcept
     --_size;
 }
 
-bool van_Emde_Boas_tree::contains(const uint32_t& key) const
-{
+bool van_Emde_Boas_tree::contains(const std::size_t& key) const {
     if (key >= _RANGE)
         throw std::out_of_range(std::to_string(key));
     if (key == _min || key == _max)
         return true;
 
     if (_aux) {
-        uint32_t target = key / _subtree_size;
-        uint32_t mod = key % _subtree_size;
+        std::size_t target = key / _subtree_size;
+        std::size_t mod = key % _subtree_size;
         if (!_constructed(target))
             return false;
         return _subtrees[target].contains(mod);
@@ -248,12 +245,15 @@ bool van_Emde_Boas_tree::contains(const uint32_t& key) const
     return false;
 }
 
-uint32_t van_Emde_Boas_tree::min() const noexcept { return _min; }
+std::size_t van_Emde_Boas_tree::min() const noexcept {
+    return _min;
+}
 
-uint32_t van_Emde_Boas_tree::max() const noexcept { return _max; }
+std::size_t van_Emde_Boas_tree::max() const noexcept {
+    return _max;
+}
 
-uint32_t van_Emde_Boas_tree::find_next(uint32_t current) const
-{
+std::size_t van_Emde_Boas_tree::find_next(std::size_t current) const {
     if (current < _min)
         return _min;
     if (_max == -1U || current >= _max)
@@ -264,18 +264,17 @@ uint32_t van_Emde_Boas_tree::find_next(uint32_t current) const
     if (!_aux) {
         return _max;
     }
-    uint32_t target = current / _subtree_size;
-    uint32_t mod = current % _subtree_size;
+    std::size_t target = current / _subtree_size;
+    std::size_t mod = current % _subtree_size;
     if (_constructed(target) && _subtrees[target]._max != -1U && mod < _subtrees[target]._max)
         return target * _subtree_size + _subtrees[target].find_next(mod);
     else {
-        uint32_t next_tree = _aux->find_next(target);
+        std::size_t next_tree = _aux->find_next(target);
         return next_tree * _subtree_size + _subtrees[next_tree]._min;
     }
 }
 
-uint32_t van_Emde_Boas_tree::find_prev(uint32_t current) const
-{
+std::size_t van_Emde_Boas_tree::find_prev(std::size_t current) const {
     if (_max == -1U || current > _max)
         return _max;
     if (current <= _min)
@@ -286,30 +285,29 @@ uint32_t van_Emde_Boas_tree::find_prev(uint32_t current) const
     if (_RANGE == 2 && current == _max) {
         return _min;
     }
-    uint32_t target = current / _subtree_size;
-    uint32_t mod = current % _subtree_size;
+    std::size_t target = current / _subtree_size;
+    std::size_t mod = current % _subtree_size;
     if (_constructed(target) && mod > _subtrees[target]._min)
         return target * _subtree_size + _subtrees[target].find_prev(mod);
     else {
-        uint32_t next_tree = _aux->find_prev(target);
+        std::size_t next_tree = _aux->find_prev(target);
         // if there is no prev in aux, predecessor is the min
         return next_tree == -1U ? _min : (next_tree * _subtree_size + _subtrees[next_tree]._max);
     }
 }
 
-bool van_Emde_Boas_tree::_constructed(uint32_t index) const noexcept
-{
+bool van_Emde_Boas_tree::_constructed(std::size_t index) const noexcept {
     return _init_check[index] < _check_size && _rev_check[_init_check[index]] == index;
 }
 
-bool van_Emde_Boas_tree::_create_or_noop(uint32_t index)
-{
+bool van_Emde_Boas_tree::_create_or_noop(std::size_t index) {
     if (_constructed(index))
         return false;
     // edge case; last tree may be of different size
-    _tree_allocator.construct(_subtrees + index,
-        ((index == _num_trees - 1) && (_RANGE % _num_trees != 0)) ? (_RANGE % _subtree_size)
-                                                                  : _subtree_size);
+    std::construct_at(_subtrees + index,
+                              ((index == _num_trees - 1) && (_RANGE % _num_trees != 0))
+                                ? (_RANGE % _subtree_size)
+                                : _subtree_size);
     _init_check[index] = _check_size;
     _rev_check[_check_size] = index;
     ++_check_size;

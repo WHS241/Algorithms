@@ -17,9 +17,9 @@ namespace graph_alg {
  * Two Dimensional Partial Orders, 1982
  * O(n^2)
  */
-template <typename Vertex, bool Weighted, typename... Args>
-std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator_closure(
-    const graph::graph<Vertex, true, Weighted, Args...>&);
+template<typename Vertex, bool Weighted, typename... Args>
+std::pair<std::list<Vertex>, std::list<Vertex>>
+  two_dimensional_order_generator_closure(const graph::graph<Vertex, true, Weighted, Args...>&);
 
 /**
  * Verify order dimension 2 and find generators if they exist
@@ -30,10 +30,9 @@ std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator_
  * Transitive closure for restricted classes of partial orders
  * O(n^2)
  */
-template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
 std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator(
-    const graph::graph<Vertex, true, Weighted, EdgeWeight, Args...>& input)
-{
+  const graph::graph<Vertex, true, Weighted, EdgeWeight, Args...>& input) {
     std::vector<Vertex> top_order = topological_order(input);
     std::pair<std::list<Vertex>, std::list<Vertex>> result;
     if (input.order() == 0)
@@ -66,9 +65,9 @@ std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator(
 
     // divide and conquer
     std::pair<std::list<Vertex>, std::list<Vertex>> front_order = two_dimensional_order_generator(
-        input.generate_induced_subgraph(top_order.begin(), top_order.begin() + input.order() / 2));
+      input.generate_induced_subgraph(top_order.begin(), top_order.begin() + input.order() / 2));
     std::pair<std::list<Vertex>, std::list<Vertex>> back_order = two_dimensional_order_generator(
-        input.generate_induced_subgraph(top_order.begin() + input.order() / 2, top_order.end()));
+      input.generate_induced_subgraph(top_order.begin() + input.order() / 2, top_order.end()));
 
     graph::graph<Vertex, true, false, Args...> closure(graph::adj_matrix);
     for (const Vertex& v : input.vertices())
@@ -93,13 +92,14 @@ std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator(
     for (std::size_t i = 0; i < back_order.second.size(); ++i)
         second_order_map[front_order.second[i]] = i;
 
-    graph::graph<Vertex, true, Weighted, EdgeWeight, Args...> matrix_rep
-        = input.convert(graph::graph_type::adj_matrix);
+    graph::graph<Vertex, true, Weighted, EdgeWeight, Args...> matrix_rep =
+      input.convert(graph::graph_type::adj_matrix);
 
     for (const Vertex& v : front_order.first) {
         // Forward sweep: find all (v, w) from (v,u) and (u, w) where u and w are in back_order
-        auto it = std::find_if(back_order.first.begin(), back_order.first.end(),
-            [&matrix_rep, &v](const Vertex& w) { return matrix_rep.has_edge(v, w); });
+        auto it =
+          std::find_if(back_order.first.begin(), back_order.first.end(),
+                       [&matrix_rep, &v](const Vertex& w) { return matrix_rep.has_edge(v, w); });
         if (it != back_order.first.end()) {
             std::size_t limit = second_order_map[*it];
             for (++it; it != back_order.first.end(); ++it) {
@@ -113,8 +113,9 @@ std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator(
 
     for (const Vertex& v : back_order.first) {
         // Backward sweep: find all (u,v) from (u,w) and (w,v) where u and w are in front_order
-        auto it = std::find_if(front_order.first.rbegin(), front_order.first.rend(),
-            [&matrix_rep, &v](const Vertex& u) { return matrix_rep.has_edge(u, v); });
+        auto it =
+          std::find_if(front_order.first.rbegin(), front_order.first.rend(),
+                       [&matrix_rep, &v](const Vertex& u) { return matrix_rep.has_edge(u, v); });
         if (it != front_order.first.rend()) {
             std::size_t limit = second_order_map[*it];
             for (++it; it != front_order.first.rend(); ++it) {
@@ -129,13 +130,12 @@ std::pair<std::list<Vertex>, std::list<Vertex>> two_dimensional_order_generator(
     return two_dimensional_order_generator_closure(matrix_rep);
 }
 
-template <typename It1, typename It2, typename It3, typename... Args>
+template<typename It1, typename It2, typename It3, typename... Args>
 graph::unweighted_graph<typename std::iterator_traits<It1>::value_type, true, Args...>
-three_dimensional_transitive_reduction(
-    It1 first1, It1 last1, It2 first2, It2 last2, It3 first3, It3 last3)
-{
-    if (std::distance(first1, last1) != std::distance(first2, last2)
-        || std::distance(first2, last2) != std::distance(first3, last3))
+  three_dimensional_transitive_reduction(It1 first1, It1 last1, It2 first2, It2 last2, It3 first3,
+                                         It3 last3) {
+    if (std::distance(first1, last1) != std::distance(first2, last2) ||
+        std::distance(first2, last2) != std::distance(first3, last3))
         throw std::invalid_argument("Incompatible/incomplete generator lengths");
 
     typedef typename std::iterator_traits<It1>::value_type Vertex;
@@ -187,7 +187,7 @@ three_dimensional_transitive_reduction(
         for (std::size_t j = i + 1; j < elements.size(); ++j) {
             // Verify that edge would occur in the transitive closure
             if (isomorphism1[i] < isomorphism1[j] && isomorphism2[i] < isomorphism2[j]) {
-                auto it = map_tree.insert({ isomorphism1[j], isomorphism2[j] }).first;
+                auto it = map_tree.insert({isomorphism1[j], isomorphism2[j]}).first;
 
                 // If there are any values where both isomorphisms give smaller numbers, there is a
                 // longer path around to current
@@ -214,6 +214,6 @@ three_dimensional_transitive_reduction(
     }
     return result;
 }
-}
+} // namespace graph_alg
 
 #endif // GRAPH_ORDER_DIMENSION_H

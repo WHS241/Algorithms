@@ -7,21 +7,20 @@
 #include <memory>
 
 namespace graph {
-template <bool Directed, bool Weighted, typename EdgeWeight>
+template<bool Directed, bool Weighted, typename EdgeWeight>
 const impl<Directed, Weighted, EdgeWeight>&
-adjacency_matrix<Directed, Weighted, EdgeWeight>::copy_from(
-    const impl<Directed, Weighted, EdgeWeight>& src)
-{
+  adjacency_matrix<Directed, Weighted, EdgeWeight>::copy_from(
+    const impl<Directed, Weighted, EdgeWeight>& src) {
     auto cast = dynamic_cast<const adjacency_matrix*>(&src);
     if (cast) {
         return (*this = *cast);
     }
 
-    _t_graph_rep temp(src.order(),
-        std::vector<_t_matrix_entry>(src.order(), std::make_pair(false, EdgeWeight())));
+    _t_graph_rep temp(
+      src.order(), std::vector<_t_matrix_entry>(src.order(), std::make_pair(false, EdgeWeight())));
     for (uint32_t i = 0; i < src.order(); ++i) {
         for (std::pair<uint32_t, EdgeWeight>& n : src.edges(i)) {
-            temp[i][n.first] = { true, n.second };
+            temp[i][n.first] = {true, n.second};
         }
     }
 
@@ -30,39 +29,34 @@ adjacency_matrix<Directed, Weighted, EdgeWeight>::copy_from(
     return *this;
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::order() const noexcept
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::order() const noexcept {
     return _graph.size();
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
+template<bool Directed, bool Weighted, typename EdgeWeight>
 bool adjacency_matrix<Directed, Weighted, EdgeWeight>::has_edge(
-    const uint32_t& start, const uint32_t& dest) const noexcept
-{
+  const uint32_t& start, const uint32_t& dest) const noexcept {
     return _graph[start][dest].first;
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-EdgeWeight adjacency_matrix<Directed, Weighted, EdgeWeight>::edge_cost(
-    const uint32_t& start, const uint32_t& dest) const
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+EdgeWeight adjacency_matrix<Directed, Weighted, EdgeWeight>::edge_cost(const uint32_t& start,
+                                                                       const uint32_t& dest) const {
     if (!has_edge(start, dest))
         throw std::domain_error("No edge");
     return _graph[start][dest].second;
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::degree(const uint32_t& start) const
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::degree(const uint32_t& start) const {
     return std::count_if(_graph[start].begin(), _graph[start].end(),
-        [](const _t_matrix_entry& entry) { return !entry.first; });
+                         [](const _t_matrix_entry& entry) { return !entry.first; });
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-std::list<uint32_t> adjacency_matrix<Directed, Weighted, EdgeWeight>::neighbors(
-    const uint32_t& start) const
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+std::list<uint32_t>
+  adjacency_matrix<Directed, Weighted, EdgeWeight>::neighbors(const uint32_t& start) const {
     std::list<uint32_t> result;
     for (uint32_t i = 0; i < _graph.size(); ++i)
         if (_graph[start][i].first)
@@ -71,11 +65,9 @@ std::list<uint32_t> adjacency_matrix<Directed, Weighted, EdgeWeight>::neighbors(
     return result;
 }
 
-template <bool Directed, bool Weighted, typename EdgeType>
-std::list<std::pair<uint32_t, EdgeType>> adjacency_matrix<Directed, Weighted, EdgeType>::edges(
-    const uint32_t& start) const
-{
-
+template<bool Directed, bool Weighted, typename EdgeType>
+std::list<std::pair<uint32_t, EdgeType>>
+  adjacency_matrix<Directed, Weighted, EdgeType>::edges(const uint32_t& start) const {
     std::list<std::pair<uint32_t, EdgeType>> result;
     for (uint32_t i = 0; i < _graph.size(); ++i)
         if (_graph[start][i].first)
@@ -84,19 +76,18 @@ std::list<std::pair<uint32_t, EdgeType>> adjacency_matrix<Directed, Weighted, Ed
     return result;
 }
 
-template <bool Directed, bool Weighted, typename EdgeType>
+template<bool Directed, bool Weighted, typename EdgeType>
 std::pair<impl<Directed, Weighted, EdgeType>*, std::vector<uint32_t>>
-adjacency_matrix<Directed, Weighted, EdgeType>::induced_subgraph(
-    const std::list<uint32_t>& subset) const
-{
+  adjacency_matrix<Directed, Weighted, EdgeType>::induced_subgraph(
+    const std::list<uint32_t>& subset) const {
     std::vector<bool> selected(_graph.size(), false);
     for (uint32_t vertex : subset) {
         selected.at(vertex) = true;
     }
 
     // determine what vertex in subgraph corresponds to what vertex
-    std::unique_ptr<adjacency_matrix<Directed, Weighted, EdgeType>> subgraph
-        = std::make_unique<adjacency_matrix<Directed, Weighted, EdgeType>>();
+    std::unique_ptr<adjacency_matrix<Directed, Weighted, EdgeType>> subgraph =
+      std::make_unique<adjacency_matrix<Directed, Weighted, EdgeType>>();
     std::vector<uint32_t> translate_to_sub(_graph.size());
     for (uint32_t i = 0; i < _graph.size(); ++i) {
         if (selected[i]) {
@@ -111,21 +102,20 @@ adjacency_matrix<Directed, Weighted, EdgeType>::induced_subgraph(
                 if (selected[j])
                     subgraph->_graph[translate_to_sub[i]][translate_to_sub[j]] = _graph[i][j];
     return std::make_pair<impl<Directed, Weighted, EdgeType>*, std::vector<uint32_t>>(
-        subgraph.release(), std::move(translate_to_sub));
+      subgraph.release(), std::move(translate_to_sub));
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-void adjacency_matrix<Directed, Weighted, EdgeWeight>::set_edge(
-    const uint32_t& start, const uint32_t& dest, const EdgeWeight& cost)
-{
-    _graph[start][dest] = { true, cost };
+template<bool Directed, bool Weighted, typename EdgeWeight>
+void adjacency_matrix<Directed, Weighted, EdgeWeight>::set_edge(const uint32_t& start,
+                                                                const uint32_t& dest,
+                                                                const EdgeWeight& cost) {
+    _graph[start][dest] = {true, cost};
     if constexpr (!Directed)
-        _graph[dest][start] = { true, cost };
+        _graph[dest][start] = {true, cost};
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::add_vertex()
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::add_vertex() {
     uint32_t old_size = _graph.size();
     try {
         for (std::vector<_t_matrix_entry>& vertex : _graph)
@@ -140,30 +130,27 @@ uint32_t adjacency_matrix<Directed, Weighted, EdgeWeight>::add_vertex()
     return _graph.size();
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-void adjacency_matrix<Directed, Weighted, EdgeWeight>::remove_edge(
-    const uint32_t& start, const uint32_t& dest)
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+void adjacency_matrix<Directed, Weighted, EdgeWeight>::remove_edge(const uint32_t& start,
+                                                                   const uint32_t& dest) {
     if (start != dest)
         _graph[start][dest].first = false;
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-void adjacency_matrix<Directed, Weighted, EdgeWeight>::isolate(const uint32_t& target)
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+void adjacency_matrix<Directed, Weighted, EdgeWeight>::isolate(const uint32_t& target) {
     if (target >= _graph.size())
         throw std::out_of_range("Degree number");
-    _graph[target]
-        = std::vector<_t_matrix_entry>(_graph.size(), _t_matrix_entry(false, EdgeWeight()));
+    _graph[target] =
+      std::vector<_t_matrix_entry>(_graph.size(), _t_matrix_entry(false, EdgeWeight()));
 
     if constexpr (!Directed)
         for (std::vector<_t_matrix_entry>& edge_list : _graph)
             edge_list[target].first = false;
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-void adjacency_matrix<Directed, Weighted, EdgeWeight>::remove(const uint32_t& target)
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+void adjacency_matrix<Directed, Weighted, EdgeWeight>::remove(const uint32_t& target) {
     std::swap(_graph[target], _graph.back());
     _graph.pop_back();
     for (std::vector<_t_matrix_entry>& vertex : _graph) {
@@ -172,10 +159,9 @@ void adjacency_matrix<Directed, Weighted, EdgeWeight>::remove(const uint32_t& ta
     }
 }
 
-template <bool Directed, bool Weighted, typename EdgeWeight>
-void adjacency_matrix<Directed, Weighted, EdgeWeight>::clear() noexcept
-{
+template<bool Directed, bool Weighted, typename EdgeWeight>
+void adjacency_matrix<Directed, Weighted, EdgeWeight>::clear() noexcept {
     _graph.clear();
 }
-}
+} // namespace graph
 #endif // ADJACENCY_MATRIX_CPP

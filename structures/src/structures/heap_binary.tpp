@@ -3,22 +3,17 @@
 #include <algorithm>
 
 namespace heap {
-template <typename T, typename Compare>
-binary_heap<T, Compare>::binary_heap(Compare comp)
-    : node_base<T, Compare>(comp)
-{
-}
+template<typename T, typename Compare>
+binary_heap<T, Compare>::binary_heap(Compare comp) : node_base<T, Compare>(comp) {}
 
-template <typename T, typename Compare>
-template <typename It, typename _Compare, typename _Requires>
-binary_heap<T, Compare>::binary_heap(It first, It last)
-    : binary_heap(first, last, Compare()) {};
+template<typename T, typename Compare>
+template<typename It, typename _Compare, typename _Requires>
+binary_heap<T, Compare>::binary_heap(It first, It last) : binary_heap(first, last, Compare()){};
 
-template <typename T, typename Compare>
-template <typename It>
-binary_heap<T, Compare>::binary_heap(It first, It last, Compare comp)
-    : node_base<T, Compare>(comp)
-{
+template<typename T, typename Compare>
+template<typename It>
+binary_heap<T, Compare>::binary_heap(It first, It last, Compare comp) :
+    node_base<T, Compare>(comp) {
     this->_size = std::distance(first, last);
     if (first != last) {
         _root.reset(this->_s_make_node(*first));
@@ -58,18 +53,15 @@ binary_heap<T, Compare>::binary_heap(It first, It last, Compare comp)
     }
 }
 
-template <typename T, typename Compare>
-binary_heap<T, Compare>::binary_heap(const binary_heap<T, Compare>& src)
-    : node_base<T, Compare>(src)
-    , _root()
-{
+template<typename T, typename Compare>
+binary_heap<T, Compare>::binary_heap(const binary_heap<T, Compare>& src) :
+    node_base<T, Compare>(src), _root() {
     if (!src.empty())
         _root.reset(src._root->_deep_clone());
 }
 
-template <typename T, typename Compare>
-binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(const binary_heap<T, Compare>& rhs)
-{
+template<typename T, typename Compare>
+binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(const binary_heap<T, Compare>& rhs) {
     if (this != &rhs) {
         binary_heap<T, Compare> temp(rhs);
         *this = std::move(temp);
@@ -77,16 +69,15 @@ binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(const binary_heap<T,
     return *this;
 }
 
-template <typename T, typename Compare>
-binary_heap<T, Compare>::binary_heap(binary_heap<T, Compare>&& src) noexcept
-    : binary_heap<T, Compare>(src._compare)
-{
+template<typename T, typename Compare>
+binary_heap<T, Compare>::binary_heap(binary_heap<T, Compare>&& src) noexcept :
+    binary_heap<T, Compare>(src._compare) {
     *this = std::move(src);
 }
 
-template <typename T, typename Compare>
-binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(binary_heap<T, Compare>&& rhs) noexcept
-{
+template<typename T, typename Compare>
+binary_heap<T, Compare>&
+  binary_heap<T, Compare>::operator=(binary_heap<T, Compare>&& rhs) noexcept {
     if (this != &rhs) {
         _root.reset();
         this->_size = 0;
@@ -97,9 +88,8 @@ binary_heap<T, Compare>& binary_heap<T, Compare>::operator=(binary_heap<T, Compa
     return *this;
 }
 
-template <typename T, typename Compare>
-typename binary_heap<T, Compare>::node_wrapper binary_heap<T, Compare>::add(const T& item)
-{
+template<typename T, typename Compare>
+typename binary_heap<T, Compare>::node_wrapper binary_heap<T, Compare>::add(const T& item) {
     std::unique_ptr<node> new_node(this->_s_make_node(item));
 
     if (this->_size == 0) {
@@ -138,9 +128,8 @@ typename binary_heap<T, Compare>::node_wrapper binary_heap<T, Compare>::add(cons
     return node_wrapper(ptr);
 }
 
-template <typename T, typename Compare>
-void binary_heap<T, Compare>::merge(binary_heap<T, Compare>& src)
-{
+template<typename T, typename Compare>
+void binary_heap<T, Compare>::merge(binary_heap<T, Compare>& src) {
     if (this == &src)
         return;
 
@@ -151,15 +140,13 @@ void binary_heap<T, Compare>::merge(binary_heap<T, Compare>& src)
     src._size = 0;
 }
 
-template <typename T, typename Compare> T binary_heap<T, Compare>::get_root() const
-{
+template<typename T, typename Compare> T binary_heap<T, Compare>::get_root() const {
     if (this->empty())
         throw std::underflow_error("Empty heap");
     return **_root;
 }
 
-template <typename T, typename Compare> T binary_heap<T, Compare>::remove_root()
-{
+template<typename T, typename Compare> T binary_heap<T, Compare>::remove_root() {
     if (this->empty())
         throw std::underflow_error("Empty heap");
 
@@ -215,10 +202,9 @@ template <typename T, typename Compare> T binary_heap<T, Compare>::remove_root()
     return to_return;
 }
 
-template <typename T, typename Compare>
+template<typename T, typename Compare>
 void binary_heap<T, Compare>::decrease(
-    typename binary_heap<T, Compare>::node_wrapper target_wrapper, const T& new_val)
-{
+  typename binary_heap<T, Compare>::node_wrapper target_wrapper, const T& new_val) {
     node* target = this->_s_extract_node(target_wrapper);
     if (this->_compare(**target, new_val))
         throw std::invalid_argument("Increasing key");
@@ -235,10 +221,9 @@ void binary_heap<T, Compare>::decrease(
     }
 }
 
-template <typename T, typename Compare>
-void binary_heap<T, Compare>::_bubble_down(
-    typename binary_heap<T, Compare>::node* parent, bool use_left_child) noexcept
-{
+template<typename T, typename Compare>
+void binary_heap<T, Compare>::_bubble_down(typename binary_heap<T, Compare>::node* parent,
+                                           bool use_left_child) noexcept {
     // move all pointers in/out of parent and bubbling child,
     // except grandparent pointer (handled below)
     node* to_swap = use_left_child ? parent->_children.front() : parent->_children.back();
@@ -266,9 +251,8 @@ void binary_heap<T, Compare>::_bubble_down(
     }
 }
 
-template <typename T, typename Compare>
-std::list<T> binary_heap<T, Compare>::_s_data(const node* root)
-{
+template<typename T, typename Compare>
+std::list<T> binary_heap<T, Compare>::_s_data(const node* root) {
     std::list<T> result;
     if (root != nullptr) {
         result.push_back(**root);
@@ -278,6 +262,6 @@ std::list<T> binary_heap<T, Compare>::_s_data(const node* root)
 
     return result;
 }
-}
+} // namespace heap
 
 #endif // !NODE_BINARY_HEAP_CPP

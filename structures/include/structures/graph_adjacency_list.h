@@ -14,15 +14,15 @@ namespace graph {
 图的邻接表储存表示
 空间：O(V+E)
 */
-template <bool Directed, bool Weighted, typename EdgeWeight>
+template<bool Directed, bool Weighted, typename EdgeWeight>
 class adjacency_list : public impl<Directed, Weighted, EdgeWeight> {
-public:
+    public:
     adjacency_list() = default;
 
     virtual ~adjacency_list() = default;
 
-    const impl<Directed, Weighted, EdgeWeight>& copy_from(
-        const impl<Directed, Weighted, EdgeWeight>&) override;
+    const impl<Directed, Weighted, EdgeWeight>&
+      copy_from(const impl<Directed, Weighted, EdgeWeight>&) override;
 
     // 输出：图的阶
     // O(1)
@@ -47,8 +47,8 @@ public:
     std::list<uint32_t> neighbors(const uint32_t& start) const override;
 
     std::list<std::pair<uint32_t, EdgeWeight>> edges(const uint32_t&) const override;
-    std::pair<impl<Directed, Weighted, EdgeWeight>*, std::vector<uint32_t>> induced_subgraph(
-        const std::list<uint32_t>&) const override;
+    std::pair<impl<Directed, Weighted, EdgeWeight>*, std::vector<uint32_t>>
+      induced_subgraph(const std::list<uint32_t>&) const override;
 
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     // O(deg(V))
@@ -84,13 +84,13 @@ public:
     // O(1)
     void clear() noexcept override;
 
-private:
+    private:
     typedef std::pair<uint32_t, EdgeWeight> _t_edge;
     typedef std::vector<std::list<_t_edge>> _t_graph_rep;
 
     _t_graph_rep _graph;
 };
-}
+} // namespace graph
 
 #include "../../src/structures/graph_adjacency_list.tpp"
 

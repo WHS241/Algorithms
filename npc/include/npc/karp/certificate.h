@@ -40,17 +40,16 @@ namespace NP_complete {
  *
  * Certificate format: unordered_map from variable to assignment
  */
-template <typename T, typename... Args>
+template<typename T, typename... Args>
 bool cert_CNF_SAT(const std::list<std::list<std::pair<T, bool>>>& expr,
-    const std::unordered_map<T, bool, Args...>& cert)
-{
-    return std::all_of(
-        expr.begin(), expr.end(), [&cert](const std::list<std::pair<T, bool>>& clause) {
-            return std::any_of(
-                clause.begin(), clause.end(), [&cert](const std::pair<T, bool>& literal) {
-                    return cert.at(literal.first) == literal.second;
-                });
-        });
+                  const std::unordered_map<T, bool, Args...>& cert) {
+    return std::all_of(expr.begin(), expr.end(),
+                       [&cert](const std::list<std::pair<T, bool>>& clause) {
+                           return std::any_of(clause.begin(), clause.end(),
+                                              [&cert](const std::pair<T, bool>& literal) {
+                                                  return cert.at(literal.first) == literal.second;
+                                              });
+                       });
 }
 
 /*
@@ -63,10 +62,9 @@ bool cert_CNF_SAT(const std::list<std::list<std::pair<T, bool>>>& expr,
  *
  * Certificate format: An n-dimensional vector
  */
-template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+template<typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 bool cert_0_1_programming(const std::pair<std::vector<std::vector<T>>, std::vector<T>>& instance,
-    const std::vector<T>& cert)
-{
+                          const std::vector<T>& cert) {
     for (const T& x : cert)
         if (x != 0 || x != 1)
             return false;
@@ -98,23 +96,24 @@ bool cert_0_1_programming(const std::pair<std::vector<std::vector<T>>, std::vect
  *
  * Certificate format: A pair of iterators (first->begin, second->end) to a collection of vertices
  */
-template <typename T, typename It, bool Weighted,
-    typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
-    typename... Args>
+template<
+  typename T, typename It, bool Weighted,
+  typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
+  typename... Args>
 bool cert_clique(const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance,
-    const std::pair<It, It>& cert)
-{
+                 const std::pair<It, It>& cert) {
     if (std::distance(cert.first, cert.second) < instance.second)
         return false;
     const graph::graph<T, false, Weighted, Args...>& main_graph = instance.first;
-    graph::graph<T, false, Weighted, Args...> subgraph
-        = main_graph.generate_induced_subgraph(cert.first, cert.second);
+    graph::graph<T, false, Weighted, Args...> subgraph =
+      main_graph.generate_induced_subgraph(cert.first, cert.second);
     subgraph.sanitize();
     std::vector<T> vertices = subgraph.vertices();
 
-    return (subgraph.order() >= instance.second)
-        && std::all_of(vertices.begin(), vertices.end(),
-            [&subgraph](const T& v) { return subgraph.degree(v) == subgraph.order() - 1; });
+    return (subgraph.order() >= instance.second) &&
+           std::all_of(vertices.begin(), vertices.end(), [&subgraph](const T& v) {
+               return subgraph.degree(v) == subgraph.order() - 1;
+           });
 }
 
 /*
@@ -128,23 +127,23 @@ bool cert_clique(const std::pair<graph::graph<T, false, Weighted, Args...>, std:
  *
  * Certificate format: A pair of iterators (first->begin, second->end) to a collection of vertices
  */
-template <typename T, typename It, bool Weighted,
-    typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
-    typename... Args>
+template<
+  typename T, typename It, bool Weighted,
+  typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
+  typename... Args>
 bool cert_independent_set(
-    const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance,
-    const std::pair<It, It>& cert)
-{
+  const std::pair<graph::graph<T, false, Weighted, Args...>, std::size_t>& instance,
+  const std::pair<It, It>& cert) {
     if (std::distance(cert.first, cert.second) < instance.second)
         return false;
     const graph::graph<T, false, Weighted, Args...>& main_graph = instance.first;
-    graph::graph<T, false, Weighted, Args...> subgraph
-        = main_graph.generate_induced_subgraph(cert.first, cert.second);
+    graph::graph<T, false, Weighted, Args...> subgraph =
+      main_graph.generate_induced_subgraph(cert.first, cert.second);
     std::vector<T> vertices = subgraph.vertices();
 
-    return (subgraph.order() >= instance.second)
-        && std::all_of(vertices.begin(), vertices.end(),
-            [&subgraph](const T& v) { return subgraph.degree(v) == 0; });
+    return (subgraph.order() >= instance.second) &&
+           std::all_of(vertices.begin(), vertices.end(),
+                       [&subgraph](const T& v) { return subgraph.degree(v) == 0; });
 }
 
 /*
@@ -158,24 +157,25 @@ bool cert_independent_set(
  *
  * Certificate format: A pair of iterators (first->begin, second->end) to a collection of vertices
  */
-template <typename T, typename It, bool Weighted, typename EdgeType,
-    typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
-    typename... Args>
+template<
+  typename T, typename It, bool Weighted, typename EdgeType,
+  typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
+  typename... Args>
 bool cert_vertex_cover(
-    const std::pair<graph::graph<T, false, Weighted, EdgeType, Args...>, std::size_t>& instance,
-    const std::pair<It, It>& cert)
-{
+  const std::pair<graph::graph<T, false, Weighted, EdgeType, Args...>, std::size_t>& instance,
+  const std::pair<It, It>& cert) {
     std::unordered_set<T, Args...> cover_set(cert.first, cert.second);
     const graph::graph<T, false, Weighted, EdgeType, Args...>& input_graph = instance.first;
     std::vector<T> vertices = input_graph.vertices();
 
-    return (cover_set.size() <= instance.second)
-        && std::all_of(vertices.begin(), vertices.end(), [&cover_set, &input_graph](const T& u) {
+    return (cover_set.size() <= instance.second) &&
+           std::all_of(vertices.begin(), vertices.end(), [&cover_set, &input_graph](const T& u) {
                std::list<T> neighbors = input_graph.neighbors(u);
 
-               return cover_set.find(u) != cover_set.end()
-                   || std::all_of(neighbors.begin(), neighbors.end(),
-                       [&cover_set](const T& v) { return cover_set.find(v) != cover_set.end(); });
+               return cover_set.find(u) != cover_set.end() ||
+                      std::all_of(neighbors.begin(), neighbors.end(), [&cover_set](const T& v) {
+                          return cover_set.find(v) != cover_set.end();
+                      });
            });
 }
 
@@ -191,32 +191,33 @@ bool cert_vertex_cover(
  * Certificate format:
  * {T_j} sets
  */
-template <typename T, typename Hash, typename KeyEqual>
+template<typename T, typename Hash, typename KeyEqual>
 bool cert_set_cover(
-    const std::pair<std::vector<std::unordered_set<T, Hash, KeyEqual>>, std::size_t>& instance,
-    std::vector<std::unordered_set<T, Hash, KeyEqual>> cert)
-{
+  const std::pair<std::vector<std::unordered_set<T, Hash, KeyEqual>>, std::size_t>& instance,
+  std::vector<std::unordered_set<T, Hash, KeyEqual>> cert) {
     std::vector<bool> found(instance.first.size(), false);
-    std::remove_if(cert.begin(), cert.end(),
-        [&sets = instance.first, &found](const std::unordered_set<T, Hash, KeyEqual>& t) {
-            for (std::size_t i = 0; i < sets.size(); ++i) {
-                if (!found[i] && sets[i] == t) {
-                    found[i] = true;
-                    return false;
-                }
-            }
-            return true;
-        });
+    std::remove_if(
+      cert.begin(), cert.end(),
+      [&sets = instance.first, &found](const std::unordered_set<T, Hash, KeyEqual>& t) {
+          for (std::size_t i = 0; i < sets.size(); ++i) {
+              if (!found[i] && sets[i] == t) {
+                  found[i] = true;
+                  return false;
+              }
+          }
+          return true;
+      });
     auto union_sets = [](std::vector<std::unordered_set<T, Hash, KeyEqual>> sets) {
-        return std::reduce(sets.begin(), sets.end(), std::unordered_set<T, Hash, KeyEqual>(),
-            [](std::unordered_set<T, Hash, KeyEqual>& x, std::unordered_set<T, Hash, KeyEqual>& y) {
-                x.merge(y);
-                return x;
-            });
+        return std::reduce(
+          sets.begin(), sets.end(), std::unordered_set<T, Hash, KeyEqual>(),
+          [](std::unordered_set<T, Hash, KeyEqual>& x, std::unordered_set<T, Hash, KeyEqual>& y) {
+              x.merge(y);
+              return x;
+          });
     };
 
     auto equal_check = [](const std::unordered_set<T, Hash, KeyEqual>& x,
-                           std::unordered_set<T, Hash, KeyEqual> y) -> bool {
+                          std::unordered_set<T, Hash, KeyEqual> y) -> bool {
         if (x.size() != y.size())
             return false;
 
@@ -228,8 +229,8 @@ bool cert_set_cover(
         return true;
     };
 
-    return cert.size() <= instance.second
-        && equal_check(union_sets(cert), union_sets(instance.first));
+    return cert.size() <= instance.second &&
+           equal_check(union_sets(cert), union_sets(instance.first));
 }
 
 /*
@@ -244,13 +245,13 @@ bool cert_set_cover(
  * Certificate format:
  * A begin-end iterator pair to a collection of vertices
  */
-template <typename T, typename It, bool Weighted, typename EdgeType,
-    typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
-    typename... Args>
+template<
+  typename T, typename It, bool Weighted, typename EdgeType,
+  typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
+  typename... Args>
 bool cert_feedback_vertex(
-    const std::pair<graph::graph<T, true, Weighted, EdgeType, Args...>, std::size_t>& instance,
-    const std::pair<It, It>& cert)
-{
+  const std::pair<graph::graph<T, true, Weighted, EdgeType, Args...>, std::size_t>& instance,
+  const std::pair<It, It>& cert) {
     if (std::distance(cert.first, cert.second) > instance.second)
         return false;
 
@@ -259,9 +260,7 @@ bool cert_feedback_vertex(
     try {
         graph_alg::topological_sort(input_graph);
         return true;
-    } catch (std::invalid_argument&) {
-        return false;
-    }
+    } catch (std::invalid_argument&) { return false; }
 }
 
 /*
@@ -277,26 +276,24 @@ bool cert_feedback_vertex(
  * A begin-end iterator pair to a collection of edges
  * Each edge is a pair of vertices (x, y), where x->y is the edge represented
  */
-template <typename T, typename It, bool Weighted, typename EdgeType,
-    typename = std::enable_if_t<
-        std::is_same_v<std::pair<T, T>, typename std::iterator_traits<It>::value_type>>,
-    typename... Args>
+template<typename T, typename It, bool Weighted, typename EdgeType,
+         typename = std::enable_if_t<
+           std::is_same_v<std::pair<T, T>, typename std::iterator_traits<It>::value_type>>,
+         typename... Args>
 bool cert_feedback_edge(
-    const std::pair<graph::graph<T, true, Weighted, EdgeType, Args...>, std::size_t>& instance,
-    const std::pair<It, It>& cert)
-{
+  const std::pair<graph::graph<T, true, Weighted, EdgeType, Args...>, std::size_t>& instance,
+  const std::pair<It, It>& cert) {
     if (std::distance(cert.first, cert.second) > instance.second)
         return false;
 
     graph::graph<T, true, Weighted, EdgeType, Args...> input_graph = instance.first;
-    std::for_each(cert.first, cert.second,
-        [&input_graph](const std::pair<T, T>& e) { input_graph.remove_edge(e.first, e.second); });
+    std::for_each(cert.first, cert.second, [&input_graph](const std::pair<T, T>& e) {
+        input_graph.remove_edge(e.first, e.second);
+    });
     try {
         graph_alg::topological_sort(input_graph);
         return true;
-    } catch (std::invalid_argument&) {
-        return false;
-    }
+    } catch (std::invalid_argument&) { return false; }
 }
 
 /*
@@ -312,12 +309,12 @@ bool cert_feedback_edge(
  * A begin-end iterator pair to a collection of vertices
  * The vertices are ordered such that (v[i], v[i+1]) is an edge in the Hamiltonian cycle
  */
-template <typename T, typename It, bool Directed, bool Weighted, typename EdgeType,
-    typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
-    typename... Args>
+template<
+  typename T, typename It, bool Directed, bool Weighted, typename EdgeType,
+  typename = std::enable_if_t<std::is_same_v<T, typename std::iterator_traits<It>::value_type>>,
+  typename... Args>
 bool cert_Hamiltonian_cycle(const graph::graph<T, Directed, Weighted, EdgeType, Args...>& instance,
-    const std::pair<It, It>& cert)
-{
+                            const std::pair<It, It>& cert) {
     if (std::distance(cert.first, cert.second) != instance.order())
         return false;
 
@@ -329,9 +326,7 @@ bool cert_Hamiltonian_cycle(const graph::graph<T, Directed, Weighted, EdgeType, 
                 bool duplicate = found[index];
                 found[index] = true;
                 return duplicate;
-            } catch (std::out_of_range&) {
-                return true;
-            }
+            } catch (std::out_of_range&) { return true; }
         }))
         return false;
 
@@ -455,6 +450,6 @@ bool cert_Hamiltonian_cycle(const graph::graph<T, Directed, Weighted, EdgeType, 
  * partitioned into two sets such that the sum of the weights of edges going between vertices in
  * different sets >= k?
  */
-}
+} // namespace NP_complete
 
 #endif // NPC_CERTIFICATE_H

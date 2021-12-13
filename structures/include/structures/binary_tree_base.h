@@ -7,8 +7,8 @@ namespace tree {
 /*
 Abstract base class for any binary tree structure
 */
-template <typename T> class binary_tree {
-public:
+template<typename T> class binary_tree {
+    public:
     typedef tree_iterator<T> iterator;
     typedef tree_const_iterator<T> const_iterator;
 
@@ -52,10 +52,10 @@ public:
     virtual iterator erase(iterator it) = 0;
     virtual iterator erase(const_iterator it);
 
-protected:
+    protected:
     struct node {
         node(const T& item = T(), node* parent = nullptr, node* left = nullptr,
-            node* right = nullptr);
+             node* right = nullptr);
 
         virtual ~node() noexcept;
         node(const node&) = delete;
@@ -98,7 +98,7 @@ protected:
     void _verify(iterator check) const;
     void _verify(const_iterator check) const;
 };
-}
+} // namespace tree
 
 #include "../../src/structures/binary_tree_base.tpp"
 

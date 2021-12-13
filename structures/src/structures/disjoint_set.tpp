@@ -4,18 +4,14 @@
 #include <stdexcept>
 #include <unordered_set>
 
-template <typename T, typename Hash, typename KeyEqual>
-template <typename It>
-disjoint_set<T, Hash, KeyEqual>::disjoint_set(It first, It last)
-    : _sets()
-    , _roots()
-{
+template<typename T, typename Hash, typename KeyEqual>
+template<typename It>
+disjoint_set<T, Hash, KeyEqual>::disjoint_set(It first, It last) : _sets(), _roots() {
     std::for_each(first, last, [this](const T& item) { insert(item); });
 };
 
-template <typename T, typename Hash, typename KeyEqual>
-void disjoint_set<T, Hash, KeyEqual>::insert(const T& item)
-{
+template<typename T, typename Hash, typename KeyEqual>
+void disjoint_set<T, Hash, KeyEqual>::insert(const T& item) {
     if (_sets.find(item) != _sets.end())
         throw std::invalid_argument("Already exists");
 
@@ -27,9 +23,8 @@ void disjoint_set<T, Hash, KeyEqual>::insert(const T& item)
     _roots.insert(item);
 }
 
-template <typename T, typename Hash, typename KeyEqual>
-void disjoint_set<T, Hash, KeyEqual>::union_sets(const T& first, const T& second)
-{
+template<typename T, typename Hash, typename KeyEqual>
+void disjoint_set<T, Hash, KeyEqual>::union_sets(const T& first, const T& second) {
     T first_parent = find(first);
     T second_parent = find(second);
     if (first_parent == second_parent)
@@ -48,9 +43,8 @@ void disjoint_set<T, Hash, KeyEqual>::union_sets(const T& first, const T& second
     }
 }
 
-template <typename T, typename Hash, typename KeyEqual>
-T disjoint_set<T, Hash, KeyEqual>::find(const T& item)
-{
+template<typename T, typename Hash, typename KeyEqual>
+T disjoint_set<T, Hash, KeyEqual>::find(const T& item) {
     // at() throws std::out_of_range
     _t_data& data = _sets.at(item);
 
@@ -60,9 +54,8 @@ T disjoint_set<T, Hash, KeyEqual>::find(const T& item)
     return data.parent;
 }
 
-template <typename T, typename Hash, typename KeyEqual>
-void disjoint_set<T, Hash, KeyEqual>::remove_set(const T& member)
-{
+template<typename T, typename Hash, typename KeyEqual>
+void disjoint_set<T, Hash, KeyEqual>::remove_set(const T& member) {
     T to_remove = find(member);
     for (auto it(_sets.begin()); it != _sets.end();) {
         if (to_remove == find(it->first))
@@ -73,22 +66,19 @@ void disjoint_set<T, Hash, KeyEqual>::remove_set(const T& member)
     _roots.erase(to_remove);
 }
 
-template <typename T, typename Hash, typename KeyEqual>
-void disjoint_set<T, Hash, KeyEqual>::clear() noexcept
-{
+template<typename T, typename Hash, typename KeyEqual>
+void disjoint_set<T, Hash, KeyEqual>::clear() noexcept {
     _sets.clear();
     _roots.clear();
 }
 
-template <typename T, typename Hash, typename KeyEqual>
-uint32_t disjoint_set<T, Hash, KeyEqual>::size() const noexcept
-{
+template<typename T, typename Hash, typename KeyEqual>
+uint32_t disjoint_set<T, Hash, KeyEqual>::size() const noexcept {
     return _sets.size();
 }
 
-template <typename T, typename Hash, typename KeyEqual>
-uint32_t disjoint_set<T, Hash, KeyEqual>::num_sets() const noexcept
-{
+template<typename T, typename Hash, typename KeyEqual>
+uint32_t disjoint_set<T, Hash, KeyEqual>::num_sets() const noexcept {
     return _roots.size();
 }
 

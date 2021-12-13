@@ -4,10 +4,10 @@
 
 #include <structures/graph.h>
 
-template <bool Directed, bool Weighted>
-graph::graph<int, Directed, Weighted> random_graph(
-    std::mt19937_64& gen, bool cyclic, graph::graph_type type, std::size_t num_vertices)
-{
+template<bool Directed, bool Weighted>
+graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cyclic,
+                                                   graph::graph_type type,
+                                                   std::size_t num_vertices) {
     graph::graph<int, Directed, Weighted> graph(type);
 
     std::uniform_real_distribution<double> weight(0, 1000);
@@ -52,18 +52,16 @@ graph::graph<int, Directed, Weighted> random_graph(
     return graph;
 }
 
-template <bool Directed, bool Weighted>
-graph::graph<int, Directed, Weighted> random_graph(
-    std::mt19937_64& gen, bool cyclic = true, graph::graph_type type = graph::adj_list)
-{
+template<bool Directed, bool Weighted>
+graph::graph<int, Directed, Weighted> random_graph(std::mt19937_64& gen, bool cyclic = true,
+                                                   graph::graph_type type = graph::adj_list) {
     std::uniform_int_distribution<std::size_t> dist(0, 20);
 
     std::size_t num_vertices = dist(gen);
     return random_graph<Directed, Weighted>(gen, cyclic, type, num_vertices);
 }
 
-std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine)
-{
+std::vector<double> generateData(uint32_t size, uint32_t bound, std::mt19937_64& engine) {
     std::vector<double> result(size);
     std::uniform_real_distribution<> dist(0, bound);
     std::generate(result.begin(), result.end(), [&dist, &engine]() { return dist(engine); });

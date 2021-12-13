@@ -16,10 +16,9 @@ namespace graph_alg {
  *
  * Θ(m+n)
  */
-template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
 std::pair<std::unordered_set<Vertex, Args...>, std::unordered_set<Vertex, Args...>>
-verify_bipartite(const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>& input)
-{
+  verify_bipartite(const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>& input) {
     std::pair<std::unordered_set<Vertex, Args...>, std::unordered_set<Vertex, Args...>> result;
 
     // Simple forcing approach: each vertex must be in a different set than neighbors
@@ -33,8 +32,8 @@ verify_bipartite(const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...
         for (const Vertex& w : input.neighbors(v)) {
             // If we've forced the current vertex into the same bin as a neighbor,
             // the graph cannot be bipartite
-            if ((in_second && result.second.find(w) != result.second.end())
-                || (!in_second && result.first.find(w) != result.first.end())) {
+            if ((in_second && result.second.find(w) != result.second.end()) ||
+                (!in_second && result.first.find(w) != result.first.end())) {
                 result.first.clear();
                 result.second.clear();
                 return true; // no need to keep going: terminate early
@@ -58,24 +57,25 @@ verify_bipartite(const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...
  *
  * John Hopcroft, Richard Karp
  * An n^5/2 algorithm for maximum matchings in bipartite graphs
- * (1973) doi:10.1137/0202019
+ * (1973)
+ * doi:10.1137/0202019
  *
  * Alexander Karzanov
  * An exact estimate of an algorithm for finding a maximum flow, applied to the problem on
- * representatives (1973) Problems in Cybernetics
+ * representatives (1973)
+ * Problems in Cybernetics
  *
- * Θ(sqrt(V) E)
+ * O(sqrt(V) E)
  */
-template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
 std::list<std::pair<Vertex, Vertex>> maximum_bipartite_matching(
-    const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>& input)
-{
+  const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>& input) {
     std::vector<Vertex> vertices = input.vertices();
     if (vertices.empty()) // there are no vertices
         return std::list<std::pair<Vertex, Vertex>>();
 
-    std::pair<std::unordered_set<Vertex, Args...>, std::unordered_set<Vertex, Args...>> sets
-        = verify_bipartite(input);
+    std::pair<std::unordered_set<Vertex, Args...>, std::unordered_set<Vertex, Args...>> sets =
+      verify_bipartite(input);
     if (sets.first.empty() && sets.second.empty())
         throw std::domain_error("Not a bipartite graph");
     if (sets.first.empty() || sets.second.empty()) // there are no edges
@@ -92,8 +92,8 @@ std::list<std::pair<Vertex, Vertex>> maximum_bipartite_matching(
 
     // populate in correct direction with fixed cost
     const uint32_t EDGE_FLOW = 1;
-    const std::unordered_map<Vertex, uint32_t, Args...>& translation
-        = input.get_translation(); // for quick lookup
+    const std::unordered_map<Vertex, uint32_t, Args...>& translation =
+      input.get_translation(); // for quick lookup
     for (const Vertex& v : sets.first) {
         for (const Vertex& w : input.neighbors(v))
             flow_graph.force_add(translation.at(v), translation.at(w), EDGE_FLOW);
@@ -103,18 +103,18 @@ std::list<std::pair<Vertex, Vertex>> maximum_bipartite_matching(
     for (const Vertex& v : sets.second)
         flow_graph.force_add(translation.at(v), dummy_2, EDGE_FLOW);
 
-    graph::graph<uint32_t, true, true, uint32_t> flow_result
-        = Dinic_max_flow(flow_graph, dummy_1, dummy_2);
+    graph::graph<uint32_t, true, true, uint32_t> flow_result =
+      Dinic_max_flow(flow_graph, dummy_1, dummy_2);
     std::list<std::pair<Vertex, Vertex>> result;
     for (const Vertex& v : sets.first) {
-        std::list<uint32_t> neighbors = flow_result.neighbors(
-            translation.at(v)); // if non-empty, we found a flow to a neighbor
+        std::list<uint32_t> neighbors =
+          flow_result.neighbors(translation.at(v)); // if non-empty, we found a flow to a neighbor
         if (neighbors.size() > 0)
             result.emplace_back(v, vertices[neighbors.front()]);
     }
 
     return result;
 }
-}
+} // namespace graph_alg
 
 #endif // GRAPH_BIPARTITE_H

@@ -1,5 +1,6 @@
 #ifndef STRING_COMP_H
 #define STRING_COMP_H
+#include <array>
 #include <string>
 #include <vector>
 
@@ -14,14 +15,15 @@ Fast pattern matching in strings
 
 O(m+n)
 */
-template <typename CharT>
-typename std::basic_string<CharT>::const_iterator find_substring(
-    const std::basic_string<CharT>& input, const std::basic_string<CharT>& target)
-{
+template<typename CharT>
+typename std::basic_string<CharT>::const_iterator
+  find_substring(const std::basic_string<CharT>& input, const std::basic_string<CharT>& target) {
     if (target.empty())
         return input.begin();
 
     // preprocessing
+    // If not a match, we want to back up as little as possible
+    // Where in target string to back up to is stored in next
     std::vector<typename std::basic_string<CharT>::size_type> next(target.size());
     next[0] = std::basic_string<CharT>::npos;
     if (next.size() > 1)
@@ -53,7 +55,7 @@ struct instruction {
     enum category { insert_char, delete_char, replace_char };
 
     category directive;
-    uint32_t src_index; // Delete or Replace
+    uint32_t src_index;    // Delete or Replace
     uint32_t target_index; // Insert or Replace
 };
 
@@ -66,10 +68,9 @@ Speech discrimination by dynamic programming
 Robert Wagner, Michael Fischer (1974)
 O(mn)
 */
-template <typename CharT>
-std::vector<instruction> Levenshtein_distance(
-    const std::basic_string<CharT>& src, const std::basic_string<CharT>& target)
-{
+template<typename CharT>
+std::vector<instruction> Levenshtein_distance(const std::basic_string<CharT>& src,
+                                              const std::basic_string<CharT>& target) {
     struct helper_node {
         instruction::category step;
         uint32_t cost;
@@ -77,8 +78,8 @@ std::vector<instruction> Levenshtein_distance(
 
     // grid[i][j] denotes the edit distance from src.substring(0, i + 1) to
     // target.substring(0, j + 1)
-    std::vector<std::vector<helper_node>> grid(
-        src.size() + 1, std::vector<helper_node>(target.size() + 1));
+    std::vector<std::vector<helper_node>> grid(src.size() + 1,
+                                               std::vector<helper_node>(target.size() + 1));
     for (uint32_t i = 0; i < grid.size(); ++i) {
         grid[i][0].step = instruction::category::delete_char;
         grid[i][0].cost = i;
@@ -100,8 +101,8 @@ std::vector<instruction> Levenshtein_distance(
             choice[2].step = instruction::category::insert_char;
             choice[2].cost = grid[i][j - 1].cost + 1;
 
-            grid[i][j] = *std::min_element(
-                choice.begin(), choice.end(), [](auto& x, auto& y) { return x.cost < y.cost; });
+            grid[i][j] = *std::min_element(choice.begin(), choice.end(),
+                                           [](auto& x, auto& y) { return x.cost < y.cost; });
         }
     }
 
@@ -110,8 +111,8 @@ std::vector<instruction> Levenshtein_distance(
     uint32_t current_X = grid.size() - 1, current_Y = grid[0].size() - 1;
     while (current_X != 0 || current_Y != 0) {
         auto& node = grid[current_X][current_Y];
-        if (node.step != instruction::category::replace_char
-            || src[current_X - 1] != target[current_Y - 1]) {
+        if (node.step != instruction::category::replace_char ||
+            src[current_X - 1] != target[current_Y - 1]) {
             instruction step;
             step.directive = node.step;
             step.src_index = current_X - 1;
@@ -128,6 +129,6 @@ std::vector<instruction> Levenshtein_distance(
 
     return result;
 }
-} // namespace Sequence
+} // namespace sequence
 
 #endif // !STRING_COMP_H

@@ -7,9 +7,9 @@
 
 #include "graph.h"
 
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
 class partitioner {
-public:
+    public:
     typedef typename std::list<std::list<Vertex>>::iterator set_ptr;
 
     // Initialize for a given graph
@@ -22,8 +22,8 @@ public:
     // Parameter 1: pivot vertex
     // Parameter 2: if pivot shares set with neighbors (and/or non-neighbors), should the pivot go
     // with the neighbors (true) or non-neighbors (false)
-    std::unordered_set<set_ptr, util::it_hash<set_ptr>> partition(
-        const Vertex&, bool include_with_neighbors);
+    std::unordered_set<set_ptr, util::it_hash<set_ptr>> partition(const Vertex&,
+                                                                  bool include_with_neighbors);
 
     // Merge two sets, given a vertex in each. The second set is always merged into the first.
     void merge_sets(const Vertex&, const Vertex&);
@@ -45,14 +45,14 @@ public:
     // Return the sets
     const std::list<std::list<Vertex>>& get_all() const;
 
-private:
+    private:
     const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph;
     std::list<std::list<Vertex>> sets;
     std::unordered_map<Vertex,
-        std::pair<typename std::list<std::list<Vertex>>::iterator,
-            typename std::list<Vertex>::iterator>,
-        Args...>
-        set_ptrs;
+                       std::pair<typename std::list<std::list<Vertex>>::iterator,
+                                 typename std::list<Vertex>::iterator>,
+                       Args...>
+      set_ptrs;
 };
 
 #include "../../src/structures/partitioner.tpp"

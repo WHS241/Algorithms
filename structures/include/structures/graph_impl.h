@@ -5,8 +5,8 @@
 
 namespace graph {
 // 图的储存表示
-template <bool Directed, bool Weighted, typename EdgeWeight> class impl {
-public:
+template<bool Directed, bool Weighted, typename EdgeWeight> class impl {
+    public:
     impl() = default;
 
     virtual ~impl() = default;
@@ -34,8 +34,8 @@ public:
 
     // 输入：结点
     // 输出：导出子图和translation
-    virtual std::pair<impl*, std::vector<uint32_t>> induced_subgraph(
-        const std::list<uint32_t>&) const = 0;
+    virtual std::pair<impl*, std::vector<uint32_t>>
+      induced_subgraph(const std::list<uint32_t>&) const = 0;
 
     // 从start到dest加边，长度为cost。若该边已存在，将边的长度设为cost。
     virtual void set_edge(const uint32_t& start, const uint32_t& dest, const EdgeWeight& cost) = 0;
@@ -59,14 +59,13 @@ public:
     // 清空整个图
     virtual void clear() noexcept = 0;
 
-protected:
+    protected:
     // 不直接用impl的话应该不需要，以防万一
-    void _range_check(uint32_t v) const
-    {
+    void _range_check(uint32_t v) const {
         if (v >= this->order())
             throw std::out_of_range(std::to_string(v));
     }
 };
-}
+} // namespace graph
 
 #endif // GRAPH_IMPL_H

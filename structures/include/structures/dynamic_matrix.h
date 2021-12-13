@@ -8,8 +8,8 @@
 
 // An implementation of a dynamic 2-dimensional array
 // Takes advantage of the space-initialization trick
-template <typename T> class dynamic_matrix {
-public:
+template<typename T> class dynamic_matrix {
+    public:
     typedef T value_type;
     typedef T* pointer;
     typedef T& reference;
@@ -17,11 +17,11 @@ public:
     typedef const T& const_reference;
 
     class row_wrapper {
-    public:
+        public:
         reference operator[](std::size_t index);
         reference at(std::size_t index);
 
-    private:
+        private:
         row_wrapper(dynamic_matrix<T>* m, std::size_t size);
 
         friend class dynamic_matrix<T>;
@@ -31,11 +31,11 @@ public:
     };
 
     class const_row_wrapper {
-    public:
+        public:
         const_reference operator[](std::size_t index) const;
         const_reference at(std::size_t index) const;
 
-    private:
+        private:
         const_row_wrapper(const dynamic_matrix<T>* m, std::size_t size);
 
         friend class dynamic_matrix<T>;
@@ -45,12 +45,12 @@ public:
     };
 
     // Generate a m * n matrix "initialized" to contain initial_value in every position
-    template <typename _T = T, typename = std::enable_if_t<std::is_default_constructible_v<_T>>>
+    template<typename _T = T, typename = std::enable_if_t<std::is_default_constructible_v<_T>>>
     dynamic_matrix(std::size_t m = 0, std::size_t n = 0);
     dynamic_matrix(std::size_t m, std::size_t n, const T& default_value);
 
     // Initializing with an initializer list
-    template <typename _T = T, typename = std::enable_if_t<std::is_default_constructible_v<_T>>>
+    template<typename _T = T, typename = std::enable_if_t<std::is_default_constructible_v<_T>>>
     dynamic_matrix(const std::initializer_list<std::initializer_list<T>>&);
 
     ~dynamic_matrix() noexcept;
@@ -82,53 +82,53 @@ public:
     0 0 0
      */
     dynamic_matrix<T> subarray(std::size_t rows, std::size_t cols, std::size_t first_row = 0,
-        std::size_t first_col = 0) const;
+                               std::size_t first_col = 0) const;
     // Specifies a different pad value
     dynamic_matrix<T> subarray(std::size_t rows, std::size_t cols, std::size_t first_row,
-        std::size_t first_col, const T& pad_value) const;
+                               std::size_t first_col, const T& pad_value) const;
 
     // Equivalent to *this = this->subarray(new_rows, new_cols, first_row, first_col)
     void resize(std::size_t new_rows, std::size_t new_cols, std::size_t first_row = 0,
-        std::size_t first_col = 0);
+                std::size_t first_col = 0);
 
     /*********************
      * MATRIX OPERATIONS *
      *********************/
 
     // Matrix addition
-    template <typename U>
-    dynamic_matrix<std::invoke_result_t<std::plus<>, T, U>> operator+(
-        const dynamic_matrix<U>&) const;
-    template <typename U, typename _Type = T,
-        typename _R = std::enable_if_t<std::is_invocable_r_v<_Type, std::plus<>, _Type, U>>>
+    template<typename U>
+    dynamic_matrix<std::invoke_result_t<std::plus<>, T, U>>
+      operator+(const dynamic_matrix<U>&) const;
+    template<typename U, typename _Type = T,
+             typename _R = std::enable_if_t<std::is_invocable_r_v<_Type, std::plus<>, _Type, U>>>
     dynamic_matrix<T>& operator+=(const dynamic_matrix<U>&) noexcept(
-        std::is_nothrow_invocable_r_v<T, std::plus<>, T, U>);
+      std::is_nothrow_invocable_r_v<T, std::plus<>, T, U>);
 
     // Matrix subtraction
-    template <typename U>
-    dynamic_matrix<std::invoke_result_t<std::minus<>, T, U>> operator-(
-        const dynamic_matrix<U>&) const;
-    template <typename U, typename _Type = T,
-        typename = std::enable_if_t<std::is_invocable_r_v<_Type, std::minus<>, _Type, U>>>
+    template<typename U>
+    dynamic_matrix<std::invoke_result_t<std::minus<>, T, U>>
+      operator-(const dynamic_matrix<U>&) const;
+    template<typename U, typename _Type = T,
+             typename = std::enable_if_t<std::is_invocable_r_v<_Type, std::minus<>, _Type, U>>>
     dynamic_matrix<T>& operator-=(const dynamic_matrix<U>&) noexcept(
-        std::is_nothrow_invocable_r_v<T, std::minus<>, T, U>);
+      std::is_nothrow_invocable_r_v<T, std::minus<>, T, U>);
 
     // Scalar multiplication / division
     dynamic_matrix<T> operator*(const T&) const;
-    dynamic_matrix<T>& operator*=(const T&) noexcept(
-        std::is_nothrow_invocable_r_v<T, std::multiplies<>, T, T>);
+    dynamic_matrix<T>&
+      operator*=(const T&) noexcept(std::is_nothrow_invocable_r_v<T, std::multiplies<>, T, T>);
     dynamic_matrix<T> operator/(const T&) const;
-    dynamic_matrix<T>& operator/=(const T&) noexcept(
-        std::is_nothrow_invocable_r_v<T, std::divides<>, T, T>);
+    dynamic_matrix<T>&
+      operator/=(const T&) noexcept(std::is_nothrow_invocable_r_v<T, std::divides<>, T, T>);
 
     // Matrix multiplication
     // Requirements: T, U, and V are default constructible and return the additive identity for the
     // data type (0) Let V be the result type of T * U. V also must support addition and
     // distributive property on both T and U i.e. for any T a,b and U c,d: (a + b) * (c + d) == a *
     // c + a * d + b * c + b * d;
-    template <typename U>
-    dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> operator*(
-        const dynamic_matrix<U>&) const;
+    template<typename U>
+    dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>>
+      operator*(const dynamic_matrix<U>&) const;
 
     /**************
      * COMPARISON *
@@ -142,7 +142,7 @@ public:
     friend class row_wrapper;
     friend class const_row_wrapper;
 
-private:
+    private:
     void _check_row(std::size_t pos) const;
     void _check_col(std::size_t pos) const;
     bool _is_initialized(std::size_t pos) const noexcept;

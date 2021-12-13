@@ -15,25 +15,25 @@ namespace tree {
  * A Dichromatic Framework for Balanced Trees
  * (1978) doi:10.1109/SFCS.1978.3
  */
-template <typename T, typename Compare = std::less<T>>
+template<typename T, typename Compare = std::less<T>>
 class red_black_tree : public binary_search_tree<T, Compare> {
-public:
+    public:
     using typename binary_search_tree<T, Compare>::value_type,
-        typename binary_search_tree<T, Compare>::value_compare,
-        typename binary_search_tree<T, Compare>::iterator,
-        typename binary_search_tree<T, Compare>::const_iterator,
-        typename binary_search_tree<T, Compare>::reverse_iterator,
-        typename binary_search_tree<T, Compare>::const_reverse_iterator;
+      typename binary_search_tree<T, Compare>::value_compare,
+      typename binary_search_tree<T, Compare>::iterator,
+      typename binary_search_tree<T, Compare>::const_iterator,
+      typename binary_search_tree<T, Compare>::reverse_iterator,
+      typename binary_search_tree<T, Compare>::const_reverse_iterator;
     using binary_search_tree<T, Compare>::binary_search_tree,
 
-        binary_search_tree<T, Compare>::begin, binary_search_tree<T, Compare>::end,
-        binary_search_tree<T, Compare>::cbegin, binary_search_tree<T, Compare>::cend,
-        binary_search_tree<T, Compare>::rbegin, binary_search_tree<T, Compare>::rend,
-        binary_search_tree<T, Compare>::crbegin, binary_search_tree<T, Compare>::crend,
+      binary_search_tree<T, Compare>::begin, binary_search_tree<T, Compare>::end,
+      binary_search_tree<T, Compare>::cbegin, binary_search_tree<T, Compare>::cend,
+      binary_search_tree<T, Compare>::rbegin, binary_search_tree<T, Compare>::rend,
+      binary_search_tree<T, Compare>::crbegin, binary_search_tree<T, Compare>::crend,
 
-        binary_search_tree<T, Compare>::empty, binary_search_tree<T, Compare>::size,
-        binary_search_tree<T, Compare>::contains, binary_search_tree<T, Compare>::find,
-        binary_search_tree<T, Compare>::erase;
+      binary_search_tree<T, Compare>::empty, binary_search_tree<T, Compare>::size,
+      binary_search_tree<T, Compare>::contains, binary_search_tree<T, Compare>::find,
+      binary_search_tree<T, Compare>::erase;
 
     // Θ(log n)
     std::pair<iterator, bool> insert(const T&) override;
@@ -41,10 +41,10 @@ public:
     // Θ(log n)
     iterator erase(iterator it) override;
 
-protected:
+    protected:
     struct t_node : public binary_tree<T>::node {
         t_node(const T& item = T(), bool black = false, t_node* parent = nullptr,
-            t_node* left = nullptr, t_node* right = nullptr);
+               t_node* left = nullptr, t_node* right = nullptr);
 
         virtual t_node* change_left(t_node* to_add) noexcept;
         virtual t_node* change_right(t_node* to_add) noexcept;
@@ -54,7 +54,7 @@ protected:
         bool is_black;
     };
 };
-}
+} // namespace tree
 
 #include "../../src/structures/red_black_tree.tpp"
 

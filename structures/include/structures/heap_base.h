@@ -8,8 +8,8 @@
 
 namespace heap {
 // Base class for heap structures
-template <typename T, typename Compare = std::less<T>> class base {
-public:
+template<typename T, typename Compare = std::less<T>> class base {
+    public:
     base() = default;
     explicit base(Compare comp);
 
@@ -26,32 +26,32 @@ public:
     virtual uint32_t size() const noexcept = 0;
     virtual bool empty() const noexcept;
 
-protected:
+    protected:
     Compare _compare;
 };
 
 // Array-based binary heap
 // Requirements: Container supports push_back(const T&) and T& operator[](unsigned int x) for 0 <= x
 // < size()
-template <typename T, typename Compare = std::less<T>, typename Container = std::vector<T>>
+template<typename T, typename Compare = std::less<T>, typename Container = std::vector<T>>
 class priority_queue : virtual public base<T, Compare> {
-public:
-    static_assert(
-        std::is_invocable_r_v<bool, Compare, T, T>, "comparator incompatible with data types");
+    public:
+    static_assert(std::is_invocable_r_v<bool, Compare, T, T>,
+                  "comparator incompatible with data types");
     static_assert(std::is_same_v<T, typename Container::value_type>,
-        "value_type must be same as underlying container");
+                  "value_type must be same as underlying container");
     static_assert(std::is_same_v<std::random_access_iterator_tag,
-                      typename Container::iterator::iterator_category>,
-        "random-access container required");
+                                 typename Container::iterator::iterator_category>,
+                  "random-access container required");
 
     priority_queue() = default;
     explicit priority_queue(Compare comp);
 
     // Θ(n)
-    template <typename It, typename _Compare = Compare,
-        typename _Requires = std::enable_if_t<std::is_default_constructible_v<Compare>>>
+    template<typename It, typename _Compare = Compare,
+             typename _Requires = std::enable_if_t<std::is_default_constructible_v<_Compare>>>
     priority_queue(It first, It last);
-    template <typename It> priority_queue(It first, It last, Compare comp);
+    template<typename It> priority_queue(It first, It last, Compare comp);
 
     // Θ(log n)
     virtual void insert(const T&);
@@ -66,10 +66,10 @@ public:
     virtual T get_root() const;
     virtual uint32_t size() const noexcept;
 
-private:
+    private:
     Container _heap;
 };
-}
+} // namespace heap
 
 #include "../../src/structures/heap_base.tpp"
 

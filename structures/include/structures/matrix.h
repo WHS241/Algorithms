@@ -6,79 +6,70 @@
 #include <array>
 #include <iostream>
 
-template <typename T, std::size_t Rows, std::size_t Cols>
+template<typename T, std::size_t Rows, std::size_t Cols>
 using matrix = std::array<std::array<T, Cols>, Rows>;
 
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols>& operator+=(matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols>& operator+=(matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y) {
     for (std::size_t i = 0; i < Rows; ++i)
         std::transform(x[i].begin(), x[i].end(), y[i].begin(), x[i].begin(), std::plus<T>());
     return x;
 }
 
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols> operator+(const matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols> operator+(const matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y) {
     matrix<T, Rows, Cols> temp = x;
     temp += y;
     return temp;
 }
 
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols>& operator-=(matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols>& operator-=(matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y) {
     for (std::size_t i = 0; i < Rows; ++i)
         std::transform(x[i].begin(), x[i].end(), y[i].begin(), x[i].begin(), std::minus<T>());
     return x;
 }
 
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols> operator-(const matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols> operator-(const matrix<T, Rows, Cols>& x, const matrix<T, Rows, Cols>& y) {
     matrix<T, Rows, Cols> temp = x;
     temp -= y;
     return temp;
 }
 
 // Scalar multiplication
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols>& operator*=(matrix<T, Rows, Cols>& m, const T& s)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols>& operator*=(matrix<T, Rows, Cols>& m, const T& s) {
     for (std::size_t i = 0; i < Rows; ++i)
         for (std::size_t j = 0; j < Cols; ++j)
             m[i][j] *= s;
     return m;
 }
 
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols>& operator*(const matrix<T, Rows, Cols>& m, const T& s)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols>& operator*(const matrix<T, Rows, Cols>& m, const T& s) {
     matrix<T, Rows, Cols> temp = m;
     temp *= s;
     return temp;
 }
 
-template <typename T, std::size_t Rows, std::size_t Cols>
-matrix<T, Rows, Cols>& operator*(const T& s, const matrix<T, Rows, Cols>& m)
-{
+template<typename T, std::size_t Rows, std::size_t Cols>
+matrix<T, Rows, Cols>& operator*(const T& s, const matrix<T, Rows, Cols>& m) {
     return m * s;
 }
 
 // Self multiplication: only works with square matrices
-template <typename T, std::size_t Dim>
-matrix<T, Dim, Dim>& operator*=(matrix<T, Dim, Dim>& x, const matrix<T, Dim, Dim>& y)
-{
+template<typename T, std::size_t Dim>
+matrix<T, Dim, Dim>& operator*=(matrix<T, Dim, Dim>& x, const matrix<T, Dim, Dim>& y) {
     // Due to the complexity of matrix multiplication, better to just assign from matrix
     // multiplication algorithm
     x = x * y;
     return x;
 }
 
-template <typename T, std::size_t Rows1, std::size_t Cols1, std::size_t Cols2>
-matrix<T, Rows1, Cols2> operator*(
-    const matrix<T, Rows1, Cols1>& x, const matrix<T, Cols1, Cols2>& y)
-{
+template<typename T, std::size_t Rows1, std::size_t Cols1, std::size_t Cols2>
+matrix<T, Rows1, Cols2> operator*(const matrix<T, Rows1, Cols1>& x,
+                                  const matrix<T, Cols1, Cols2>& y) {
     // Pad to even
     constexpr std::size_t padded_Cols1 = (Cols1 % 2 == 0) ? Cols1 : Cols1 + 1;
     constexpr std::size_t padded_Rows1 = (Rows1 % 2 == 0) ? Rows1 : Rows1 + 1;
@@ -173,16 +164,18 @@ matrix<T, Rows1, Cols2> operator*(
                 y_div[3][j - split_j][k] = T();
 
         // The seven multiplications in Strassen's algorithm
-        matrix<T, split_i, split_k> subresults[7]
-            = { (x_div[0] + x_div[3]) * (y_div[0] + y_div[3]), (x_div[2] + x_div[3]) * y_div[0],
-                  x_div[0] * (y_div[1] - y_div[3]), x_div[3] * (y_div[2] - y_div[0]),
-                  (x_div[0] + x_div[1]) * y_div[3], (x_div[2] - x_div[0]) * (y_div[0] + y_div[1]),
-                  (x_div[1] - x_div[3]) * (y_div[2] + y_div[3]) };
+        matrix<T, split_i, split_k> subresults[7] = {(x_div[0] + x_div[3]) * (y_div[0] + y_div[3]),
+                                                     (x_div[2] + x_div[3]) * y_div[0],
+                                                     x_div[0] * (y_div[1] - y_div[3]),
+                                                     x_div[3] * (y_div[2] - y_div[0]),
+                                                     (x_div[0] + x_div[1]) * y_div[3],
+                                                     (x_div[2] - x_div[0]) * (y_div[0] + y_div[1]),
+                                                     (x_div[1] - x_div[3]) * (y_div[2] + y_div[3])};
 
-        matrix<T, split_i, split_k> submatrices[4]
-            = { subresults[0] + subresults[3] - subresults[4] + subresults[6],
-                  subresults[2] + subresults[4], subresults[1] + subresults[3],
-                  subresults[0] - subresults[1] + subresults[2] + subresults[5] };
+        matrix<T, split_i, split_k> submatrices[4] = {
+          subresults[0] + subresults[3] - subresults[4] + subresults[6],
+          subresults[2] + subresults[4], subresults[1] + subresults[3],
+          subresults[0] - subresults[1] + subresults[2] + subresults[5]};
 
         matrix<T, Rows1, Cols2> result;
         for (i = 0; i < split_i; ++i) {

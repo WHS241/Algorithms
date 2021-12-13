@@ -12,9 +12,8 @@ namespace sequence {
  Straightforward binary search
  Values iterators point to should be sorted with Compare
  */
-template <typename RandomIt, typename T, typename Compare>
-RandomIt binary_search(RandomIt first, RandomIt last, const T& item, Compare comp)
-{
+template<typename RandomIt, typename T, typename Compare>
+RandomIt binary_search(RandomIt first, RandomIt last, const T& item, Compare comp) {
     if (first == last)
         return first;
 
@@ -32,9 +31,8 @@ RandomIt binary_search(RandomIt first, RandomIt last, const T& item, Compare com
 
     return (*first == item) ? first : no_match;
 }
-template <typename RandomIt, typename T>
-RandomIt binary_search(RandomIt first, RandomIt last, const T& item)
-{
+template<typename RandomIt, typename T>
+RandomIt binary_search(RandomIt first, RandomIt last, const T& item) {
     return binary_search(first, last, item, std::less<T>());
 }
 
@@ -43,9 +41,8 @@ Assuming values are ordered such that all elements x for which pred(x) is true
 come before those for which pred(x) is false, find the first element after that
 cutoff.
 */
-template <typename RandomIt, typename Function>
-RandomIt find_cutoff(RandomIt first, RandomIt last, Function pred)
-{
+template<typename RandomIt, typename Function>
+RandomIt find_cutoff(RandomIt first, RandomIt last, Function pred) {
     if (first == last || !pred(*first))
         return first;
     if (pred(*(last - 1)))
@@ -69,9 +66,8 @@ Requirements:
 For some 0 <= x < (last-first), if i != x, comp(*(first + i), *(first + i + 1))
 If x != 0, comp(*first, *(last - 1))
 */
-template <typename RandomIt, typename Compare>
-RandomIt find_min_in_cyclic(RandomIt first, RandomIt last, Compare comp)
-{
+template<typename RandomIt, typename Compare>
+RandomIt find_min_in_cyclic(RandomIt first, RandomIt last, Compare comp) {
     if (first == last)
         return first;
 
@@ -85,8 +81,7 @@ RandomIt find_min_in_cyclic(RandomIt first, RandomIt last, Compare comp)
     --last;
     return comp(*first, *last) ? first : last;
 }
-template <typename RandomIt, typename T> RandomIt find_min_in_cyclic(RandomIt first, RandomIt last)
-{
+template<typename RandomIt, typename T> RandomIt find_min_in_cyclic(RandomIt first, RandomIt last) {
     return find_min_in_cyclic(first, last, std::less<T>());
 }
 
@@ -98,8 +93,7 @@ RandomIt::operator*() returns type int or equivalent
 Values are sorted with std::less (or equivalent) and distinct
 return -1 if not found
 */
-template <typename RandomIt> uint32_t special_index(RandomIt first, RandomIt last)
-{
+template<typename RandomIt> uint32_t special_index(RandomIt first, RandomIt last) {
     RandomIt noMatch = last, begin = first;
     while (last - first > 1) {
         RandomIt mid = first + (last - first) / 2;
@@ -116,6 +110,6 @@ template <typename RandomIt> uint32_t special_index(RandomIt first, RandomIt las
         return -1;
     return first - begin;
 }
-} // namespace Sequence
+} // namespace sequence
 
 #endif // !BINARY_SEARCH_H

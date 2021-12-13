@@ -19,12 +19,12 @@
  * Efficiency of a good but not linear set union algorithm
  * (1975) doi:10.1145/321879.321884
  */
-template <typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
+template<typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
 class disjoint_set {
-public:
+    public:
     disjoint_set() = default;
 
-    template <typename It> disjoint_set(It first, It last);
+    template<typename It> disjoint_set(It first, It last);
 
     // Inserts a new element under its own set
     // O(1)
@@ -47,7 +47,7 @@ public:
     uint32_t size() const noexcept;
     uint32_t num_sets() const noexcept;
 
-private:
+    private:
     struct _t_data {
         T parent;
         uint32_t size;

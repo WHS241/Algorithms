@@ -6,15 +6,15 @@
 #include <memory>
 
 namespace tree {
-template <typename T> class binary_tree;
+template<typename T> class binary_tree;
 
 enum traversal { pre_order, in_order, post_order, level_order };
 
-template <typename T> class tree_iterator_impl;
+template<typename T> class tree_iterator_impl;
 
 // The iterator pattern for the binary_tree
-template <typename T> class tree_iterator {
-public:
+template<typename T> class tree_iterator {
+    public:
     using difference_type = int;
     using value_type = T;
     using pointer = T*;
@@ -42,9 +42,9 @@ public:
     tree_iterator& operator--();
     tree_iterator operator--(int);
 
-private:
+    private:
     tree_iterator(typename binary_tree<T>::node* root, traversal order, bool entire_subtree,
-        binary_tree<T>* tree);
+                  binary_tree<T>* tree);
     typename binary_tree<T>::node* _get_node();
 
     std::unique_ptr<tree_iterator_impl<T>> _impl;
@@ -53,8 +53,8 @@ private:
     friend class binary_tree<T>;
 };
 
-template <typename T> class tree_const_iterator {
-public:
+template<typename T> class tree_const_iterator {
+    public:
     using difference_type = int;
     using value_type = T;
     using pointer = const T*;
@@ -77,9 +77,9 @@ public:
     tree_const_iterator& operator--();
     tree_const_iterator operator--(int);
 
-private:
+    private:
     tree_const_iterator(const typename binary_tree<T>::node* root, traversal order,
-        bool entire_subtree, const binary_tree<T>* tree);
+                        bool entire_subtree, const binary_tree<T>* tree);
     const typename binary_tree<T>::node* _get_node();
 
     std::unique_ptr<tree_iterator_impl<T>> _impl;
@@ -87,7 +87,7 @@ private:
     const binary_tree<T>* _tree;
     friend class binary_tree<T>;
 };
-}
+} // namespace tree
 
 #include "../../src/structures/binary_tree_iterator.tpp"
 

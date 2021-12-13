@@ -26,19 +26,17 @@ All pairs:
 namespace graph_alg {
 
 class no_path_exception : public std::domain_error {
-public:
-    no_path_exception()
-        : std::domain_error("No path") {};
+    public:
+    no_path_exception() : std::domain_error("No path"){};
 };
 
 /*
 Use BFS to find path with fewest edges
 */
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
-std::list<Vertex> least_edges_path(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
-    const Vertex& dest)
-{
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+std::list<Vertex>
+  least_edges_path(const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src,
+                   const Vertex& start, const Vertex& dest) {
     std::list<Vertex> result;
 
     if (start == dest)
@@ -49,20 +47,21 @@ std::list<Vertex> least_edges_path(
     bool found = false;
 
     std::unordered_map<Vertex, Vertex, Args...> parent;
-    breadth_first(src, start,
-        [&dest, &search_number, &current_bfs_num, &found, &parent, &src](const Vertex& curr) {
-            search_number[curr] = current_bfs_num++;
-            if (curr == dest) {
-                found = true;
-            } else if (!found) {
-                std::list<Vertex> neighbors = src.neighbors(curr);
-                for (const Vertex& vertex : neighbors) {
-                    if (parent.find(vertex) == parent.end())
-                        parent[vertex] = curr;
-                }
-            }
-            return found;
-        });
+    breadth_first(
+      src, start,
+      [&dest, &search_number, &current_bfs_num, &found, &parent, &src](const Vertex& curr) {
+          search_number[curr] = current_bfs_num++;
+          if (curr == dest) {
+              found = true;
+          } else if (!found) {
+              std::list<Vertex> neighbors = src.neighbors(curr);
+              for (const Vertex& vertex : neighbors) {
+                  if (parent.find(vertex) == parent.end())
+                      parent[vertex] = curr;
+              }
+          }
+          return found;
+      });
 
     if (!found)
         throw no_path_exception();
@@ -77,17 +76,16 @@ std::list<Vertex> least_edges_path(
 Use topological sort on a weighted DAG
 Can be used with other comparison operators (e.g. find longest path)
 */
-template <typename Vertex, typename Compare, typename EdgeWeight, typename... Args>
-std::pair<EdgeWeight, std::list<Vertex>> shortest_path_DAG(
-    const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src, const Vertex& start,
-    const Vertex& dest, Compare compare)
-{
+template<typename Vertex, typename Compare, typename EdgeWeight, typename... Args>
+std::pair<EdgeWeight, std::list<Vertex>>
+  shortest_path_DAG(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src,
+                    const Vertex& start, const Vertex& dest, Compare compare) {
     std::list<Vertex> result;
     if (start == dest)
         return std::make_pair(0., result);
 
-    std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> all_destinations
-        = shortest_path_DAG_all_targets(src, start, compare);
+    std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> all_destinations =
+      shortest_path_DAG_all_targets(src, start, compare);
     if (all_destinations.find(dest) == all_destinations.end())
         throw no_path_exception();
 
@@ -100,19 +98,17 @@ std::pair<EdgeWeight, std::list<Vertex>> shortest_path_DAG(
 /*
 Use topological sort on a weighted DAG
 */
-template <typename Vertex, typename EdgeWeight, typename... Args>
-std::pair<EdgeWeight, std::list<Vertex>> shortest_path_DAG(
-    const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src, const Vertex& start,
-    const Vertex& dest)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+std::pair<EdgeWeight, std::list<Vertex>>
+  shortest_path_DAG(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src,
+                    const Vertex& start, const Vertex& dest) {
     return shortest_path_DAG(src, start, dest, std::less<EdgeWeight>());
 }
 
-template <typename Vertex, typename EdgeWeight, typename Compare, typename... Args>
-std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> shortest_path_DAG_all_targets(
-    const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src, const Vertex& start,
-    Compare compare)
-{
+template<typename Vertex, typename EdgeWeight, typename Compare, typename... Args>
+std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>
+  shortest_path_DAG_all_targets(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src,
+                                const Vertex& start, Compare compare) {
     std::vector<Vertex> topological_order = topological_sort(src);
 
     std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> result;
@@ -126,8 +122,8 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> shortest_path
     for (; it != topological_order.end(); ++it) {
         if (result.find(*it) != result.end()) {
             for (const std::pair<Vertex, EdgeWeight>& edge : src.edges(*it)) {
-                if (result.find(edge.first) == result.end()
-                    || compare(result[*it].first + edge.second, result[edge.first].first)) {
+                if (result.find(edge.first) == result.end() ||
+                    compare(result[*it].first + edge.second, result[edge.first].first)) {
                     result[edge.first].first = result[*it].first + edge.second;
                     result[edge.first].second = *it;
                 }
@@ -138,21 +134,20 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> shortest_path
     return result;
 }
 
-template <typename Vertex, typename EdgeWeight, typename... Args>
-std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> shortest_path_DAG_all_targets(
-    const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src, const Vertex& start)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>
+  shortest_path_DAG_all_targets(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src,
+                                const Vertex& start) {
     return shortest_path_DAG_all_targets(src, start, std::less<EdgeWeight>());
 }
 
 /*
  F function determines whether to halt early (returns true to halt)
  */
-template <typename Vertex, bool Directed, typename EdgeWeight, typename F, typename... Args>
-std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Dijkstra_partial(
-    const graph::graph<Vertex, Directed, true, EdgeWeight, Args...>& src, const Vertex& start,
-    F function)
-{
+template<typename Vertex, bool Directed, typename EdgeWeight, typename F, typename... Args>
+std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>
+  Dijkstra_partial(const graph::graph<Vertex, Directed, true, EdgeWeight, Args...>& src,
+                   const Vertex& start, F function) {
     static_assert(std::is_invocable_r_v<bool, F, Vertex>, "incompatible function");
 
     // What we store in a heap; tracks predecessor and cost so far
@@ -169,15 +164,15 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Dijkstra_part
     // Initialize to self and 0
     std::vector<data> data_map(vertices.size());
     std::transform(vertices.begin(), vertices.end(), data_map.begin(), [](const Vertex& value) {
-        return data { value, value, zero };
+        return data{value, value, zero};
     });
 
     // the heap structure used here determines the runtime of the algorithm
     // must be a node_base
     auto compare = [&start](const data& x, const data& y) {
         // Push start vertex to front, visited vertices are ahead of unvisited
-        return x.current == start
-            || (x.current != x.from && (y.current == y.from || x.cost < y.cost));
+        return x.current == start ||
+               (x.current != x.from && (y.current == y.from || x.cost < y.cost));
     };
     typedef typename heap::node_base<data, decltype(compare)>::node node;
     heap::Fibonacci<data, decltype(compare)> heap(compare);
@@ -238,17 +233,16 @@ A note on two problems in connexion with graphs
 Binary heap: Θ((V+E) log V)
 Fibonacci heap: Θ(V log V + E)
 */
-template <typename Vertex, bool Directed, typename EdgeWeight, typename... Args>
-std::pair<EdgeWeight, std::list<Vertex>> Dijkstra_single_target(
-    const graph::graph<Vertex, Directed, true, EdgeWeight, Args...>& src, const Vertex& start,
-    const Vertex& dest)
-{
+template<typename Vertex, bool Directed, typename EdgeWeight, typename... Args>
+std::pair<EdgeWeight, std::list<Vertex>>
+  Dijkstra_single_target(const graph::graph<Vertex, Directed, true, EdgeWeight, Args...>& src,
+                         const Vertex& start, const Vertex& dest) {
     std::list<Vertex> path;
     if (start == dest)
         return std::make_pair(EdgeWeight(), path);
 
-    std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> all_destinations
-        = Dijkstra_partial(src, start, [&dest](const Vertex& current) { return current == dest; });
+    std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> all_destinations =
+      Dijkstra_partial(src, start, [&dest](const Vertex& current) { return current == dest; });
 
     if (all_destinations.at(dest).second == dest)
         throw no_path_exception();
@@ -259,10 +253,10 @@ std::pair<EdgeWeight, std::list<Vertex>> Dijkstra_single_target(
     return std::make_pair(all_destinations[dest].first, path);
 }
 
-template <typename Vertex, bool Directed, typename EdgeWeight, typename... Args>
-std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>> Dijkstra_all_targets(
-    const graph::graph<Vertex, Directed, true, EdgeWeight, Args...>& src, const Vertex& start)
-{
+template<typename Vertex, bool Directed, typename EdgeWeight, typename... Args>
+std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>>
+  Dijkstra_all_targets(const graph::graph<Vertex, Directed, true, EdgeWeight, Args...>& src,
+                       const Vertex& start) {
     return Dijkstra_partial(src, start, [](const Vertex&) { return false; });
 }
 
@@ -285,10 +279,10 @@ On a routing problem
 
 Θ(VE)
 */
-template <typename Vertex, typename EdgeWeight, typename... Args>
-std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Bellman_Ford_all_targets(
-    const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src, const Vertex& start)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>
+  Bellman_Ford_all_targets(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src,
+                           const Vertex& start) {
     std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> result;
     std::vector<Vertex> vertices = src.vertices();
     for (const Vertex& v : vertices) {
@@ -309,8 +303,8 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Bellman_Ford_
                     // Two scenarios for relaxing:
                     // 1. We've never visited this vertex before
                     // 2. We've found a shorter path
-                    if ((edge.first != start && result[edge.first].second == edge.first)
-                        || (result[v].first + edge.second < result[edge.first].first)) {
+                    if ((edge.first != start && result[edge.first].second == edge.first) ||
+                        (result[v].first + edge.second < result[edge.first].first)) {
                         result[edge.first] = std::make_pair(result[v].first + edge.second, v);
                         relaxed = true;
                     }
@@ -335,18 +329,17 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> Bellman_Ford_
 
     return result;
 }
-template <typename Vertex, typename EdgeWeight, typename... Args>
-std::pair<EdgeWeight, std::list<Vertex>> Bellman_Ford_single_target(
-    const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src, const Vertex& start,
-    const Vertex& dest)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+std::pair<EdgeWeight, std::list<Vertex>>
+  Bellman_Ford_single_target(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src,
+                             const Vertex& start, const Vertex& dest) {
     std::list<Vertex> path;
     if (start == dest) {
         return std::make_pair(EdgeWeight(), path);
     }
 
-    std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> all_destinations
-        = Bellman_Ford_all_targets(src, start);
+    std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...> all_destinations =
+      Bellman_Ford_all_targets(src, start);
     if (all_destinations.at(dest).second == dest)
         throw no_path_exception();
 
@@ -371,14 +364,13 @@ Algorithm 97: Shortest Path
 
 Θ(V^3)
 */
-template <typename Vertex, typename EdgeWeight, typename... Args>
+template<typename Vertex, typename EdgeWeight, typename... Args>
 std::unordered_map<Vertex, std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>,
-    Args...>
-Floyd_Warshall_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src)
-{
+                   Args...>
+  Floyd_Warshall_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src) {
     std::unordered_map<Vertex, std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>,
-        Args...>
-        result;
+                       Args...>
+      result;
     std::vector<Vertex> vertices = src.vertices();
 
     static const EdgeWeight zero = EdgeWeight();
@@ -411,10 +403,10 @@ Floyd_Warshall_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args
                             // update if no other path
                             && (result[start].find(dest) == result[start].end()
                                 // finally, we compare
-                                || result[start][middle].first + result[middle][dest].first
-                                    < result[start][dest].first)) {
+                                || result[start][middle].first + result[middle][dest].first <
+                                     result[start][dest].first)) {
                             result[start][dest] = std::make_pair(
-                                result[start][middle].first + result[middle][dest].first, middle);
+                              result[start][middle].first + result[middle][dest].first, middle);
                         }
                     }
                 }
@@ -438,11 +430,10 @@ Efficient algorithms for shortest paths in sparse networks
 
 Θ(V^2 log V + VE)
 */
-template <typename Vertex, typename EdgeWeight, typename... Args>
+template<typename Vertex, typename EdgeWeight, typename... Args>
 std::unordered_map<Vertex, std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>,
-    Args...>
-Johnson_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src)
-{
+                   Args...>
+  Johnson_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& src) {
     graph::graph<uint32_t, true, true, EdgeWeight> Bellman_graph;
 
     for (uint32_t i = 0; i < src.order() + 1; ++i)
@@ -450,14 +441,14 @@ Johnson_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& s
     for (const Vertex& v : src.vertices()) {
         Bellman_graph.force_add(src.order(), src.get_translation().at(v), EdgeWeight());
         for (const std::pair<Vertex, EdgeWeight>& e : src.edges(v)) {
-            Bellman_graph.force_add(
-                src.get_translation().at(v), src.get_translation().at(e.first), e.second);
+            Bellman_graph.force_add(src.get_translation().at(v), src.get_translation().at(e.first),
+                                    e.second);
         }
     }
 
     // O(VE)
-    std::unordered_map<uint32_t, std::pair<EdgeWeight, uint32_t>, Args...> shortest_path_tree
-        = Bellman_Ford_all_targets(Bellman_graph, src.order()); // where we find negative cycles
+    std::unordered_map<uint32_t, std::pair<EdgeWeight, uint32_t>, Args...> shortest_path_tree =
+      Bellman_Ford_all_targets(Bellman_graph, src.order()); // where we find negative cycles
 
     graph::graph<Vertex, true, true, EdgeWeight, Args...> reweighted;
     for (const Vertex& v : src.vertices())
@@ -468,24 +459,26 @@ Johnson_all_pairs(const graph::graph<Vertex, true, true, EdgeWeight, Args...>& s
     for (const Vertex& start : src.vertices())
         for (const std::pair<Vertex, EdgeWeight>& edge : src.edges(start))
             reweighted.force_add(start, edge.first,
-                edge.second + shortest_path_tree[src.get_translation().at(start)].first
-                    - shortest_path_tree[src.get_translation().at(edge.first)].first);
+                                 edge.second +
+                                   shortest_path_tree[src.get_translation().at(start)].first -
+                                   shortest_path_tree[src.get_translation().at(edge.first)].first);
 
     std::unordered_map<Vertex, std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>,
-        Args...>
-        result;
+                       Args...>
+      result;
 
     // Use Dijkstra's algorithm to find the rest
     for (const Vertex& start : src.vertices()) {
-        std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>> subresult
-            = Dijkstra_all_targets(reweighted, start);
+        std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>> subresult =
+          Dijkstra_all_targets(reweighted, start);
         for (const std::pair<Vertex, std::pair<EdgeWeight, Vertex>>& endpoint : subresult) {
             if (endpoint.first != endpoint.second.second) {
                 // unweight
-                result[start][endpoint.first] = std::make_pair(endpoint.second.first
-                        + shortest_path_tree[src.get_translation().at(endpoint.first)].first
-                        - shortest_path_tree[src.get_translation().at(start)].first,
-                    endpoint.second.second);
+                result[start][endpoint.first] = std::make_pair(
+                  endpoint.second.first +
+                    shortest_path_tree[src.get_translation().at(endpoint.first)].first -
+                    shortest_path_tree[src.get_translation().at(start)].first,
+                  endpoint.second.second);
             }
         }
 

@@ -27,8 +27,7 @@ namespace special_case {
  *
  * O(n^2 log log n)
  */
-template <typename It> std::vector<std::size_t> model_max_clique_circle_graph(It first, It last)
-{
+template<typename It> std::vector<std::size_t> model_max_clique_circle_graph(It first, It last) {
     typedef typename std::iterator_traits<It>::value_type::first_type coord;
 
     struct chord {
@@ -36,8 +35,7 @@ template <typename It> std::vector<std::size_t> model_max_clique_circle_graph(It
         coord second;
         std::size_t pos;
 
-        bool operator==(const chord& rhs) const
-        {
+        bool operator==(const chord& rhs) const {
             return first == rhs.first && second == rhs.second;
         }
     };
@@ -51,20 +49,22 @@ template <typename It> std::vector<std::size_t> model_max_clique_circle_graph(It
     matcher.reserve(2 * num_chords);
     subresults.reserve(2 * num_chords);
 
-    auto chord_compare = [](const chord& x, const chord& y) { return x.first < y.first; };
+    auto chord_compare = [](const chord& x, const chord& y) {
+        return x.first < y.first;
+    };
 
     // Double count all edges, as we need to track endpoints separately
     for (std::size_t i = 0; first != last; ++first) {
-        doubled_chords.push_back({ first->first, first->second, i });
-        doubled_chords.push_back({ first->second, first->first, i++ });
+        doubled_chords.push_back({first->first, first->second, i});
+        doubled_chords.push_back({first->second, first->first, i++});
     }
 
     // Order the endpoints, then match each endpoint to the index of its partner
     sequence::mergesort(doubled_chords.begin(), doubled_chords.end(), chord_compare);
     for (const chord& c : doubled_chords) {
-        chord complement = { c.second, c.first, c.pos };
-        auto complement_it = sequence::binary_search(
-            doubled_chords.begin(), doubled_chords.end(), complement, chord_compare);
+        chord complement = {c.second, c.first, c.pos};
+        auto complement_it = sequence::binary_search(doubled_chords.begin(), doubled_chords.end(),
+                                                     complement, chord_compare);
         matcher.push_back(complement_it - doubled_chords.begin());
     }
 
@@ -77,35 +77,35 @@ template <typename It> std::vector<std::size_t> model_max_clique_circle_graph(It
         // Filter to get only intersecting chords: index of current are (0, x), and other is (y, z),
         // then they intersect iff 0 < y < x < z
         std::copy_if(matcher.begin(), matcher.begin() + limit, std::back_inserter(filtered_matches),
-            [&limit](std::size_t x) { return x >= limit; });
+                     [&limit](std::size_t x) { return x >= limit; });
 
         // Generalizing the above to multiple chords (y1, z1), (y2, z2), ..., 0 < y_1 < ... < y_n <
         // x < z_1 < ... < z_n y-values are just the index in matcher, so just need to find the
         // longest increasing sequence of z-values (values stored in matcher)
         auto clique_on_current_gen = sequence::longest_increasing_integer_subsequence(
-            filtered_matches.begin(), filtered_matches.end());
+          filtered_matches.begin(), filtered_matches.end());
         std::vector<std::size_t> subresult(clique_on_current_gen.size());
         std::transform(clique_on_current_gen.cbegin(), clique_on_current_gen.cend(),
-            subresult.begin(),
-            [&doubled_chords, &i](const std::vector<std::size_t>::const_iterator& it) {
-                // need to account for cyclic shift
-                return doubled_chords[(*it + i) % doubled_chords.size()].pos;
-            });
+                       subresult.begin(),
+                       [&doubled_chords, &i](const std::vector<std::size_t>::const_iterator& it) {
+                           // need to account for cyclic shift
+                           return doubled_chords[(*it + i) % doubled_chords.size()].pos;
+                       });
         subresults.push_back(subresult);
 
-        // Cyclic shift: need to account for shift: change stored values
-        auto replace
-            = [&matcher](std::size_t x) { return (x == 0) ? (matcher.size() - 1) : (x - 1); };
+        // Cyclic shift: need to account for shift affecting index of other endpoint: change stored values
+        auto replace = [&matcher](std::size_t x) {
+            return (x == 0) ? (matcher.size() - 1) : (x - 1);
+        };
         std::size_t temp = matcher.front();
         std::transform(matcher.begin() + 1, matcher.end(), matcher.begin(), replace);
         matcher.back() = replace(temp);
     }
 
     return *std::max_element(subresults.begin(), subresults.end(),
-        [](const std::vector<std::size_t>& x, const std::vector<std::size_t>& y) {
-            return x.size() < y.size();
-        });
+                             [](const std::vector<std::size_t>& x,
+                                const std::vector<std::size_t>& y) { return x.size() < y.size(); });
 }
-}
+} // namespace special_case
 
 #endif // MODEL_BASED_SPECIAL_CASE

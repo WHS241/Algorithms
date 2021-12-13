@@ -6,8 +6,7 @@
 #include <memory>
 #include <unordered_map>
 
-sequence::Huffman_tree sequence::create_Huffman_tree(const std::string& message)
-{
+sequence::Huffman_tree sequence::create_Huffman_tree(const std::string& message) {
     if (message.empty())
         return Huffman_tree();
 
@@ -22,9 +21,9 @@ sequence::Huffman_tree sequence::create_Huffman_tree(const std::string& message)
     std::list<std::pair<Huffman_tree::node*, uint32_t>> values, buffer;
     try {
         std::transform(countMap.begin(), countMap.end(), std::back_inserter(values),
-            [](const std::pair<char, uint32_t>& count) {
-                return std::make_pair(new Huffman_tree::node(count.first), count.second);
-            });
+                       [](const std::pair<char, uint32_t>& count) {
+                           return std::make_pair(new Huffman_tree::node(count.first), count.second);
+                       });
 
         if (values.size() == 1) {
             Huffman_tree result;
@@ -37,6 +36,7 @@ sequence::Huffman_tree sequence::create_Huffman_tree(const std::string& message)
         uint32_t final_size = values.size();
 
         // start creating the tree
+        // Take two lowest-frequence nodes and make a new node with the two as children
         while (!values.empty()) {
             std::unique_ptr<Huffman_tree::node> node(new Huffman_tree::node);
             uint32_t count;
@@ -52,8 +52,8 @@ sequence::Huffman_tree sequence::create_Huffman_tree(const std::string& message)
                 buffer.pop_front();
             }
             // Second-lowest frequency
-            if (!values.empty()
-                && (buffer.empty() || values.front().second < buffer.front().second)) {
+            if (!values.empty() &&
+                (buffer.empty() || values.front().second < buffer.front().second)) {
                 node->replace_right(values.front().first);
                 count += values.front().second;
                 values.pop_front();

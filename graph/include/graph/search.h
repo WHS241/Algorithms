@@ -10,13 +10,12 @@
 #include <structures/partitioner.h>
 
 // Recursive helpers for DFS
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
-    typename KeyEqual, typename F1, typename F2>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
+         typename KeyEqual, typename F1, typename F2>
 static bool depth_first_helper(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>& src,
-    const Vertex& current, F1& on_visit, F2& on_backtrack,
-    std::unordered_map<Vertex, bool, Hash, KeyEqual>& visited)
-{
+  const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>& src,
+  const Vertex& current, F1& on_visit, F2& on_backtrack,
+  std::unordered_map<Vertex, bool, Hash, KeyEqual>& visited) {
     visited[current] = true;
 
     // account for if the user specified when to terminate early
@@ -37,12 +36,11 @@ static bool depth_first_helper(
     return false;
 }
 
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
-    typename KeyEqual, typename F1, typename F2>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename Hash,
+         typename KeyEqual, typename F1, typename F2>
 static bool depth_first_tree_helper(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>& src,
-    const Vertex& current, F1& on_visit, F2& on_backtrack)
-{
+  const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>& src,
+  const Vertex& current, F1& on_visit, F2& on_backtrack) {
     if constexpr (std::is_convertible_v<std::result_of_t<F1(Vertex)>, bool>) {
         if (on_visit(current))
             return true;
@@ -69,16 +67,15 @@ On each vertex:
 Requirements: F1::operator()(Vertex param) and F2::operator()(Vertex param1, Vertex param2) are
 defined
 */
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
-    typename F1 = std::function<void(const Vertex&)>,
-    typename F2 = std::function<void(const Vertex&, const Vertex&)>>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
+         typename F1 = std::function<void(const Vertex&)>,
+         typename F2 = std::function<void(const Vertex&, const Vertex&)>>
 void depth_first(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
-    F1 on_arrival = [](const Vertex&) {},
-    F2 on_backtrack = [](const Vertex& parent, const Vertex& child) {})
-{
+  const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
+  F1 on_arrival = [](const Vertex&) {},
+  F2 on_backtrack = [](const Vertex& parent, const Vertex& child) {}) {
     static_assert(std::is_invocable_v<F1, Vertex> && std::is_invocable_v<F2, Vertex, Vertex>,
-        "incompatible functions");
+                  "incompatible functions");
     std::unordered_map<Vertex, bool, Args...> visited;
     std::vector<Vertex> vertices = src.vertices();
     if (vertices.empty())
@@ -96,20 +93,18 @@ void depth_first(
 /*
 Perform DFS, restarting if necessary
 */
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
-    typename F1 = std::function<void(const Vertex&)>,
-    typename F2 = std::function<void(const Vertex&, const Vertex&)>,
-    typename F3 = std::function<void(const Vertex&)>>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
+         typename F1 = std::function<void(const Vertex&)>,
+         typename F2 = std::function<void(const Vertex&, const Vertex&)>,
+         typename F3 = std::function<void(const Vertex&)>>
 void depth_first_forest(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
-    F1 on_arrival = [](const Vertex&) {},
-    F2 on_backtrack = [](const Vertex& parent, const Vertex& child) {},
-    F3 on_finish_root = [](const Vertex&) {})
-{
-    static_assert(
-        std::is_invocable_v<F1,
-            Vertex> && std::is_invocable_v<F2, Vertex, Vertex> && std::is_invocable_v<F3, Vertex>,
-        "incompatible functions");
+  const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
+  F1 on_arrival = [](const Vertex&) {},
+  F2 on_backtrack = [](const Vertex& parent, const Vertex& child) {},
+  F3 on_finish_root = [](const Vertex&) {}) {
+    static_assert(std::is_invocable_v<F1, Vertex> && std::is_invocable_v<F2, Vertex, Vertex> &&
+                    std::is_invocable_v<F3, Vertex>,
+                  "incompatible functions");
     std::unordered_map<Vertex, bool, Args...> visited;
     std::vector<Vertex> vertices = src.vertices();
     if (vertices.empty())
@@ -126,7 +121,9 @@ void depth_first_forest(
 
     on_finish_root(start);
 
-    auto findUnvisited = [](const std::pair<Vertex, bool>& x) { return !x.second; };
+    auto findUnvisited = [](const std::pair<Vertex, bool>& x) {
+        return !x.second;
+    };
 
     for (auto it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited);
          it != visited.cend(); it = std::find_if(visited.cbegin(), visited.cend(), findUnvisited)) {
@@ -141,16 +138,15 @@ void depth_first_forest(
  * Infinite run-time on arbitrary graphs unless F1/F2 return values
  * O(V E) on DAGs
  */
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
-    typename F1 = std::function<void(const Vertex&)>,
-    typename F2 = std::function<void(const Vertex&, const Vertex&)>>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
+         typename F1 = std::function<void(const Vertex&)>,
+         typename F2 = std::function<void(const Vertex&, const Vertex&)>>
 void depth_first_tree(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
-    F1 on_arrival = [](const Vertex&) {},
-    F2 on_backtrack = [](const Vertex& parent, const Vertex& child) {})
-{
+  const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
+  F1 on_arrival = [](const Vertex&) {},
+  F2 on_backtrack = [](const Vertex& parent, const Vertex& child) {}) {
     static_assert(std::is_invocable_v<F1, Vertex> && std::is_invocable_v<F2, Vertex, Vertex>,
-        "incompatible functions");
+                  "incompatible functions");
     std::vector<Vertex> vertices = src.vertices();
     if (vertices.empty())
         return;
@@ -169,12 +165,11 @@ On each vertex:
 
 Requirements: F::operator()(T param) is defined
 */
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
-    typename F = std::function<void(const Vertex&)>>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args,
+         typename F = std::function<void(const Vertex&)>>
 void breadth_first(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
-    F on_visit = [](const Vertex&) {})
-{
+  const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& src, const Vertex& start,
+  F on_visit = [](const Vertex&) {}) {
     static_assert(std::is_invocable_v<F, Vertex>, "incompatible functions");
     std::unordered_map<Vertex, bool, Args...> visited;
     std::vector<Vertex> vertices = src.vertices();
@@ -210,11 +205,10 @@ void breadth_first(
     }
 }
 
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
-std::list<Vertex> generate_lex_bfs(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph,
-    const Vertex& first_vertex)
-{
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+std::list<Vertex>
+  generate_lex_bfs(const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph,
+                   const Vertex& first_vertex) {
     if (graph.get_translation().find(first_vertex) == graph.get_translation().end())
         throw std::out_of_range("Does not contain given vertex");
 
@@ -241,10 +235,9 @@ std::list<Vertex> generate_lex_bfs(
     return result;
 }
 
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
-std::list<Vertex> generate_lex_bfs(
-    const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph)
-{
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight, typename... Args>
+std::list<Vertex>
+  generate_lex_bfs(const graph::graph<Vertex, Directed, Weighted, EdgeWeight, Args...>& graph) {
     return graph.order() == 0 ? std::list<Vertex>()
                               : generate_lex_bfs(graph, graph.get_translation().begin()->first);
 }
@@ -257,13 +250,12 @@ Topological sorting of large networks
 (1962) doi:10.1145/368996.369025
 Θ(V+E)
 */
-template <typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
-std::vector<Vertex> topological_sort(
-    const graph::graph<Vertex, true, Weighted, EdgeWeight, Args...>& src)
-{
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+std::vector<Vertex>
+  topological_sort(const graph::graph<Vertex, true, Weighted, EdgeWeight, Args...>& src) {
     std::unordered_map<Vertex, uint32_t, Args...> in_degree;
     std::list<Vertex> candidates; // vertices with in-degree 0
-    std::vector<Vertex> result; // stores topological sort
+    std::vector<Vertex> result;   // stores topological sort
 
     // populate map
     for (const Vertex& vert : src.vertices())

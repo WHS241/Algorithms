@@ -5,8 +5,7 @@
 #include <iterator>
 #include <typeinfo>
 
-template <typename It> induction::Skyline induction::generateSkyline(It first, It last)
-{
+template<typename It> induction::Skyline induction::generateSkyline(It first, It last) {
     Skyline result;
     if (first == last) {
         return result;
@@ -19,8 +18,8 @@ template <typename It> induction::Skyline induction::generateSkyline(It first, I
     }
 
     It mid;
-    if (typeid(typename std::iterator_traits<It>::iterator_category)
-        == typeid(std::random_access_iterator_tag)) {
+    if (typeid(typename std::iterator_traits<It>::iterator_category) ==
+        typeid(std::random_access_iterator_tag)) {
         mid = first + (last - first) / 2;
     } else {
         uint32_t dist = std::distance(first, last);
@@ -34,8 +33,9 @@ template <typename It> induction::Skyline induction::generateSkyline(It first, I
     if (subproblemB.leftEnd < subproblemA.leftEnd)
         std::swap(subproblemA, subproblemB);
 
-    auto it = std::find_if(subproblemA.section.begin(), subproblemA.section.end(),
-        [&subproblemB](auto section) { return section.second >= subproblemB.leftEnd; });
+    auto it =
+      std::find_if(subproblemA.section.begin(), subproblemA.section.end(),
+                   [&subproblemB](auto section) { return section.second >= subproblemB.leftEnd; });
 
     if (it == subproblemA.section.end()) {
         subproblemA.section.push_back(std::make_pair(0, subproblemB.leftEnd));
@@ -44,8 +44,8 @@ template <typename It> induction::Skyline induction::generateSkyline(It first, I
     }
 
     result.leftEnd = subproblemA.leftEnd;
-    result.section.splice(
-        result.section.end(), subproblemA.section, subproblemA.section.begin(), it);
+    result.section.splice(result.section.end(), subproblemA.section, subproblemA.section.begin(),
+                          it);
     auto it2 = subproblemB.section.begin();
     double currentLeft = subproblemB.leftEnd;
     result.section.push_back(std::make_pair(it->first, currentLeft));

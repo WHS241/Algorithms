@@ -14,9 +14,8 @@ Find both min and max elements
 result.first is min, result.second is max
 3n/2 comparisons (compared to 2n for finding each separately)
 */
-template <typename It, typename Compare>
-std::pair<It, It> extrema(It first, It last, Compare compare)
-{
+template<typename It, typename Compare>
+std::pair<It, It> extrema(It first, It last, Compare compare) {
     if (first == last)
         return std::make_pair(first, first);
 
@@ -25,8 +24,8 @@ std::pair<It, It> extrema(It first, It last, Compare compare)
     if (temp == last)
         return std::make_pair(first, first);
 
-    std::pair<It, It> result
-        = compare(*first, *temp) ? std::make_pair(first, temp) : std::make_pair(temp, first);
+    std::pair<It, It> result =
+      compare(*first, *temp) ? std::make_pair(first, temp) : std::make_pair(temp, first);
     first = ++temp;
 
     // extend two at a time: compare against each other before result
@@ -54,27 +53,25 @@ std::pair<It, It> extrema(It first, It last, Compare compare)
 
     return result;
 }
-template <typename It> std::pair<It, It> extrema(It first, It last)
-{
+template<typename It> std::pair<It, It> extrema(It first, It last) {
     return extrema(first, last, std::less<>());
 }
 
 /*
  Selection
- Select the k-th smallest element (k passed as parameter rank)
+ Select the k-th smallest element (k passed as parameter rank, in range 0 to k-1)
  Parameter 4 (optional) is the size of subproblems algorithm divides into
 
  Manuel Blum, Robert Floyd, Vaughan Pratt, Ronald Rivest, Robert Tarjan
  Time bounds for selection
  (1972) doi:10.1016/S0022-0000(73)80033-9
 
- Must be >=5 for algorithm to be Θ(n), preferably odd. Infinite
+ Parameter 4 must be >=5 for algorithm to be Θ(n), preferably odd. Infinite
  recursion/looping if 1
  */
-template <typename It, typename Compare>
-typename std::iterator_traits<It>::value_type selection(
-    It first, It last, uint32_t rank, Compare compare, uint32_t partition_size = 5)
-{
+template<typename It, typename Compare>
+typename std::iterator_traits<It>::value_type
+  selection(It first, It last, uint32_t rank, Compare compare, uint32_t partition_size = 5) {
     typedef typename std::iterator_traits<It>::value_type T;
     std::list<T> buffer(first, last);
     if (rank >= buffer.size())
@@ -103,8 +100,8 @@ typename std::iterator_traits<It>::value_type selection(
         }
 
         // median of medians, then partition
-        auto pivot_value = selection(
-            medians.begin(), medians.end(), medians.size() / 2, compare, partition_size);
+        auto pivot_value =
+          selection(medians.begin(), medians.end(), medians.size() / 2, compare, partition_size);
         auto partition_iterator = std::find(buffer.begin(), buffer.end(), pivot_value);
         partition_iterator = partition(buffer.begin(), buffer.end(), partition_iterator, compare);
 
@@ -128,11 +125,10 @@ typename std::iterator_traits<It>::value_type selection(
     return *it;
 }
 
-template <typename It, typename Compare>
-typename std::iterator_traits<It>::value_type selection(It first, It last, uint32_t rank)
-{
+template<typename It>
+typename std::iterator_traits<It>::value_type selection(It first, It last, uint32_t rank) {
     return selection(first, last, rank, std::less<>());
 }
-} // namespace Sequence
+} // namespace sequence
 
 #endif // !ORDER_STATISTICS_H

@@ -20,10 +20,10 @@ Uses a hash map to translate to vertices labeled 1 - n behind the scenes
 
 Preconditions: Hash and KeyEqual are default-constructible and copy-assignable
 */
-template <typename Vertex, bool Directed, bool Weighted, typename EdgeWeight = double,
-    typename Hash = std::hash<Vertex>, typename KeyEqual = std::equal_to<Vertex>>
+template<typename Vertex, bool Directed, bool Weighted, typename EdgeWeight = double,
+         typename Hash = std::hash<Vertex>, typename KeyEqual = std::equal_to<Vertex>>
 class graph {
-public:
+    public:
     graph(graph_type type = adj_list);
 
     virtual ~graph() = default;
@@ -50,23 +50,23 @@ public:
     // get the graph type
     virtual graph_type get_type() const;
     // return a new graph with the same data in a different representation
-    virtual graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual> convert(
-        graph_type target) const;
+    virtual graph<Vertex, Directed, Weighted, EdgeWeight, Hash, KeyEqual>
+      convert(graph_type target) const;
     // return vertices in graph
     virtual std::vector<Vertex> vertices() const;
     // generate a subgraph induced by a set of vertices
-    template <typename InputIterator,
-        typename _Requires = std::enable_if_t<std::is_convertible_v<
-            typename std::iterator_traits<InputIterator>::value_type, Vertex>>>
+    template<typename InputIterator,
+             typename _Requires = std::enable_if_t<std::is_convertible_v<
+               typename std::iterator_traits<InputIterator>::value_type, Vertex>>>
     graph generate_induced_subgraph(InputIterator first, InputIterator last) const;
 
     // set edge between start and dest to cost
     // adds edge if currently nonexistent
-    virtual void set_edge(
-        const Vertex& start, const Vertex& dest, const EdgeWeight& cost = EdgeWeight());
+    virtual void set_edge(const Vertex& start, const Vertex& dest,
+                          const EdgeWeight& cost = EdgeWeight());
     // force add an edge, even if edge already exists
-    virtual void force_add(
-        const Vertex& start, const Vertex& dest, const EdgeWeight& cost = EdgeWeight());
+    virtual void force_add(const Vertex& start, const Vertex& dest,
+                           const EdgeWeight& cost = EdgeWeight());
     // sanitize the graph after repetitive force_add calls
     virtual void sanitize();
 
@@ -86,12 +86,11 @@ public:
     // Get information about the translation map
     // This field member may be helpful in some cases
     virtual const std::unordered_map<Vertex, uint32_t, Hash, KeyEqual>&
-    get_translation() const noexcept
-    {
+      get_translation() const noexcept {
         return _translation;
     }
 
-private:
+    private:
     void _check_self_loop(const Vertex& u, const Vertex& v);
     void _set_type(graph_type type, const impl<Directed, Weighted, EdgeWeight>* src = nullptr);
     void _set_empty(graph_type type);
@@ -102,31 +101,30 @@ private:
     std::vector<Vertex> _reverse_translation;
 };
 
-template <typename T, bool Directed, bool Weighted, typename EdgeWeight, typename... MapArgs>
-std::ostream& operator<<(
-    std::ostream& os, const graph<T, Directed, Weighted, EdgeWeight, MapArgs...>& rhs)
-{
+template<typename T, bool Directed, bool Weighted, typename EdgeWeight, typename... MapArgs>
+std::ostream& operator<<(std::ostream& os,
+                         const graph<T, Directed, Weighted, EdgeWeight, MapArgs...>& rhs) {
     for (const T& vertex : rhs.vertices()) {
         os << vertex << ": ";
         auto edges = rhs.edges(vertex);
         std::transform(edges.begin(), edges.end(), std::ostream_iterator<std::string>(os, ", "),
-            [](const std::pair<T, EdgeWeight>& edge) {
-                std::ostringstream builder;
-                builder << '[' << edge.first << ']';
-                if constexpr (Weighted)
-                    builder << " (" << edge.second << ')';
-                return builder.str();
-            });
+                       [](const std::pair<T, EdgeWeight>& edge) {
+                           std::ostringstream builder;
+                           builder << '[' << edge.first << ']';
+                           if constexpr (Weighted)
+                               builder << " (" << edge.second << ')';
+                           return builder.str();
+                       });
         os << std::endl;
     }
     return os;
 }
 
 // Make parameter juggling easier
-template <typename Vertex, bool Directed, typename... Args>
+template<typename Vertex, bool Directed, typename... Args>
 using unweighted_graph = graph<Vertex, Directed, false, bool, Args...>;
 
-}
+} // namespace graph
 
 #include "../../src/structures/graph.tpp"
 

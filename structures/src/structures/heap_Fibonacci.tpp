@@ -6,35 +6,27 @@
 #include <memory>
 
 namespace heap {
-template <typename T, typename Compare>
-Fibonacci<T, Compare>::Fibonacci(Compare comp)
-    : node_base<T, Compare>(comp)
-    , _trees()
-    , _min(nullptr)
-{
-}
+template<typename T, typename Compare>
+Fibonacci<T, Compare>::Fibonacci(Compare comp) :
+    node_base<T, Compare>(comp), _trees(), _min(nullptr) {}
 
-template <typename T, typename Compare> Fibonacci<T, Compare>::~Fibonacci() noexcept
-{
+template<typename T, typename Compare> Fibonacci<T, Compare>::~Fibonacci() noexcept {
     for (node* root : _trees)
         delete root;
 }
 
-template <typename T, typename Compare>
-Fibonacci<T, Compare>::Fibonacci(const Fibonacci<T, Compare>& src)
-    : node_base<T, Compare>(src)
-    , _trees()
-    , _min(nullptr)
-{
+template<typename T, typename Compare>
+Fibonacci<T, Compare>::Fibonacci(const Fibonacci<T, Compare>& src) :
+    node_base<T, Compare>(src), _trees(), _min(nullptr) {
     try {
         std::transform(src._trees.begin(), src._trees.end(), std::back_inserter(_trees),
-            [this, &src](const node* root) {
-                std::unique_ptr<node> new_tree(root->_deep_clone());
-                this->_s_set_flag(*new_tree, this->_s_get_flag(*root));
-                if (root == src._min)
-                    _min = new_tree.get();
-                return new_tree.release();
-            });
+                       [this, &src](const node* root) {
+                           std::unique_ptr<node> new_tree(root->_deep_clone());
+                           this->_s_set_flag(*new_tree, this->_s_get_flag(*root));
+                           if (root == src._min)
+                               _min = new_tree.get();
+                           return new_tree.release();
+                       });
     } catch (...) {
         for (node* root : _trees)
             delete root;
@@ -42,20 +34,14 @@ Fibonacci<T, Compare>::Fibonacci(const Fibonacci<T, Compare>& src)
     }
 }
 
-template <typename T, typename Compare>
-template <typename It, typename _Compare, typename _Requires>
-Fibonacci<T, Compare>::Fibonacci(It first, It last)
-    : Fibonacci(first, last, Compare())
-{
-}
+template<typename T, typename Compare>
+template<typename It, typename _Compare, typename _Requires>
+Fibonacci<T, Compare>::Fibonacci(It first, It last) : Fibonacci(first, last, Compare()) {}
 
-template <typename T, typename Compare>
-template <typename It>
-Fibonacci<T, Compare>::Fibonacci(It first, It last, Compare comp)
-    : node_base<T, Compare>(comp)
-    , _trees()
-    , _min(nullptr)
-{
+template<typename T, typename Compare>
+template<typename It>
+Fibonacci<T, Compare>::Fibonacci(It first, It last, Compare comp) :
+    node_base<T, Compare>(comp), _trees(), _min(nullptr) {
     try {
         for (; first != last; ++first)
             add(*first);
@@ -66,9 +52,8 @@ Fibonacci<T, Compare>::Fibonacci(It first, It last, Compare comp)
     }
 }
 
-template <typename T, typename Compare>
-Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(const Fibonacci<T, Compare>& rhs)
-{
+template<typename T, typename Compare>
+Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(const Fibonacci<T, Compare>& rhs) {
     if (this != &rhs) {
         Fibonacci<T, Compare> temp(rhs);
         *this = std::move(rhs);
@@ -76,16 +61,14 @@ Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(const Fibonacci<T, Compa
     return *this;
 }
 
-template <typename T, typename Compare>
-Fibonacci<T, Compare>::Fibonacci(Fibonacci<T, Compare>&& src) noexcept
-    : Fibonacci<T, Compare>(src.comp)
-{
+template<typename T, typename Compare>
+Fibonacci<T, Compare>::Fibonacci(Fibonacci<T, Compare>&& src) noexcept :
+    Fibonacci<T, Compare>(src.comp) {
     *this = std::move(src);
 }
 
-template <typename T, typename Compare>
-Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(Fibonacci<T, Compare>&& rhs) noexcept
-{
+template<typename T, typename Compare>
+Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(Fibonacci<T, Compare>&& rhs) noexcept {
     if (this != &rhs) {
         for (node* root : _trees)
             delete root;
@@ -100,9 +83,8 @@ Fibonacci<T, Compare>& Fibonacci<T, Compare>::operator=(Fibonacci<T, Compare>&& 
     return *this;
 }
 
-template <typename T, typename Compare>
-typename Fibonacci<T, Compare>::node_wrapper Fibonacci<T, Compare>::add(const T& item)
-{
+template<typename T, typename Compare>
+typename Fibonacci<T, Compare>::node_wrapper Fibonacci<T, Compare>::add(const T& item) {
     std::unique_ptr<node> new_node(this->_s_make_node(item));
     _trees.push_back(new_node.get());
     if (_min == nullptr || this->_compare(item, **_min))
@@ -112,15 +94,13 @@ typename Fibonacci<T, Compare>::node_wrapper Fibonacci<T, Compare>::add(const T&
     return node_wrapper(new_node.release());
 }
 
-template <typename T, typename Compare> T Fibonacci<T, Compare>::get_root() const
-{
+template<typename T, typename Compare> T Fibonacci<T, Compare>::get_root() const {
     if (this->empty())
         throw std::underflow_error("Empty heap");
     return **_min;
 }
 
-template <typename T, typename Compare> T Fibonacci<T, Compare>::remove_root()
-{
+template<typename T, typename Compare> T Fibonacci<T, Compare>::remove_root() {
     if (this->empty())
         throw std::underflow_error("Empty heap");
 
@@ -130,7 +110,6 @@ template <typename T, typename Compare> T Fibonacci<T, Compare>::remove_root()
         _trees.clear();
         this->_size = 0;
     } else {
-
         // number of new trees grows logarithmically (a tree of size n must have height <= log_phi
         // n) for simplicity, we know sqrt(2) < phi < 2
         uint32_t num_trees = 1;
@@ -162,8 +141,8 @@ template <typename T, typename Compare> T Fibonacci<T, Compare>::remove_root()
                     std::iter_swap(it, compare_candidate);
                 auto merge_bound = compare_candidate;
                 ++merge_bound;
-                (*it)->_children.splice(
-                    (*it)->_children.end(), _trees, compare_candidate, merge_bound);
+                (*it)->_children.splice((*it)->_children.end(), _trees, compare_candidate,
+                                        merge_bound);
                 (*compare_candidate)->_parent = *it;
                 new_roots[tree_size] = _trees.end();
                 ++tree_size;
@@ -182,10 +161,9 @@ template <typename T, typename Compare> T Fibonacci<T, Compare>::remove_root()
     return old_root;
 }
 
-template <typename T, typename Compare>
-void Fibonacci<T, Compare>::decrease(
-    typename Fibonacci<T, Compare>::node_wrapper target_wrapper, const T& new_val)
-{
+template<typename T, typename Compare>
+void Fibonacci<T, Compare>::decrease(typename Fibonacci<T, Compare>::node_wrapper target_wrapper,
+                                     const T& new_val) {
     node* target = this->_s_extract_node(target_wrapper);
 
     **target = new_val;
@@ -198,8 +176,8 @@ void Fibonacci<T, Compare>::decrease(
             node* old_parent = target->_parent;
             target->_parent = nullptr;
             this->_s_set_flag(*target, false);
-            auto to_remove
-                = std::find(old_parent->_children.begin(), old_parent->_children.end(), target);
+            auto to_remove =
+              std::find(old_parent->_children.begin(), old_parent->_children.end(), target);
             auto to_remove_next = to_remove;
             ++to_remove_next;
             _trees.splice(_trees.end(), old_parent->_children, to_remove, to_remove_next);
@@ -211,9 +189,8 @@ void Fibonacci<T, Compare>::decrease(
     }
 }
 
-template <typename T, typename Compare>
-void Fibonacci<T, Compare>::merge(Fibonacci<T, Compare>& src)
-{
+template<typename T, typename Compare>
+void Fibonacci<T, Compare>::merge(Fibonacci<T, Compare>& src) {
     if (_min == nullptr || (src._min != nullptr && this->_compare(**src._min, **_min)))
         _min = src._min;
     _trees.splice(_trees.end(), src._trees);
@@ -221,6 +198,6 @@ void Fibonacci<T, Compare>::merge(Fibonacci<T, Compare>& src)
     src._size = 0;
     src._min = nullptr;
 }
-}
+} // namespace heap
 
 #endif // FIBONACCI_HEAP_CPP

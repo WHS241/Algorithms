@@ -4,8 +4,7 @@
 #include <list>
 #include <utility>
 
-std::list<std::list<std::pair<int, bool>>> read_CNF(std::istream& in)
-{
+std::list<std::list<std::pair<int, bool>>> read_CNF(std::istream& in) {
     std::string line;
     std::getline(in, line);
 

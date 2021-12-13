@@ -6,32 +6,23 @@
 #include <stdexcept>
 
 namespace heap {
-template <typename T, typename Compare>
-binomial<T, Compare>::binomial(Compare comp)
-    : node_base<T, Compare>(comp)
-    , _trees()
-    , _min(nullptr)
-{
-}
+template<typename T, typename Compare>
+binomial<T, Compare>::binomial(Compare comp) :
+    node_base<T, Compare>(comp), _trees(), _min(nullptr) {}
 
-template <typename T, typename Compare>
-template <typename It, typename _Compare, typename _Requires>
-binomial<T, Compare>::binomial(It first, It last)
-    : binomial(first, last, Compare()) {};
+template<typename T, typename Compare>
+template<typename It, typename _Compare, typename _Requires>
+binomial<T, Compare>::binomial(It first, It last) : binomial(first, last, Compare()){};
 
-template <typename T, typename Compare> binomial<T, Compare>::~binomial() noexcept
-{
+template<typename T, typename Compare> binomial<T, Compare>::~binomial() noexcept {
     for (node* root : _trees)
         delete root;
 }
 
-template <typename T, typename Compare>
-template <typename It>
-binomial<T, Compare>::binomial(It first, It last, Compare comp)
-    : node_base<T, Compare>(comp)
-    , _trees()
-    , _min(nullptr)
-{
+template<typename T, typename Compare>
+template<typename It>
+binomial<T, Compare>::binomial(It first, It last, Compare comp) :
+    node_base<T, Compare>(comp), _trees(), _min(nullptr) {
     try {
         for (; first != last; ++first)
             add(*first);
@@ -42,25 +33,22 @@ binomial<T, Compare>::binomial(It first, It last, Compare comp)
     }
 }
 
-template <typename T, typename Compare>
-binomial<T, Compare>::binomial(const binomial<T, Compare>& src)
-    : node_base<T, Compare>(src)
-    , _trees(src._trees.size(), nullptr)
-    , _min(nullptr)
-{
+template<typename T, typename Compare>
+binomial<T, Compare>::binomial(const binomial<T, Compare>& src) :
+    node_base<T, Compare>(src), _trees(src._trees.size(), nullptr), _min(nullptr) {
     this->_size = src._size;
     node* min_element;
     try {
         std::transform(src._trees.begin(), src._trees.end(), _trees.begin(),
-            [this, &min_element, &src](node* root) {
-                if (root == nullptr)
-                    return root;
+                       [this, &min_element, &src](node* root) {
+                           if (root == nullptr)
+                               return root;
 
-                std::unique_ptr<node> clone(root->_deep_clone());
-                if (root == src._min)
-                    min_element = clone.get();
-                return clone.release();
-            });
+                           std::unique_ptr<node> clone(root->_deep_clone());
+                           if (root == src._min)
+                               min_element = clone.get();
+                           return clone.release();
+                       });
     } catch (...) {
         for (node* root : _trees)
             delete root;
@@ -69,9 +57,8 @@ binomial<T, Compare>::binomial(const binomial<T, Compare>& src)
     this->_min = min_element;
 }
 
-template <typename T, typename Compare>
-binomial<T, Compare>& binomial<T, Compare>::operator=(const binomial<T, Compare>& rhs)
-{
+template<typename T, typename Compare>
+binomial<T, Compare>& binomial<T, Compare>::operator=(const binomial<T, Compare>& rhs) {
     if (this != &rhs) {
         binomial<T, Compare> temp(rhs);
         if constexpr (std::is_move_assignable_v<Compare>) {
@@ -86,16 +73,14 @@ binomial<T, Compare>& binomial<T, Compare>::operator=(const binomial<T, Compare>
     return *this;
 }
 
-template <typename T, typename Compare>
-binomial<T, Compare>::binomial(binomial<T, Compare>&& src) noexcept
-    : binomial<T, Compare>(src._compare)
-{
+template<typename T, typename Compare>
+binomial<T, Compare>::binomial(binomial<T, Compare>&& src) noexcept :
+    binomial<T, Compare>(src._compare) {
     *this = std::move(src);
 }
 
-template <typename T, typename Compare>
-binomial<T, Compare>& binomial<T, Compare>::operator=(binomial<T, Compare>&& rhs) noexcept
-{
+template<typename T, typename Compare>
+binomial<T, Compare>& binomial<T, Compare>::operator=(binomial<T, Compare>&& rhs) noexcept {
     if (this != &rhs) {
         for (node* root : _trees) {
             delete root;
@@ -111,9 +96,8 @@ binomial<T, Compare>& binomial<T, Compare>::operator=(binomial<T, Compare>&& rhs
     return *this;
 }
 
-template <typename T, typename Compare>
-typename binomial<T, Compare>::node_wrapper binomial<T, Compare>::add(const T& item)
-{
+template<typename T, typename Compare>
+typename binomial<T, Compare>::node_wrapper binomial<T, Compare>::add(const T& item) {
     binomial<T, Compare> temp(this->_compare);
     std::unique_ptr<node> add_node(this->_s_make_node(item));
     temp._size = 1;
@@ -123,15 +107,13 @@ typename binomial<T, Compare>::node_wrapper binomial<T, Compare>::add(const T& i
     return node_wrapper(add_node.release());
 }
 
-template <typename T, typename Compare> T binomial<T, Compare>::get_root() const
-{
+template<typename T, typename Compare> T binomial<T, Compare>::get_root() const {
     if (this->empty())
         throw std::underflow_error("Empty heap");
     return **_min;
 }
 
-template <typename T, typename Compare> T binomial<T, Compare>::remove_root()
-{
+template<typename T, typename Compare> T binomial<T, Compare>::remove_root() {
     if (this->empty())
         throw std::underflow_error("Empty heap");
 
@@ -160,10 +142,11 @@ template <typename T, typename Compare> T binomial<T, Compare>::remove_root()
     auto it = std::find(_trees.begin(), _trees.end(), _min);
     try {
         // find the minimum values, since merge() will not compare all roots
-        temp._min = temp._trees.empty()
+        temp._min =
+          temp._trees.empty()
             ? nullptr
             : *std::min_element(temp._trees.begin(), temp._trees.end(),
-                [this](node* x, node* y) { return this->_compare(**x, **y); });
+                                [this](node* x, node* y) { return this->_compare(**x, **y); });
 
         // We can now extract the node, updating min
         *it = nullptr;
@@ -192,10 +175,9 @@ template <typename T, typename Compare> T binomial<T, Compare>::remove_root()
     return oldRoot;
 }
 
-template <typename T, typename Compare>
-void binomial<T, Compare>::decrease(
-    typename binomial<T, Compare>::node_wrapper target_wrapper, const T& new_value)
-{
+template<typename T, typename Compare>
+void binomial<T, Compare>::decrease(typename binomial<T, Compare>::node_wrapper target_wrapper,
+                                    const T& new_value) {
     node* target = this->_s_extract_node(target_wrapper);
     if (this->_compare(**target, new_value))
         throw std::invalid_argument("Increasing key");
@@ -222,8 +204,8 @@ void binomial<T, Compare>::decrease(
 
             if (target->_parent != nullptr) {
                 // still need to account for next level up
-                it = std::find(
-                    target->_parent->_children.begin(), target->_parent->_children.end(), to_swap);
+                it = std::find(target->_parent->_children.begin(), target->_parent->_children.end(),
+                               to_swap);
                 *it = target;
             } else {
                 auto tree_it = std::find(_trees.begin(), _trees.end(), to_swap);
@@ -235,8 +217,7 @@ void binomial<T, Compare>::decrease(
     }
 }
 
-template <typename T, typename Compare> void binomial<T, Compare>::merge(binomial<T, Compare>& src)
-{
+template<typename T, typename Compare> void binomial<T, Compare>::merge(binomial<T, Compare>& src) {
     if (this == &src || src.empty())
         return;
     if (this->empty()) {
@@ -318,5 +299,5 @@ template <typename T, typename Compare> void binomial<T, Compare>::merge(binomia
     src._size = 0;
     this->_size = new_size;
 }
-}
+} // namespace heap
 #endif // BINOMIAL_HEAP_CPP

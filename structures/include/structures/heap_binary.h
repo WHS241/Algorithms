@@ -9,19 +9,20 @@
 #include "heap_node_base.h"
 
 namespace heap {
-template <typename T, typename Compare = std::less<T>>
+template<typename T, typename Compare = std::less<T>>
 class binary_heap : public node_base<T, Compare> {
-public:
+    public:
     using typename node_base<T, Compare>::node, typename node_base<T, Compare>::node_wrapper;
 
     binary_heap() = default;
     explicit binary_heap(Compare comp);
 
     // Θ(n)
-    template <typename It, typename _Compare = Compare,
-        typename _Requires = typename std::enable_if_t<std::is_default_constructible_v<_Compare>>>
+    template<
+      typename It, typename _Compare = Compare,
+      typename _Requires = typename std::enable_if_t<std::is_default_constructible_v<_Compare>>>
     binary_heap(It first, It last);
-    template <typename It> binary_heap(It first, It last, Compare comp);
+    template<typename It> binary_heap(It first, It last, Compare comp);
 
     virtual ~binary_heap() noexcept = default;
     binary_heap(const binary_heap<T, Compare>&);
@@ -45,13 +46,13 @@ public:
     // Binary heap merging currently will invalidate all previous Node*
     void merge(binary_heap<T, Compare>&);
 
-private:
+    private:
     void _bubble_down(node* parent, bool use_left_child) noexcept;
     static std::list<T> _s_data(const node*);
 
     std::unique_ptr<node> _root;
 };
-}
+} // namespace heap
 
 #include "../../src/structures/heap_binary.tpp"
 

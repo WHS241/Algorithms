@@ -3,16 +3,15 @@
 
 namespace tree {
 
-template <typename T, typename Compare>
-std::pair<typename red_black_tree<T, Compare>::iterator, bool> red_black_tree<T, Compare>::insert(
-    const T& item)
-{
+template<typename T, typename Compare>
+std::pair<typename red_black_tree<T, Compare>::iterator, bool>
+  red_black_tree<T, Compare>::insert(const T& item) {
     auto* ptr = dynamic_cast<t_node*>(this->_root.get());
     if (ptr == nullptr) {
         auto new_root = new t_node(item, true);
         this->_root.reset(new_root);
         this->_size = 1;
-        return { begin(), true };
+        return {begin(), true};
     }
 
     bool go_left = this->_compare(item, ptr->item);
@@ -21,7 +20,7 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool> red_black_tree<T,
         ptr = next;
 
         if (!this->_allow_duplicates && item == ptr->item)
-            return { this->_make_iterator(ptr, traversal::in_order, false), false };
+            return {this->_make_iterator(ptr, traversal::in_order, false), false};
 
         go_left = this->_compare(item, ptr->item);
         next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
@@ -36,8 +35,8 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool> red_black_tree<T,
     }
     ++this->_size;
 
-    std::pair<iterator, bool> result
-        = { this->_make_iterator(add, traversal::in_order, false), true };
+    std::pair<iterator, bool> result = {this->_make_iterator(add, traversal::in_order, false),
+                                        true};
 
     // now to balance the tree
     while (add != this->_root.get()) {
@@ -47,8 +46,8 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool> red_black_tree<T,
             return result;
 
         auto grandparent = dynamic_cast<t_node*>(parent->parent);
-        auto uncle = dynamic_cast<t_node*>(
-            (grandparent->left == parent) ? grandparent->right : grandparent->left);
+        auto uncle = dynamic_cast<t_node*>((grandparent->left == parent) ? grandparent->right
+                                                                         : grandparent->left);
 
         if (uncle != nullptr && !uncle->is_black) {
             // red parent and uncle
@@ -88,10 +87,9 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool> red_black_tree<T,
     return result;
 }
 
-template <typename T, typename Compare>
-typename red_black_tree<T, Compare>::iterator red_black_tree<T, Compare>::erase(
-    typename red_black_tree<T, Compare>::iterator it)
-{
+template<typename T, typename Compare>
+typename red_black_tree<T, Compare>::iterator
+  red_black_tree<T, Compare>::erase(typename red_black_tree<T, Compare>::iterator it) {
     binary_search_tree<T, Compare>::_verify(it);
     auto node = dynamic_cast<t_node*>(binary_tree<T>::_s_get_node(it));
     if (node == nullptr)
@@ -177,8 +175,8 @@ typename red_black_tree<T, Compare>::iterator red_black_tree<T, Compare>::erase(
         while (node != this->_root.get()) {
             if (!parent->is_black || !sibling->is_black)
                 break;
-            if ((!inner_sibling || inner_sibling->is_black)
-                && (!outer_sibling || outer_sibling->is_black)) {
+            if ((!inner_sibling || inner_sibling->is_black) &&
+                (!outer_sibling || outer_sibling->is_black)) {
                 sibling->is_black = false;
 
                 // balanced up to parent, but parent black-height is shorter than its sibling's
@@ -218,8 +216,8 @@ typename red_black_tree<T, Compare>::iterator red_black_tree<T, Compare>::erase(
         }
 
         // parent must be red by here
-        if ((!inner_sibling || inner_sibling->is_black)
-            && (!outer_sibling || outer_sibling->is_black)) {
+        if ((!inner_sibling || inner_sibling->is_black) &&
+            (!outer_sibling || outer_sibling->is_black)) {
             // recoloring parent and sibling restores original black-lengths
             parent->is_black = true;
             sibling->is_black = false;
@@ -234,8 +232,8 @@ typename red_black_tree<T, Compare>::iterator red_black_tree<T, Compare>::erase(
                 // reassign to new nodes
                 outer_sibling = sibling;
                 sibling = inner_sibling;
-                inner_sibling = dynamic_cast<t_node*>(
-                    is_left_child ? inner_sibling->left : inner_sibling->right);
+                inner_sibling =
+                  dynamic_cast<t_node*>(is_left_child ? inner_sibling->left : inner_sibling->right);
             }
 
             // outer_sibling now must be red, sibling is black
@@ -249,43 +247,36 @@ typename red_black_tree<T, Compare>::iterator red_black_tree<T, Compare>::erase(
     return it;
 }
 
-template <typename T, typename Compare>
-red_black_tree<T, Compare>::t_node::t_node(
-    const T& item, bool black, t_node* parent, t_node* left, t_node* right)
-    : binary_tree<T>::node(item, parent, left, right)
-    , is_black(black)
-{
-}
+template<typename T, typename Compare>
+red_black_tree<T, Compare>::t_node::t_node(const T& item, bool black, t_node* parent, t_node* left,
+                                           t_node* right) :
+    binary_tree<T>::node(item, parent, left, right), is_black(black) {}
 
-template <typename T, typename Compare>
+template<typename T, typename Compare>
 typename red_black_tree<T, Compare>::t_node* red_black_tree<T, Compare>::t_node::change_left(
-    red_black_tree<T, Compare>::t_node* to_add) noexcept
-{
+  red_black_tree<T, Compare>::t_node* to_add) noexcept {
     return dynamic_cast<t_node*>(binary_tree<T>::node::change_left(to_add));
 }
 
-template <typename T, typename Compare>
+template<typename T, typename Compare>
 typename red_black_tree<T, Compare>::t_node* red_black_tree<T, Compare>::t_node::change_right(
-    red_black_tree<T, Compare>::t_node* to_add) noexcept
-{
+  red_black_tree<T, Compare>::t_node* to_add) noexcept {
     return dynamic_cast<t_node*>(binary_tree<T>::node::change_right(to_add));
 }
 
-template <typename T, typename Compare>
+template<typename T, typename Compare>
 void red_black_tree<T, Compare>::t_node::replace_left(
-    red_black_tree<T, Compare>::t_node* to_add) noexcept
-{
+  red_black_tree<T, Compare>::t_node* to_add) noexcept {
     t_node* prev = change_left(to_add);
     delete prev;
 }
 
-template <typename T, typename Compare>
+template<typename T, typename Compare>
 void red_black_tree<T, Compare>::t_node::replace_right(
-    red_black_tree<T, Compare>::t_node* to_add) noexcept
-{
+  red_black_tree<T, Compare>::t_node* to_add) noexcept {
     t_node* prev = change_right(to_add);
     delete prev;
 }
-}
+} // namespace tree
 
 #endif // !RED_BLACK_TREE_CPP

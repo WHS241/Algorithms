@@ -20,8 +20,8 @@ struct Skyline {
 // divide and conquer: Θ(n log n)
 // RandomIt not necessary, but helpful
 // It::value_type must be of type Silhouette
-template <typename It> Skyline generateSkyline(It first, It last);
-} // namespace Induction
+template<typename It> Skyline generateSkyline(It first, It last);
+} // namespace induction
 
 #include "../../src/induction/graphic.cpp"
 

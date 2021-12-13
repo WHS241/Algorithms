@@ -20,9 +20,8 @@ masterLast)
 Conditions: It1::value_type is equivalent to It2::value_type
 Θ(distance(targetFirst, targetLast) + distance(masterFirst, masterLast))
 */
-template <typename It1, typename It2>
-bool is_subsequence(It1 target_first, It1 target_last, It2 master_first, It2 master_last)
-{
+template<typename It1, typename It2>
+bool is_subsequence(It1 target_first, It1 target_last, It2 master_first, It2 master_last) {
     for (; target_first != target_last; ++target_first, ++master_first) {
         master_first = std::find(master_first, master_last, *target_first);
         if (master_first == master_last)
@@ -36,30 +35,25 @@ namespace {
      Iterator adaptor:
      Simulate stuttering without having to create a new container
      */
-    template <typename It> class stutter_iterator {
-    public:
+    template<typename It> class stutter_iterator {
+        public:
         typedef typename std::iterator_traits<It>::value_type value_type;
 
-        stutter_iterator(const It it, uint32_t stutter)
-            : _iterator(it)
-            , _stutter(stutter)
-            , _counter(0) {};
+        stutter_iterator(const It it, uint32_t stutter) :
+            _iterator(it), _stutter(stutter), _counter(0){};
 
-        bool operator==(const stutter_iterator& rhs)
-        {
-            return _stutter == rhs._stutter && _counter == rhs._counter
-                && _iterator == rhs._iterator;
+        bool operator==(const stutter_iterator& rhs) {
+            return _stutter == rhs._stutter && _counter == rhs._counter &&
+                   _iterator == rhs._iterator;
         }
         bool operator!=(const stutter_iterator& rhs) { return !operator==(rhs); }
-        stutter_iterator& operator++()
-        {
+        stutter_iterator& operator++() {
             _counter = (_counter + 1) % _stutter;
             if (_counter == 0)
                 ++_iterator;
             return *this;
         }
-        stutter_iterator operator++(int)
-        {
+        stutter_iterator operator++(int) {
             stutter_iterator temp(*this);
             ++*this;
             return temp;
@@ -67,9 +61,9 @@ namespace {
 
         const value_type& operator*() const { return *_iterator; }
 
-        const value_type* operator->() const { return _iterator; }
+        const value_type* operator->() const { return _iterator.operator->(); }
 
-    private:
+        private:
         const uint32_t _stutter;
         uint32_t _counter;
         It _iterator;
@@ -84,12 +78,10 @@ Andranik Mirzaian (1987)
 Θ((n+m) log(n/m)) where m = distance(targetFirst, targetLast),
                         n = distance(masterFirst, masterLast)
 */
-template <typename It1, typename It2>
-uint32_t max_stutter(It1 target_first, It1 target_last, It2 master_first, It2 master_last)
-{
-    uint32_t lower = 0,
-             upper
-        = std::distance(master_first, master_last) / std::distance(target_first, target_last);
+template<typename It1, typename It2>
+uint32_t max_stutter(It1 target_first, It1 target_last, It2 master_first, It2 master_last) {
+    uint32_t lower = 0, upper = std::distance(master_first, master_last) /
+                                std::distance(target_first, target_last);
 
     // binary search style
     while (lower < upper) {
@@ -110,20 +102,23 @@ n_x <= (last - first)
 and compare(first[n_(i-1)], first[n_i]) is true for any 0 < i <= x
 Θ(n log n)
 */
-template <typename It, typename Compare>
-std::list<It> longest_ordered_subsequence(It first, It last, Compare comp)
-{
+template<typename It, typename Compare>
+std::list<It> longest_ordered_subsequence(It first, It last, Compare comp) {
     if constexpr (std::is_same<typename std::iterator_traits<It>::iterator_category,
-                      std::random_access_iterator_tag>::value) {
+                               std::random_access_iterator_tag>::value) {
         std::vector<It> predecessor(last - first, last);
-        // all non-last entries point to elements in ascending order
+        // all non-last entries tail[n] point to smallest possible last element of a subsequence of length n + 1
+        // guaranteed to be stored in increasing order 
         std::vector<It> tail(predecessor.size(), last);
 
         // populate vectors
         uint32_t index = 0;
         for (auto temp(first); temp != last; ++temp, ++index) {
-            auto replace_iterator = find_cutoff(tail.begin(), tail.begin() + index,
-                [&temp, &last, &comp](const It& it) { return it != last && comp(*it, *temp); });
+            // find which subsequence can terminate with a smaller value by introducing next element
+            auto replace_iterator =
+              find_cutoff(tail.begin(), tail.begin() + index, [&temp, &last, &comp](const It& it) {
+                  return it != last && comp(*it, *temp);
+              });
 
             if (replace_iterator != tail.begin())
                 predecessor[index] = *(replace_iterator - 1);
@@ -132,9 +127,9 @@ std::list<It> longest_ordered_subsequence(It first, It last, Compare comp)
 
         // backtrack through predecessor starting with last element of tail
         std::list<It> result;
-        for (auto temp
-             = *(find_cutoff(tail.begin(), tail.end(), [&last](const It& it) { return it != last; })
-                 - 1);
+        for (auto temp = *(
+               find_cutoff(tail.begin(), tail.end(), [&last](const It& it) { return it != last; }) -
+               1);
              temp != last; temp = predecessor[temp - first]) {
             result.push_front(temp);
         }
@@ -146,12 +141,15 @@ std::list<It> longest_ordered_subsequence(It first, It last, Compare comp)
         typedef std::pair<It, uint32_t> T;
 
         std::vector<T> it_tracker(num_elements);
-        auto compare = [&comp](const T& x, const T& y) { return comp(*x.first, *y.first); };
+        auto compare = [&comp](const T& x, const T& y) {
+            return comp(*x.first, *y.first);
+        };
 
+        // stores smallest possible last element of increasing subsequence of each length
         tree::red_black_tree<T, decltype(compare)> tree(compare);
 
         for (uint32_t i = 0; first != last; ++first, ++i) {
-            it_tracker[i] = { first, i };
+            it_tracker[i] = {first, i};
             auto current = tree.insert(it_tracker[i]).first;
             if (current == tree.begin()) {
                 predecessor[i] = i;
@@ -172,26 +170,9 @@ std::list<It> longest_ordered_subsequence(It first, It last, Compare comp)
         }
         result.push_front(tracer.first);
         return result;
-        /*
-                // transfer to something with random access iterators
-                std::vector<typename std::iterator_traits<It>::value_type> buffer(first, last);
-                auto tempResult = longest_ordered_subsequence(buffer.begin(), buffer.end(), comp);
-
-                // convert to input iterators
-                std::list<It> result;
-                auto lastTemp = buffer.begin();
-                std::transform(tempResult.begin(), tempResult.end(), std::back_inserter(result),
-                    [&first, &lastTemp](auto it) {
-                        std::advance(first, it - lastTemp);
-                        lastTemp = it;
-                        return first;
-                    });
-                return result;
-                */
     }
 }
-template <typename It> std::list<It> longest_ordered_subsequence(It first, It last)
-{
+template<typename It> std::list<It> longest_ordered_subsequence(It first, It last) {
     return longest_ordered_subsequence(first, last, std::less<>());
 }
 
@@ -200,11 +181,10 @@ Specialized version for integral types
 Uses van Emde Boas tree
 For n numbers where max - min = M, O(n log log M)
 */
-template <typename It,
-    typename _Requires
-    = std::enable_if_t<std::is_integral_v<typename std::iterator_traits<It>::value_type>, void>>
-std::list<It> longest_increasing_integer_subsequence(It first, It last)
-{
+template<typename It, typename _Requires = std::enable_if_t<
+                        std::is_integral_v<typename std::iterator_traits<It>::value_type>, void>>
+std::list<It> longest_increasing_integer_subsequence(It first, It last) {
+    // Same process as non-specialized version, but with different find-predecessor runtime
     if (first == last) {
         return std::list<It>();
     }
@@ -219,7 +199,7 @@ std::list<It> longest_increasing_integer_subsequence(It first, It last)
 
     for (uint32_t i = 0; first != last; ++first, ++i) {
         it_tracker[i] = first;
-        auto it = vEB.insert({ *first - *bounds.first, i }).first;
+        auto it = vEB.insert({*first - *bounds.first, i}).first;
         if (it == vEB.begin()) {
             predecessor[i] = i;
         } else {
@@ -240,6 +220,6 @@ std::list<It> longest_increasing_integer_subsequence(It first, It last)
     return result;
 }
 
-} // namespace Sequence
+} // namespace sequence
 
 #endif // SUBSEQUENCE_H

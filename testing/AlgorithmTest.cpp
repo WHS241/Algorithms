@@ -22,18 +22,16 @@
 #include "generator.h"
 
 class AlgorithmTest : public ::testing::Test {
-protected:
+    protected:
     std::mt19937_64 engine;
 
-    void SetUp() override
-    {
+    void SetUp() override {
         std::random_device base;
         engine = std::mt19937_64(base());
     }
 };
 
-TEST_F(AlgorithmTest, Circle_Graph_Clique)
-{
+TEST_F(AlgorithmTest, Circle_Graph_Clique) {
     std::uniform_real_distribution<double> point_dist;
     for (int i = 0; i < 100; ++i) {
         std::unordered_set<double> used_points;
@@ -51,8 +49,8 @@ TEST_F(AlgorithmTest, Circle_Graph_Clique)
             chords[j] = next;
         }
 
-        std::vector<std::size_t> result
-            = special_case::model_max_clique_circle_graph(chords.begin(), chords.end());
+        std::vector<std::size_t> result =
+          special_case::model_max_clique_circle_graph(chords.begin(), chords.end());
         ASSERT_LE(result.size(), chords.size());
         ASSERT_NE(result.size(), 0);
 
@@ -64,19 +62,18 @@ TEST_F(AlgorithmTest, Circle_Graph_Clique)
             bool intersects_all = true;
             for (std::size_t k = 0; intersects_all && k < 100; ++k)
                 if (j != k && in_set[k])
-                    intersects_all = ((chords[j].first < chords[k].first)
-                                         && (chords[k].first < chords[j].second)
-                                         && (chords[j].second < chords[k].second))
-                        || ((chords[k].first < chords[j].first)
-                            && (chords[j].first < chords[k].second)
-                            && (chords[k].second < chords[j].second));
+                    intersects_all = ((chords[j].first < chords[k].first) &&
+                                      (chords[k].first < chords[j].second) &&
+                                      (chords[j].second < chords[k].second)) ||
+                                     ((chords[k].first < chords[j].first) &&
+                                      (chords[j].first < chords[k].second) &&
+                                      (chords[k].second < chords[j].second));
             ASSERT_EQ(intersects_all, in_set[j]);
         }
     }
 }
 
-TEST_F(AlgorithmTest, CNF_Test)
-{
+TEST_F(AlgorithmTest, CNF_Test) {
     for (int i = 1; i <= 1000; ++i) {
         std::ostringstream path_builder;
         path_builder << "CNF Tests/uf20-0" << i << ".cnf";
@@ -90,8 +87,7 @@ TEST_F(AlgorithmTest, CNF_Test)
     }
 }
 
-TEST_F(AlgorithmTest, Reductions_from_CNF)
-{
+TEST_F(AlgorithmTest, Reductions_from_CNF) {
     for (int i = 1; i < +1000; ++i) {
         std::ostringstream path_builder;
         path_builder << "CNF Tests/uf20-0" << i << ".cnf";
@@ -130,28 +126,27 @@ TEST_F(AlgorithmTest, Reductions_from_CNF)
         }
 
         ASSERT_TRUE(NP_complete::cert_clique(
-            reduction_res, std::make_pair(clique_cert.begin(), clique_cert.end())))
-            << path_builder.str();
+          reduction_res, std::make_pair(clique_cert.begin(), clique_cert.end())))
+          << path_builder.str();
         auto IS_res = NP_complete::Clique_to_Independent_Set(reduction_res);
         ASSERT_TRUE(NP_complete::cert_independent_set(
-            IS_res, std::make_pair(clique_cert.begin(), clique_cert.end())));
+          IS_res, std::make_pair(clique_cert.begin(), clique_cert.end())));
 
         auto VC_res = NP_complete::Independent_Set_to_Vertex_Cover(IS_res);
         std::unordered_set<std::pair<int, std::size_t>, util::pair_hash<int, std::size_t>>
-            clique_cert_set(clique_cert.begin(), clique_cert.end());
+          clique_cert_set(clique_cert.begin(), clique_cert.end());
         std::vector<std::pair<int, std::size_t>> all_verts = VC_res.first.vertices();
         all_verts.resize(std::remove_if(all_verts.begin(), all_verts.end(),
-                             [&clique_cert_set](const std::pair<int, std::size_t>& v) {
-                                 return clique_cert_set.find(v) != clique_cert_set.end();
-                             })
-            - all_verts.begin());
+                                        [&clique_cert_set](const std::pair<int, std::size_t>& v) {
+                                            return clique_cert_set.find(v) != clique_cert_set.end();
+                                        }) -
+                         all_verts.begin());
         ASSERT_TRUE(NP_complete::cert_vertex_cover(
-            VC_res, std::make_pair(all_verts.begin(), all_verts.end())));
+          VC_res, std::make_pair(all_verts.begin(), all_verts.end())));
     }
 }
 
-TEST_F(AlgorithmTest, Reductions_from_Vertex_Cover)
-{
+TEST_F(AlgorithmTest, Reductions_from_Vertex_Cover) {
     for (int j = 0; j < 100; ++j) {
         graph::graph<int, false, false> input = random_graph<false, false>(engine);
 
@@ -165,8 +160,9 @@ TEST_F(AlgorithmTest, Reductions_from_Vertex_Cover)
 
         while (copy.order() != 0) {
             std::vector<int> curr_vertices = copy.vertices();
-            int next = *std::max_element(curr_vertices.begin(), curr_vertices.end(),
-                [&copy](int i, int j) { return copy.degree(i) < copy.degree(j); });
+            int next =
+              *std::max_element(curr_vertices.begin(), curr_vertices.end(),
+                                [&copy](int i, int j) { return copy.degree(i) < copy.degree(j); });
             certificate.push_back(next);
             copy.remove(next);
 
@@ -177,33 +173,35 @@ TEST_F(AlgorithmTest, Reductions_from_Vertex_Cover)
 
         auto vertex_cover_inst = std::make_pair(input, certificate.size());
         ASSERT_TRUE(NP_complete::cert_vertex_cover(
-            vertex_cover_inst, std::make_pair(certificate.begin(), certificate.end())));
-        std::pair<std::vector<std::unordered_set<std::pair<int, int>,
-                      util::pair_hash_unordered<int>, util::key_eq_unordered<int>>>,
-            std::size_t>
-            set_cover_inst = NP_complete::Vertex_Cover_to_Set_Cover(vertex_cover_inst);
+          vertex_cover_inst, std::make_pair(certificate.begin(), certificate.end())));
+        std::pair<
+          std::vector<std::unordered_set<std::pair<int, int>, util::pair_hash_unordered<int>,
+                                         util::key_eq_unordered<int>>>,
+          std::size_t>
+          set_cover_inst = NP_complete::Vertex_Cover_to_Set_Cover(vertex_cover_inst);
 
         std::vector<std::unordered_set<std::pair<int, int>, util::pair_hash_unordered<int>,
-            util::key_eq_unordered<int>>>
-            set_cover_certificate(certificate.size());
+                                       util::key_eq_unordered<int>>>
+          set_cover_certificate(certificate.size());
         std::transform(certificate.begin(), certificate.end(), set_cover_certificate.begin(),
-            [&input, &set_cover_inst](
-                int v) { return set_cover_inst.first[input.get_translation().at(v)]; });
+                       [&input, &set_cover_inst](int v) {
+                           return set_cover_inst.first[input.get_translation().at(v)];
+                       });
         ASSERT_TRUE(NP_complete::cert_set_cover(set_cover_inst, set_cover_certificate));
 
         ASSERT_TRUE(NP_complete::cert_feedback_vertex(
-            NP_complete::Vertex_Cover_to_Feedback_Vertex(vertex_cover_inst),
-            std::make_pair(certificate.begin(), certificate.end())));
+          NP_complete::Vertex_Cover_to_Feedback_Vertex(vertex_cover_inst),
+          std::make_pair(certificate.begin(), certificate.end())));
 
         std::vector<std::pair<std::pair<int, bool>, std::pair<int, bool>>>
-            feedback_edge_certificate;
+          feedback_edge_certificate;
         feedback_edge_certificate.reserve(certificate.size());
         for (int v : certificate)
-            feedback_edge_certificate.emplace_back(
-                std::make_pair(v, false), std::make_pair(v, true));
+            feedback_edge_certificate.emplace_back(std::make_pair(v, false),
+                                                   std::make_pair(v, true));
         ASSERT_TRUE(NP_complete::cert_feedback_edge(
-            NP_complete::Vertex_Cover_to_Feedback_Edge(vertex_cover_inst),
-            std::make_pair(feedback_edge_certificate.begin(), feedback_edge_certificate.end())));
+          NP_complete::Vertex_Cover_to_Feedback_Edge(vertex_cover_inst),
+          std::make_pair(feedback_edge_certificate.begin(), feedback_edge_certificate.end())));
 
         // DHC
         std::list<std::tuple<std::size_t, std::size_t, int, int>> DHC_certificate;
@@ -220,14 +218,13 @@ TEST_F(AlgorithmTest, Reductions_from_Vertex_Cover)
                 DHC_certificate.emplace_back(-1, 2, v, u);
             }
         }
-        ASSERT_TRUE(
-            NP_complete::cert_Hamiltonian_cycle(NP_complete::Vertex_Cover_to_DHC(vertex_cover_inst),
-                std::make_pair(DHC_certificate.begin(), DHC_certificate.end())));
+        ASSERT_TRUE(NP_complete::cert_Hamiltonian_cycle(
+          NP_complete::Vertex_Cover_to_DHC(vertex_cover_inst),
+          std::make_pair(DHC_certificate.begin(), DHC_certificate.end())));
     }
 }
 
-TEST_F(AlgorithmTest, Lex_BFS)
-{
+TEST_F(AlgorithmTest, Lex_BFS) {
     auto lex_compare = [](const std::set<int>& x, const std::set<int>& y, int bound) -> bool {
         if (x.empty())
             return true;
@@ -253,7 +250,7 @@ TEST_F(AlgorithmTest, Lex_BFS)
         for (int i : lex_bfs) {
             if (level_map[i] == input.order()) {
                 level_map[i] = bfs_levels.size();
-                std::unordered_set<int> root_set({ i });
+                std::unordered_set<int> root_set({i});
                 bfs_levels.push_back(root_set);
             } else {
                 ASSERT_NE(bfs_levels[level_map[i]].find(i), bfs_levels[level_map[i]].end());
@@ -261,14 +258,15 @@ TEST_F(AlgorithmTest, Lex_BFS)
             for (int j : input.neighbors(i)) {
                 if (level_map[j] != input.order()) {
                     // BFS cannot have back edges
-                    if (level_map[j] < level_map[i])
+                    if (level_map[j] < level_map[i]) {
                         ASSERT_EQ(level_map[j], level_map[i] - 1);
-                    else if (level_map[j] > level_map[i])
+                    } else if (level_map[j] > level_map[i]) {
                         ASSERT_EQ(level_map[j], level_map[i] + 1);
+                    }
                 } else {
                     level_map[j] = level_map[i] + 1;
                     if (level_map[j] == bfs_levels.size()) {
-                        std::unordered_set<int> next_level({ j });
+                        std::unordered_set<int> next_level({j});
                         bfs_levels.push_back(next_level);
                     } else {
                         EXPECT_EQ(level_map[j] + 1, bfs_levels.size());
@@ -293,8 +291,9 @@ TEST_F(AlgorithmTest, Lex_BFS)
                 current_root = i;
             } else {
                 ASSERT_GE(*lex_orders[i].begin(), current_root);
-                if (level_map[lex_bfs[i - 1]] == level_map[lex_bfs[i]])
+                if (level_map[lex_bfs[i - 1]] == level_map[lex_bfs[i]]) {
                     EXPECT_PRED3(lex_compare, lex_orders[i - 1], lex_orders[i], i - 1);
+                }
             }
     }
 }
@@ -302,8 +301,7 @@ TEST_F(AlgorithmTest, Lex_BFS)
 /*
  * For testing the max flow algorithms
  */
-template <typename F> void test_case_one(F target_algorithm)
-{
+template<typename F> void test_case_one(F target_algorithm) {
     graph::graph<char, true, true, int> input;
     input.add_vertex('A');
     input.add_vertex('B');
@@ -342,8 +340,7 @@ template <typename F> void test_case_one(F target_algorithm)
     EXPECT_EQ(result.degree('E'), 1);
     EXPECT_EQ(result.degree('F'), 1);
 }
-template <typename F> void test_case_two(F target_algorithm)
-{
+template<typename F> void test_case_two(F target_algorithm) {
     graph::graph<char, true, true, int> input;
     input.add_vertex('s');
     input.add_vertex('1');
@@ -380,8 +377,7 @@ template <typename F> void test_case_two(F target_algorithm)
     EXPECT_EQ(result.degree('t'), 0);
 }
 
-template <typename F> void test_case_three(F target_algorithm)
-{
+template<typename F> void test_case_three(F target_algorithm) {
     graph::graph<char, true, true, int> input;
     input.add_vertex('s');
     input.add_vertex('a');
@@ -416,8 +412,7 @@ template <typename F> void test_case_three(F target_algorithm)
     EXPECT_EQ(result.degree('t'), 0);
 }
 
-template <typename F> void verify_properties(F algorithm, std::mt19937_64& engine)
-{
+template<typename F> void verify_properties(F algorithm, std::mt19937_64& engine) {
     for (uint32_t i = 0; i < 50; ++i) {
         graph::graph<int, true, true> input = random_graph<true, true>(engine);
         auto vertices = input.vertices();
@@ -443,7 +438,7 @@ template <typename F> void verify_properties(F algorithm, std::mt19937_64& engin
             double out_flow = divergence[vertices[start_index]];
             double in_flow = divergence[vertices[end_index]];
             EXPECT_NEAR(out_flow, -in_flow, 1e-10);
-            for (int j = 0; j < divergence.size(); ++j) {
+            for (std::size_t j = 0; j < divergence.size(); ++j) {
                 if (j != start_index && j != end_index) {
                     EXPECT_NEAR(divergence[j], 0., 1e-10);
                 }
@@ -452,8 +447,7 @@ template <typename F> void verify_properties(F algorithm, std::mt19937_64& engin
     }
 }
 
-template <typename F> void verify_directed_min_cut(F alg_to_test, std::mt19937_64& engine)
-{
+template<typename F> void verify_directed_min_cut(F alg_to_test, std::mt19937_64& engine) {
     for (uint32_t i = 0; i < 50; ++i) {
         graph::graph<int, true, true> input = random_graph<true, true>(engine);
         auto vertices = input.vertices();
@@ -465,17 +459,19 @@ template <typename F> void verify_directed_min_cut(F alg_to_test, std::mt19937_6
                 end_index = vertex_picker(engine);
 
             auto max_flow = alg_to_test(input, vertices[start_index], vertices[end_index]);
-            auto min_cut = graph_alg::minimum_cut(
-                input, vertices[start_index], vertices[end_index], alg_to_test);
+            auto min_cut = graph_alg::minimum_cut(input, vertices[start_index], vertices[end_index],
+                                                  alg_to_test);
 
             // verify max-flow-min-cut theorem
             auto flow_start = max_flow.edges(vertices[start_index]);
-            double flow_value = std::accumulate(flow_start.begin(), flow_start.end(), 0.,
-                [](double prev, const auto& curr) { return prev + curr.second; });
-            double cut_cost = std::accumulate(min_cut.begin(), min_cut.end(), 0.,
-                [&input](double prev, const graph_alg::cut_edge<int>& curr) {
-                    return prev + input.edge_cost(curr.start, curr.end);
-                });
+            double flow_value =
+              std::accumulate(flow_start.begin(), flow_start.end(), 0.,
+                              [](double prev, const auto& curr) { return prev + curr.second; });
+            double cut_cost =
+              std::accumulate(min_cut.begin(), min_cut.end(), 0.,
+                              [&input](double prev, const graph_alg::cut_edge<int>& curr) {
+                                  return prev + input.edge_cost(curr.start, curr.end);
+                              });
             EXPECT_DOUBLE_EQ(flow_value, cut_cost);
 
             // verify cut
@@ -483,13 +479,12 @@ template <typename F> void verify_directed_min_cut(F alg_to_test, std::mt19937_6
                 input.remove_edge(edge.start, edge.end);
             }
             EXPECT_THROW(
-                graph_alg::least_edges_path(input, vertices[start_index], vertices[end_index]),
-                graph_alg::no_path_exception);
+              graph_alg::least_edges_path(input, vertices[start_index], vertices[end_index]),
+              graph_alg::no_path_exception);
         }
     }
 }
-template <typename F> void verify_undirected_min_cut(F alg_to_test, std::mt19937_64& engine)
-{
+template<typename F> void verify_undirected_min_cut(F alg_to_test, std::mt19937_64& engine) {
     // Undirected
     for (uint32_t i = 0; i < 50; ++i) {
         graph::graph<int, false, true> input = random_graph<false, true>(engine);
@@ -502,31 +497,31 @@ template <typename F> void verify_undirected_min_cut(F alg_to_test, std::mt19937
                 end_index = vertex_picker(engine);
 
             auto max_flow = alg_to_test(input, vertices[start_index], vertices[end_index]);
-            auto min_cut = graph_alg::minimum_cut(
-                input, vertices[start_index], vertices[end_index], alg_to_test);
+            auto min_cut = graph_alg::minimum_cut(input, vertices[start_index], vertices[end_index],
+                                                  alg_to_test);
 
             // verify max-flow-min-cut theorem
             auto flow_start = max_flow.edges(vertices[start_index]);
-            EXPECT_DOUBLE_EQ(std::accumulate(flow_start.begin(), flow_start.end(), 0.,
-                                 [](double prev, const auto& curr) { return prev + curr.second; }),
-                std::accumulate(min_cut.begin(), min_cut.end(), 0.,
-                    [&input](double prev, const graph_alg::cut_edge<int>& curr) {
-                        return prev + input.edge_cost(curr.start, curr.end);
-                    }));
+            EXPECT_DOUBLE_EQ(
+              std::accumulate(flow_start.begin(), flow_start.end(), 0.,
+                              [](double prev, const auto& curr) { return prev + curr.second; }),
+              std::accumulate(min_cut.begin(), min_cut.end(), 0.,
+                              [&input](double prev, const graph_alg::cut_edge<int>& curr) {
+                                  return prev + input.edge_cost(curr.start, curr.end);
+                              }));
 
             // verify cut
             for (const auto& edge : min_cut) {
                 input.remove_edge(edge.start, edge.end);
             }
             EXPECT_THROW(
-                graph_alg::least_edges_path(input, vertices[start_index], vertices[end_index]),
-                graph_alg::no_path_exception);
+              graph_alg::least_edges_path(input, vertices[start_index], vertices[end_index]),
+              graph_alg::no_path_exception);
         }
     }
 }
 
-TEST_F(AlgorithmTest, Max_Flow_Edmonds_Karp)
-{
+TEST_F(AlgorithmTest, Max_Flow_Edmonds_Karp) {
     test_case_one(graph_alg::Edmonds_Karp_max_flow<char, true, int>);
     test_case_two(graph_alg::Edmonds_Karp_max_flow<char, true, int>);
     test_case_three(graph_alg::Edmonds_Karp_max_flow<char, true, int>);
@@ -535,12 +530,20 @@ TEST_F(AlgorithmTest, Max_Flow_Edmonds_Karp)
     verify_undirected_min_cut(graph_alg::Edmonds_Karp_max_flow<int, false, double>, engine);
 }
 
-TEST_F(AlgorithmTest, Max_Flow_Dinic)
-{
+TEST_F(AlgorithmTest, Max_Flow_Dinic) {
     test_case_one(graph_alg::Dinic_max_flow<char, true, int>);
     test_case_two(graph_alg::Dinic_max_flow<char, true, int>);
     test_case_three(graph_alg::Dinic_max_flow<char, true, int>);
     verify_properties(graph_alg::Dinic_max_flow<int, true, double>, engine);
     verify_directed_min_cut(graph_alg::Dinic_max_flow<int, true, double>, engine);
     verify_undirected_min_cut(graph_alg::Dinic_max_flow<int, false, double>, engine);
+}
+
+TEST_F(AlgorithmTest, Max_Flow_Karzanov) {
+    test_case_one(graph_alg::Karzanov_max_flow<char, true, int>);
+    test_case_two(graph_alg::Karzanov_max_flow<char, true, int>);
+    test_case_three(graph_alg::Karzanov_max_flow<char, true, int>);
+    verify_properties(graph_alg::Karzanov_max_flow<int, true, double>, engine);
+    verify_directed_min_cut(graph_alg::Karzanov_max_flow<int, true, double>, engine);
+    verify_undirected_min_cut(graph_alg::Karzanov_max_flow<int, false, double>, engine);
 }

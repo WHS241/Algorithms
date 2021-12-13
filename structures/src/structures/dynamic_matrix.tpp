@@ -4,18 +4,17 @@
 #include <stdexcept>
 #include <string>
 
-template <typename T>
-typename dynamic_matrix<T>::reference dynamic_matrix<T>::row_wrapper::operator[](std::size_t index)
-{
+template<typename T>
+typename dynamic_matrix<T>::reference
+  dynamic_matrix<T>::row_wrapper::operator[](std::size_t index) {
     std::size_t pos = _index * _matrix->_cols + index;
     if (!_matrix->_is_initialized(pos))
         _matrix->_initialize(pos, _matrix->_default_value);
     return _matrix->_elements[pos];
 }
 
-template <typename T>
-typename dynamic_matrix<T>::reference dynamic_matrix<T>::row_wrapper::at(std::size_t index)
-{
+template<typename T>
+typename dynamic_matrix<T>::reference dynamic_matrix<T>::row_wrapper::at(std::size_t index) {
     _matrix->_check_col(index);
     std::size_t pos = _index * _matrix->_cols + index;
     if (!_matrix->_is_initialized(pos))
@@ -23,54 +22,42 @@ typename dynamic_matrix<T>::reference dynamic_matrix<T>::row_wrapper::at(std::si
     return _matrix->_elements[pos];
 }
 
-template <typename T>
-dynamic_matrix<T>::row_wrapper::row_wrapper(dynamic_matrix<T>* m, std::size_t index)
-    : _matrix(m)
-    , _index(index)
-{
-}
+template<typename T>
+dynamic_matrix<T>::row_wrapper::row_wrapper(dynamic_matrix<T>* m, std::size_t index) :
+    _matrix(m), _index(index) {}
 
-template <typename T>
-typename dynamic_matrix<T>::const_reference dynamic_matrix<T>::const_row_wrapper::operator[](
-    std::size_t index) const
-{
+template<typename T>
+typename dynamic_matrix<T>::const_reference
+  dynamic_matrix<T>::const_row_wrapper::operator[](std::size_t index) const {
     std::size_t pos = _index * _matrix->_cols + index;
     return _matrix->_is_initialized(pos) ? _matrix->_elements[pos] : _matrix->_default_value;
 }
 
-template <typename T>
-typename dynamic_matrix<T>::const_reference dynamic_matrix<T>::const_row_wrapper::at(
-    std::size_t index) const
-{
+template<typename T>
+typename dynamic_matrix<T>::const_reference
+  dynamic_matrix<T>::const_row_wrapper::at(std::size_t index) const {
     _matrix->_check_col(index);
     std::size_t pos = _index * _matrix->_cols + index;
     return _matrix->_is_initialized(pos) ? _matrix->_elements[pos] : _matrix->_default_value;
 }
 
-template <typename T>
-dynamic_matrix<T>::const_row_wrapper::const_row_wrapper(
-    const dynamic_matrix<T>* m, std::size_t index)
-    : _matrix(m)
-    , _index(index)
-{
-}
+template<typename T>
+dynamic_matrix<T>::const_row_wrapper::const_row_wrapper(const dynamic_matrix<T>* m,
+                                                        std::size_t index) :
+    _matrix(m), _index(index) {}
 
-template <typename T>
-template <typename, typename>
-dynamic_matrix<T>::dynamic_matrix(std::size_t m, std::size_t n)
-    : dynamic_matrix<T>(m, n, T())
-{
-}
+template<typename T>
+template<typename, typename>
+dynamic_matrix<T>::dynamic_matrix(std::size_t m, std::size_t n) : dynamic_matrix<T>(m, n, T()) {}
 
-template <typename T>
-dynamic_matrix<T>::dynamic_matrix(std::size_t m, std::size_t n, const T& default_value)
-    : _allocator()
-    , _check_allocator()
-    , _check_size(0U)
-    , _default_value(default_value)
-    , _rows(m)
-    , _cols(n)
-{
+template<typename T>
+dynamic_matrix<T>::dynamic_matrix(std::size_t m, std::size_t n, const T& default_value) :
+    _allocator(),
+    _check_allocator(),
+    _check_size(0U),
+    _default_value(default_value),
+    _rows(m),
+    _cols(n) {
     // out of bounds error
     std::size_t size = m * n;
     if (m != 0 && n != 0 && (size / m != n || size / n != m))
@@ -99,12 +86,11 @@ dynamic_matrix<T>::dynamic_matrix(std::size_t m, std::size_t n, const T& default
     }
 }
 
-template <typename T>
-template <typename, typename>
-dynamic_matrix<T>::dynamic_matrix(const std::initializer_list<std::initializer_list<T>>& src)
-    : dynamic_matrix<T>(
-        src.size(), std::max(src, [](auto x, auto y) { return x.size() < y.size(); }).size())
-{
+template<typename T>
+template<typename, typename>
+dynamic_matrix<T>::dynamic_matrix(const std::initializer_list<std::initializer_list<T>>& src) :
+    dynamic_matrix<T>(src.size(),
+                      std::max(src, [](auto x, auto y) { return x.size() < y.size(); }).size()) {
     std::size_t row_num = 0;
     for (const std::initializer_list<T>& r : src) {
         std::size_t col_num = 0;
@@ -116,8 +102,7 @@ dynamic_matrix<T>::dynamic_matrix(const std::initializer_list<std::initializer_l
     }
 }
 
-template <typename T> dynamic_matrix<T>::~dynamic_matrix() noexcept
-{
+template<typename T> dynamic_matrix<T>::~dynamic_matrix() noexcept {
     for (std::size_t i = 0U; i < _check_size; ++i)
         _allocator.destroy(_elements + _check_2[i]);
     std::size_t size = _rows * _cols;
@@ -128,15 +113,14 @@ template <typename T> dynamic_matrix<T>::~dynamic_matrix() noexcept
     }
 }
 
-template <typename T>
-dynamic_matrix<T>::dynamic_matrix(const dynamic_matrix<T>& src)
-    : _allocator()
-    , _check_allocator()
-    , _check_size(0U)
-    , _default_value(src._default_value)
-    , _rows(src._rows)
-    , _cols(src._cols)
-{
+template<typename T>
+dynamic_matrix<T>::dynamic_matrix(const dynamic_matrix<T>& src) :
+    _allocator(),
+    _check_allocator(),
+    _check_size(0U),
+    _default_value(src._default_value),
+    _rows(src._rows),
+    _cols(src._cols) {
     std::size_t size = src._rows * src._cols;
 
     if (size == 0) {
@@ -161,7 +145,6 @@ dynamic_matrix<T>::dynamic_matrix(const dynamic_matrix<T>& src)
         }
 
     } catch (...) {
-
         for (std::size_t i = 0U; i < _check_size; ++i)
             _allocator.destroy(_elements + _check_2[i]);
 
@@ -175,8 +158,7 @@ dynamic_matrix<T>::dynamic_matrix(const dynamic_matrix<T>& src)
     }
 }
 
-template <typename T> dynamic_matrix<T>& dynamic_matrix<T>::operator=(const dynamic_matrix<T>& rhs)
-{
+template<typename T> dynamic_matrix<T>& dynamic_matrix<T>::operator=(const dynamic_matrix<T>& rhs) {
     if (this != &rhs) {
         dynamic_matrix<T> temp(rhs);
         *this = std::move(temp);
@@ -184,25 +166,23 @@ template <typename T> dynamic_matrix<T>& dynamic_matrix<T>::operator=(const dyna
     return *this;
 }
 
-template <typename T>
-dynamic_matrix<T>::dynamic_matrix(dynamic_matrix<T>&& src)
-    : _allocator(std::move(src._allocator))
-    , _elements(std::move(src._elements))
-    , _check_allocator(std::move(src._check_allocator))
-    , _check_1(std::move(src._check_1))
-    , _check_2(std::move(src._check_2))
-    , _check_size(std::move(src._check_size))
-    , _default_value(std::move(src._default_value))
-    , _rows(std::move(src._rows))
-    , _cols(std::move(src._cols))
-{
+template<typename T>
+dynamic_matrix<T>::dynamic_matrix(dynamic_matrix<T>&& src) :
+    _allocator(std::move(src._allocator)),
+    _elements(std::move(src._elements)),
+    _check_allocator(std::move(src._check_allocator)),
+    _check_1(std::move(src._check_1)),
+    _check_2(std::move(src._check_2)),
+    _check_size(std::move(src._check_size)),
+    _default_value(std::move(src._default_value)),
+    _rows(std::move(src._rows)),
+    _cols(std::move(src._cols)) {
     src._rows = src._cols = src._check_size = 0;
     src._elements = nullptr;
     src._check_1 = src._check_2 = nullptr;
 }
 
-template <typename T> dynamic_matrix<T>& dynamic_matrix<T>::operator=(dynamic_matrix<T>&& rhs)
-{
+template<typename T> dynamic_matrix<T>& dynamic_matrix<T>::operator=(dynamic_matrix<T>&& rhs) {
     if (this != &rhs) {
         this->~dynamic_matrix();
         _rows = _cols = _check_size = 0;
@@ -222,46 +202,46 @@ template <typename T> dynamic_matrix<T>& dynamic_matrix<T>::operator=(dynamic_ma
     return *this;
 }
 
-template <typename T>
-typename dynamic_matrix<T>::row_wrapper dynamic_matrix<T>::operator[](std::size_t pos)
-{
+template<typename T>
+typename dynamic_matrix<T>::row_wrapper dynamic_matrix<T>::operator[](std::size_t pos) {
     return row_wrapper(this, pos);
 }
 
-template <typename T> typename dynamic_matrix<T>::row_wrapper dynamic_matrix<T>::at(std::size_t pos)
-{
+template<typename T>
+typename dynamic_matrix<T>::row_wrapper dynamic_matrix<T>::at(std::size_t pos) {
     _check_row(pos);
     return operator[](pos);
 }
 
-template <typename T>
-typename dynamic_matrix<T>::const_row_wrapper dynamic_matrix<T>::operator[](std::size_t pos) const
-{
+template<typename T>
+typename dynamic_matrix<T>::const_row_wrapper dynamic_matrix<T>::operator[](std::size_t pos) const {
     return const_row_wrapper(this, pos);
 }
 
-template <typename T>
-typename dynamic_matrix<T>::const_row_wrapper dynamic_matrix<T>::at(std::size_t pos) const
-{
+template<typename T>
+typename dynamic_matrix<T>::const_row_wrapper dynamic_matrix<T>::at(std::size_t pos) const {
     _check_row(pos);
     return operator[](pos);
 }
 
-template <typename T> std::size_t dynamic_matrix<T>::num_rows() const { return _rows; }
+template<typename T> std::size_t dynamic_matrix<T>::num_rows() const {
+    return _rows;
+}
 
-template <typename T> std::size_t dynamic_matrix<T>::num_cols() const { return _cols; }
+template<typename T> std::size_t dynamic_matrix<T>::num_cols() const {
+    return _cols;
+}
 
-template <typename T>
-dynamic_matrix<T> dynamic_matrix<T>::subarray(
-    std::size_t rows, std::size_t cols, std::size_t first_row, std::size_t first_col) const
-{
+template<typename T>
+dynamic_matrix<T> dynamic_matrix<T>::subarray(std::size_t rows, std::size_t cols,
+                                              std::size_t first_row, std::size_t first_col) const {
     return subarray(rows, cols, first_row, first_col, _default_value);
 }
 
-template <typename T>
+template<typename T>
 dynamic_matrix<T> dynamic_matrix<T>::subarray(std::size_t rows, std::size_t cols,
-    std::size_t first_row, std::size_t first_col, const T& pad_value) const
-{
+                                              std::size_t first_row, std::size_t first_col,
+                                              const T& pad_value) const {
     _check_row(first_row);
     _check_col(first_col);
 
@@ -294,18 +274,16 @@ dynamic_matrix<T> dynamic_matrix<T>::subarray(std::size_t rows, std::size_t cols
     return result;
 }
 
-template <typename T>
-void dynamic_matrix<T>::resize(
-    std::size_t rows, std::size_t cols, std::size_t first_row, std::size_t first_col)
-{
+template<typename T>
+void dynamic_matrix<T>::resize(std::size_t rows, std::size_t cols, std::size_t first_row,
+                               std::size_t first_col) {
     *this = subarray(rows, cols, first_row, first_col);
 }
 
-template <typename T>
-template <typename U>
-dynamic_matrix<std::invoke_result_t<std::plus<>, T, U>> dynamic_matrix<T>::operator+(
-    const dynamic_matrix<U>& rhs) const
-{
+template<typename T>
+template<typename U>
+dynamic_matrix<std::invoke_result_t<std::plus<>, T, U>>
+  dynamic_matrix<T>::operator+(const dynamic_matrix<U>& rhs) const {
     if (_rows != rhs._rows || _cols != rhs._cols)
         throw std::invalid_argument("Dimension mismatch");
 
@@ -317,11 +295,10 @@ dynamic_matrix<std::invoke_result_t<std::plus<>, T, U>> dynamic_matrix<T>::opera
     return result;
 }
 
-template <typename T>
-template <typename U, typename, typename>
+template<typename T>
+template<typename U, typename, typename>
 dynamic_matrix<T>& dynamic_matrix<T>::operator+=(const dynamic_matrix<U>& rhs) noexcept(
-    std::is_nothrow_invocable_r_v<T, std::plus<>, T, U>)
-{
+  std::is_nothrow_invocable_r_v<T, std::plus<>, T, U>) {
     if (_rows != rhs._rows || _cols != rhs._cols)
         throw std::invalid_argument("Dimension mismatch");
 
@@ -340,11 +317,10 @@ dynamic_matrix<T>& dynamic_matrix<T>::operator+=(const dynamic_matrix<U>& rhs) n
     return *this;
 }
 
-template <typename T>
-template <typename U>
-dynamic_matrix<std::invoke_result_t<std::minus<>, T, U>> dynamic_matrix<T>::operator-(
-    const dynamic_matrix<U>& rhs) const
-{
+template<typename T>
+template<typename U>
+dynamic_matrix<std::invoke_result_t<std::minus<>, T, U>>
+  dynamic_matrix<T>::operator-(const dynamic_matrix<U>& rhs) const {
     if (_rows != rhs._rows || _cols != rhs._cols)
         throw std::invalid_argument("Dimension mismatch");
 
@@ -356,11 +332,10 @@ dynamic_matrix<std::invoke_result_t<std::minus<>, T, U>> dynamic_matrix<T>::oper
     return result;
 }
 
-template <typename T>
-template <typename U, typename, typename>
+template<typename T>
+template<typename U, typename, typename>
 dynamic_matrix<T>& dynamic_matrix<T>::operator-=(const dynamic_matrix<U>& rhs) noexcept(
-    std::is_nothrow_invocable_r_v<T, std::minus<>, T, U>)
-{
+  std::is_nothrow_invocable_r_v<T, std::minus<>, T, U>) {
     if (_rows != rhs._rows || _cols != rhs._cols)
         throw std::invalid_argument("Dimension mismatch");
 
@@ -379,8 +354,7 @@ dynamic_matrix<T>& dynamic_matrix<T>::operator-=(const dynamic_matrix<U>& rhs) n
     return *this;
 }
 
-template <typename T> dynamic_matrix<T> dynamic_matrix<T>::operator*(const T& rhs) const
-{
+template<typename T> dynamic_matrix<T> dynamic_matrix<T>::operator*(const T& rhs) const {
     if constexpr (std::is_nothrow_invocable_r_v<T, std::multiplies<>, T, T>) {
         dynamic_matrix<T> temp(*this);
         temp *= rhs;
@@ -394,10 +368,9 @@ template <typename T> dynamic_matrix<T> dynamic_matrix<T>::operator*(const T& rh
     }
 }
 
-template <typename T>
+template<typename T>
 dynamic_matrix<T>& dynamic_matrix<T>::operator*=(const T& rhs) noexcept(
-    std::is_nothrow_invocable_r_v<T, std::multiplies<>, T, T>)
-{
+  std::is_nothrow_invocable_r_v<T, std::multiplies<>, T, T>) {
     if constexpr (std::is_nothrow_invocable_r_v<T, std::multiplies<>, T, T>) {
         _default_value = _default_value * rhs;
         for (std::size_t i = 0; i < _check_size; ++i)
@@ -408,8 +381,7 @@ dynamic_matrix<T>& dynamic_matrix<T>::operator*=(const T& rhs) noexcept(
     return *this;
 }
 
-template <typename T> dynamic_matrix<T> dynamic_matrix<T>::operator/(const T& rhs) const
-{
+template<typename T> dynamic_matrix<T> dynamic_matrix<T>::operator/(const T& rhs) const {
     if constexpr (std::is_nothrow_invocable_r_v<T, std::divides<>, T, T>) {
         dynamic_matrix<T> temp(*this);
         temp /= rhs;
@@ -423,10 +395,9 @@ template <typename T> dynamic_matrix<T> dynamic_matrix<T>::operator/(const T& rh
     }
 }
 
-template <typename T>
+template<typename T>
 dynamic_matrix<T>& dynamic_matrix<T>::operator/=(const T& rhs) noexcept(
-    std::is_nothrow_invocable_r_v<T, std::divides<>, T, T>)
-{
+  std::is_nothrow_invocable_r_v<T, std::divides<>, T, T>) {
     if constexpr (std::is_nothrow_invocable_r_v<T, std::divides<>, T, T>) {
         _default_value = _default_value / rhs;
         for (std::size_t i = 0; i < _check_size; ++i)
@@ -437,11 +408,10 @@ dynamic_matrix<T>& dynamic_matrix<T>::operator/=(const T& rhs) noexcept(
     return *this;
 }
 
-template <typename T>
-template <typename U>
-dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>::operator*(
-    const dynamic_matrix<U>& rhs) const
-{
+template<typename T>
+template<typename U>
+dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>>
+  dynamic_matrix<T>::operator*(const dynamic_matrix<U>& rhs) const {
     if (_cols != rhs._rows)
         throw std::invalid_argument("Dimension mismatch");
     static const std::size_t CUTOFF = 12;
@@ -464,10 +434,10 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
     }
 
     // If highly non-square, break into more square-like matrices and recurse
-    std::size_t dimensions[3] = { _rows, _cols, rhs._cols };
+    std::size_t dimensions[3] = {_rows, _cols, rhs._cols};
     std::sort(dimensions, dimensions + 3);
-    if (dimensions[1] >= 2 * dimensions[0]
-        || (dimensions[1] == dimensions[0] && dimensions[2] >= 2 * dimensions[0])) {
+    if (dimensions[1] >= 2 * dimensions[0] ||
+        (dimensions[1] == dimensions[0] && dimensions[2] >= 2 * dimensions[0])) {
         // Case 1: skinny LHS
         if (dimensions[0] == _rows) {
             std::size_t num_large_cols(_cols / _rows), num_rhs_large_cols(rhs._cols / _rows);
@@ -517,7 +487,7 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
                 for (std::size_t j = 0; j < num_large_cols; ++j) {
                     dynamic_matrix<result_t> subresult = lhs_sub[i] * rhs_sub[j];
                     std::size_t row_bound(std::min(_cols, _rows - i * _cols)),
-                        col_bound(std::min(_cols, rhs._cols - j * _cols));
+                      col_bound(std::min(_cols, rhs._cols - j * _cols));
                     for (std::size_t k = 0; k < row_bound; ++k)
                         for (std::size_t l = 0; l < col_bound; ++l)
                             result[i * _cols + k][j * _cols + l] = subresult[k][l];
@@ -538,8 +508,8 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
             dynamic_matrix<dynamic_matrix<T>> lhs_sub(num_large_rows, num_large_cols);
             for (std::size_t i = 0; i < num_large_rows; ++i)
                 for (std::size_t j = 0; j < num_large_cols; ++j)
-                    lhs_sub[i][j]
-                        = this->subarray(rhs._cols, rhs._cols, i * rhs._cols, j * rhs._cols, T());
+                    lhs_sub[i][j] =
+                      this->subarray(rhs._cols, rhs._cols, i * rhs._cols, j * rhs._cols, T());
 
             std::vector<dynamic_matrix<U>> rhs_sub(num_large_cols);
             for (std::size_t i = 0; i < num_large_cols; ++i)
@@ -563,41 +533,41 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
     // Strassen-Winograd algorithm
     // split each matrix in four
     std::size_t row_split(_rows / 2 + _rows % 2), mid_split(_cols / 2 + _cols % 2),
-        col_split(rhs._cols / 2 + rhs._cols % 2);
+      col_split(rhs._cols / 2 + rhs._cols % 2);
 
     if constexpr (std::is_same_v<T, U> && std::is_same_v<T, result_t>) {
         // only need in this case 10 temp variables
         dynamic_matrix<T> temp[10];
         temp[0] = this->subarray(row_split, mid_split, 0, mid_split, T()); // A12
-        temp[1] = rhs.subarray(mid_split, col_split, mid_split, 0, T()); // B21
-        temp[2] = temp[0] * temp[1]; // P2 = A12 * B21
-        temp[3] = this->subarray(row_split, mid_split, 0, 0); // A11
-        temp[4] = rhs.subarray(mid_split, col_split, 0, 0); // B11
-        temp[5] = temp[3] * temp[4]; // P1 = A11 * B11
+        temp[1] = rhs.subarray(mid_split, col_split, mid_split, 0, T());   // B21
+        temp[2] = temp[0] * temp[1];                                       // P2 = A12 * B21
+        temp[3] = this->subarray(row_split, mid_split, 0, 0);              // A11
+        temp[4] = rhs.subarray(mid_split, col_split, 0, 0);                // B11
+        temp[5] = temp[3] * temp[4];                                       // P1 = A11 * B11
 
-        temp[6] = this->subarray(row_split, mid_split, row_split, 0, T()); // A21
+        temp[6] = this->subarray(row_split, mid_split, row_split, 0, T());         // A21
         temp[7] = this->subarray(row_split, mid_split, row_split, mid_split, T()); // A22
-        temp[8] = temp[6] + temp[7]; // S1 = A21 + A22
-        temp[9] = rhs.subarray(mid_split, col_split, 0, col_split, T()); // B12
+        temp[8] = temp[6] + temp[7];                                               // S1 = A21 + A22
+        temp[9] = rhs.subarray(mid_split, col_split, 0, col_split, T());           // B12
         temp[2] = temp[5] + temp[2]; // U1 = P1 + P2 = C11
         for (std::size_t i = 0; i < row_split; ++i)
             for (std::size_t j = 0; j < col_split; ++j)
                 result[i][j] = temp[2][i][j];
-        temp[4] = temp[9] - temp[4]; // T1 = B12 - B11
-        temp[6] = temp[3] - temp[6]; // S3 = A11 - A21
+        temp[4] = temp[9] - temp[4];                                             // T1 = B12 - B11
+        temp[6] = temp[3] - temp[6];                                             // S3 = A11 - A21
         temp[2] = rhs.subarray(mid_split, col_split, mid_split, col_split, T()); // B22
-        temp[3] = temp[8] - temp[3]; // S2 = S1 - A11
-        temp[8] = temp[8] * temp[4]; // P5 = S1 * T1
-        temp[0] -= temp[3]; // S4 = A12 - S2
-        temp[4] = temp[2] - temp[4]; // T2 = B22 - T1
-        temp[0] = temp[0] * temp[2]; // P3 = S4 * B22
-        temp[1] = temp[4] - temp[1]; // T4 = T2 - B21
-        temp[2] -= temp[9]; // T3 = B22 - B12
-        temp[3] = temp[3] * temp[4]; // P6 = S2 * T2
-        temp[1] = temp[7] * temp[1]; // P4 = A22 * T4
-        temp[2] = temp[6] * temp[2]; // P7 = S3 * T3
-        temp[3] = temp[5] + temp[3]; // U2 = P1 + P6
-        temp[4] = temp[3] + temp[8]; // U4 = U2 + P5
+        temp[3] = temp[8] - temp[3];                                             // S2 = S1 - A11
+        temp[8] = temp[8] * temp[4];                                             // P5 = S1 * T1
+        temp[0] -= temp[3];                                                      // S4 = A12 - S2
+        temp[4] = temp[2] - temp[4];                                             // T2 = B22 - T1
+        temp[0] = temp[0] * temp[2];                                             // P3 = S4 * B22
+        temp[1] = temp[4] - temp[1];                                             // T4 = T2 - B21
+        temp[2] -= temp[9];                                                      // T3 = B22 - B12
+        temp[3] = temp[3] * temp[4];                                             // P6 = S2 * T2
+        temp[1] = temp[7] * temp[1];                                             // P4 = A22 * T4
+        temp[2] = temp[6] * temp[2];                                             // P7 = S3 * T3
+        temp[3] = temp[5] + temp[3];                                             // U2 = P1 + P6
+        temp[4] = temp[3] + temp[8];                                             // U4 = U2 + P5
         temp[0] = temp[4] + temp[0]; // U5 = U4 + P3 = C12
         for (std::size_t i = 0; i < row_split; ++i)
             for (std::size_t j = 0; j < col_split && col_split + j < rhs._cols; ++j)
@@ -616,14 +586,14 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
         dynamic_matrix<T> lhs_sub[5];
         dynamic_matrix<U> rhs_sub[4];
         dynamic_matrix<result_t> res_sub[4];
-        lhs_sub[0] = this->subarray(row_split, mid_split, 0, 0); // A11
-        lhs_sub[1] = this->subarray(row_split, mid_split, 0, mid_split, T()); // A12
-        lhs_sub[2] = this->subarray(row_split, mid_split, row_split, 0); // A21
+        lhs_sub[0] = this->subarray(row_split, mid_split, 0, 0);                      // A11
+        lhs_sub[1] = this->subarray(row_split, mid_split, 0, mid_split, T());         // A12
+        lhs_sub[2] = this->subarray(row_split, mid_split, row_split, 0);              // A21
         lhs_sub[3] = this->subarray(row_split, mid_split, row_split, mid_split, T()); // A22
-        rhs_sub[0] = rhs.subarray(mid_split, col_split, 0, 0); // B11
-        rhs_sub[1] = rhs.subarray(mid_split, col_split, 0, col_split, U()); // B12
-        rhs_sub[2] = rhs.subarray(mid_split, col_split, mid_split, 0, U()); // B21
-        rhs_sub[3] = rhs.subarray(mid_split, col_split, mid_split, col_split, U()); // B22
+        rhs_sub[0] = rhs.subarray(mid_split, col_split, 0, 0);                        // B11
+        rhs_sub[1] = rhs.subarray(mid_split, col_split, 0, col_split, U());           // B12
+        rhs_sub[2] = rhs.subarray(mid_split, col_split, mid_split, 0, U());           // B21
+        rhs_sub[3] = rhs.subarray(mid_split, col_split, mid_split, col_split, U());   // B22
 
         res_sub[1] = lhs_sub[0] * rhs_sub[0]; // P1 = A11 * B11
         res_sub[0] = lhs_sub[1] * rhs_sub[2]; // P2 = A12 * B21
@@ -635,18 +605,18 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
         lhs_sub[4] = lhs_sub[2] + lhs_sub[3]; // S1 = A21 + A22
         rhs_sub[0] = rhs_sub[1] - rhs_sub[0]; // T1 = B12 - B11
         res_sub[2] = lhs_sub[4] * rhs_sub[0]; // P5 = S1 * T1
-        lhs_sub[4] -= lhs_sub[0]; // S2 = S1 - A11
+        lhs_sub[4] -= lhs_sub[0];             // S2 = S1 - A11
         rhs_sub[0] = rhs_sub[3] - rhs_sub[0]; // T2 = B22 - T1
         res_sub[3] = lhs_sub[4] * rhs_sub[0]; // P6 = S2 * T2
-        res_sub[1] += res_sub[3]; // U2 = P1 + P6
-        lhs_sub[0] -= lhs_sub[2]; // S3 = A11 - A21
+        res_sub[1] += res_sub[3];             // U2 = P1 + P6
+        lhs_sub[0] -= lhs_sub[2];             // S3 = A11 - A21
         rhs_sub[1] = rhs_sub[3] - rhs_sub[1]; // T3 = B22 - B12
         res_sub[0] = lhs_sub[0] * rhs_sub[1]; // P7 = S3 * T3
-        lhs_sub[1] -= lhs_sub[4]; // S4 = A12 - S2
-        rhs_sub[0] -= rhs_sub[2]; // T4 = T2 - B21
+        lhs_sub[1] -= lhs_sub[4];             // S4 = A12 - S2
+        rhs_sub[0] -= rhs_sub[2];             // T4 = T2 - B21
         res_sub[3] = lhs_sub[1] * rhs_sub[3]; // P3 = S4 * B22
         res_sub[0] = res_sub[1] + res_sub[0]; // U3 = U2 + P7
-        res_sub[1] += res_sub[2]; // U4 = U2 + P5
+        res_sub[1] += res_sub[2];             // U4 = U2 + P5
         res_sub[3] = res_sub[1] + res_sub[3]; // U5 = U4 + P3
         for (std::size_t i = 0; i < row_split; ++i)
             for (std::size_t j = 0; j < col_split && col_split + j < rhs._cols; ++j)
@@ -667,8 +637,7 @@ dynamic_matrix<std::invoke_result_t<std::multiplies<>, T, U>> dynamic_matrix<T>:
     return result;
 }
 
-template <typename T> bool dynamic_matrix<T>::operator==(const dynamic_matrix<T>& rhs) const
-{
+template<typename T> bool dynamic_matrix<T>::operator==(const dynamic_matrix<T>& rhs) const {
     if (!(_rows == rhs._rows && _cols == rhs._cols))
         return false;
     for (std::size_t i = 0; i < _rows; ++i)
@@ -679,31 +648,26 @@ template <typename T> bool dynamic_matrix<T>::operator==(const dynamic_matrix<T>
 }
 
 #if __cplusplus <= 201703L
-template <typename T> bool dynamic_matrix<T>::operator!=(const dynamic_matrix<T>& rhs) const
-{
+template<typename T> bool dynamic_matrix<T>::operator!=(const dynamic_matrix<T>& rhs) const {
     return !operator==(rhs);
 }
 #endif
 
-template <typename T> void dynamic_matrix<T>::_check_row(std::size_t pos) const
-{
+template<typename T> void dynamic_matrix<T>::_check_row(std::size_t pos) const {
     if (pos >= _rows)
         throw std::out_of_range(std::to_string(pos));
 }
 
-template <typename T> void dynamic_matrix<T>::_check_col(std::size_t pos) const
-{
+template<typename T> void dynamic_matrix<T>::_check_col(std::size_t pos) const {
     if (pos >= _cols)
         throw std::out_of_range(std::to_string(pos));
 }
 
-template <typename T> bool dynamic_matrix<T>::_is_initialized(std::size_t pos) const noexcept
-{
+template<typename T> bool dynamic_matrix<T>::_is_initialized(std::size_t pos) const noexcept {
     return _check_1[pos] < _check_size && _check_2[_check_1[pos]] == pos;
 }
 
-template <typename T> void dynamic_matrix<T>::_initialize(std::size_t pos, const T& value)
-{
+template<typename T> void dynamic_matrix<T>::_initialize(std::size_t pos, const T& value) {
     if (_is_initialized(pos)) {
         _elements[pos] = value;
     } else {

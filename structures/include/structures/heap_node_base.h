@@ -4,23 +4,20 @@
 #include "heap_base.h"
 
 namespace heap {
-template <typename T, typename Compare> class binary_heap;
-template <typename T, typename Compare> class binomial;
-template <typename T, typename Compare> class Fibonacci;
+template<typename T, typename Compare> class binary_heap;
+template<typename T, typename Compare> class binomial;
+template<typename T, typename Compare> class Fibonacci;
 
 // node_base:
 // adding an element returns a pointer to the added node
 // pointer is valid until element is removed from heap
-template <typename T, typename Compare = std::less<T>> class node_base : public base<T, Compare> {
-public:
+template<typename T, typename Compare = std::less<T>> class node_base : public base<T, Compare> {
+    public:
     node_base() = default;
-    explicit node_base(Compare comp)
-        : base<T, Compare>(comp)
-    {
-    }
+    explicit node_base(Compare comp) : base<T, Compare>(comp) {}
 
     class node {
-    public:
+        public:
         virtual ~node() noexcept;
         node(const node&) = delete;
         node& operator=(const node&) = delete;
@@ -29,13 +26,9 @@ public:
         T& operator*();
         T* operator->();
 
-    private:
+        private:
         node() = default;
-        node(const T& value)
-            : _value(value)
-            , _parent(nullptr)
-            , _children()
-            , _flag(false) {};
+        node(const T& value) : _value(value), _parent(nullptr), _children(), _flag(false){};
         node* _deep_clone() const;
 
         T _value;
@@ -48,11 +41,11 @@ public:
     };
 
     class node_wrapper {
-    public:
+        public:
         node_wrapper(node* = nullptr) noexcept;
         const node* get() const noexcept;
 
-    private:
+        private:
         node* _node;
         friend class node_base<T, Compare>;
     };
@@ -73,7 +66,7 @@ public:
     // merge([class]&& src) which moves all the values of src into this, emptying src.
     // Node pointers should not be invalidated by this merge.
 
-protected:
+    protected:
     // Copies _size over
     // Protected because this is meant to only be a helper function for the copy ctor of concrete
     // children
@@ -86,7 +79,7 @@ protected:
 
     uint32_t _size = 0;
 };
-}
+} // namespace heap
 
 #include "../../src/structures/heap_node_base.tpp"
 

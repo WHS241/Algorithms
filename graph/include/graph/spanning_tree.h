@@ -27,10 +27,9 @@ namespace graph_alg {
  * (1926) Práce Mor. Přírodověd. Spol. V Brně III
  * Θ(E log V)
  */
-template <typename Vertex, typename EdgeWeight, typename... Args>
-graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Boruvka(
-    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, true, EdgeWeight, Args...>
+  minimum_spanning_Boruvka(const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input) {
     struct edge_info {
         Vertex start;
         Vertex terminal;
@@ -43,7 +42,7 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Boruvka(
     graph::graph<Vertex, false, true, EdgeWeight, Args...> result;
     disjoint_set<Vertex, Args...> tree_components;
     std::unordered_map<Vertex, std::list<std::pair<Vertex, EdgeWeight>>, Args...>
-        mutable_list; // need to be able to iterate through and delete edges quickly
+      mutable_list; // need to be able to iterate through and delete edges quickly
 
     for (Vertex& v : input_vertices) {
         result.add_vertex(v);
@@ -68,24 +67,24 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Boruvka(
 
             if (!mutable_list[v].empty()) {
                 std::pair<Vertex, EdgeWeight> least_weight_edge = *std::min_element(
-                    edge_list.begin(), edge_list.end(),
-                    [](const std::pair<Vertex, EdgeWeight>& x,
-                        const std::pair<Vertex, EdgeWeight>& y) { return x.second < y.second; });
-                edge_info candidate { v, least_weight_edge.first, least_weight_edge.second };
+                  edge_list.begin(), edge_list.end(),
+                  [](const std::pair<Vertex, EdgeWeight>& x,
+                     const std::pair<Vertex, EdgeWeight>& y) { return x.second < y.second; });
+                edge_info candidate{v, least_weight_edge.first, least_weight_edge.second};
 
                 // check that it is the smallest out of current set so far
-                if (to_add.find(component_root) == to_add.end()
-                    || candidate.weight < to_add[component_root].weight)
+                if (to_add.find(component_root) == to_add.end() ||
+                    candidate.weight < to_add[component_root].weight)
                     to_add[component_root] = std::move(candidate);
             }
         }
 
         // add edges and update connected components
         for (const std::pair<Vertex, edge_info>& candidate : to_add)
-            if (tree_components.find(candidate.second.start)
-                != tree_components.find(candidate.second.terminal)) {
-                result.force_add(
-                    candidate.second.start, candidate.second.terminal, candidate.second.weight);
+            if (tree_components.find(candidate.second.start) !=
+                tree_components.find(candidate.second.terminal)) {
+                result.force_add(candidate.second.start, candidate.second.terminal,
+                                 candidate.second.weight);
                 tree_components.union_sets(candidate.second.start, candidate.second.terminal);
             }
     }
@@ -114,10 +113,9 @@ input.get_translation().at(u) < input.get_translation().at(v); });
  * Θ(V^2) with array
  * Θ(E + V log V) with Fibonacci heap
  */
-template <typename Vertex, typename EdgeWeight, typename... Args>
-graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Prim(
-    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, true, EdgeWeight, Args...>
+  minimum_spanning_Prim(const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input) {
     struct edge {
         Vertex current;
         Vertex from;
@@ -134,7 +132,7 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Prim(
     std::vector<edge> data_map(vertices.size());
     std::transform(vertices.begin(), vertices.end(), data_map.begin(), [](const Vertex& value) {
         // double max orders unconnected vertices after connected
-        return edge { value, value, EdgeWeight() };
+        return edge{value, value, EdgeWeight()};
     });
 
     // ordering for edges in heap below; visited before unvisited
@@ -196,10 +194,9 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Prim(
  * (1956) doi:10.1090/S0002-9939-1956-0078686-7
  * Θ(E log V) with sorting and UNION-FIND
  */
-template <typename Vertex, typename EdgeWeight, typename... Args>
-graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Kruskal(
-    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
-{
+template<typename Vertex, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, true, EdgeWeight, Args...>
+  minimum_spanning_Kruskal(const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input) {
     std::vector<Vertex> vertices = input.vertices();
 
     struct edge {
@@ -209,7 +206,9 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Kruskal(
     };
     std::unordered_set<Vertex, Args...> processed_vertices; // used to prevent double-counting edges
 
-    auto edge_compare = [](const edge& x, const edge& y) { return x.weight < y.weight; };
+    auto edge_compare = [](const edge& x, const edge& y) {
+        return x.weight < y.weight;
+    };
     std::vector<edge> edges; // all edges, ordered by weight
     edges.reserve(vertices.size());
 
@@ -256,13 +255,11 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Kruskal(
  * An O(|E|loglog|V|) algorithm for finding minimum spanning trees
  * (1975) doi:10.1016/0020-0190(75)90056-3
  */
-template <typename Vertex, typename EdgeWeight, typename... Args>
-graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
-    const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input)
-{
-
-    if (input.order()
-        < 3) // as long as there are no multi-edges, any graph with <= 2 vertices is its own MST
+template<typename Vertex, typename EdgeWeight, typename... Args>
+graph::graph<Vertex, false, true, EdgeWeight, Args...>
+  minimum_spanning_Yao(const graph::graph<Vertex, false, true, EdgeWeight, Args...>& input) {
+    // as long as there are no multi-edges, any graph with <= 2 vertices is its own MST
+    if (input.order() < 3)
         return input;
 
     typedef std::list<std::pair<Vertex, EdgeWeight>> edge_list;
@@ -277,7 +274,8 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
 
     for (const Vertex& v : input_vertices) {
         // Divide-and-conquer to partial sort: Find the middle cutoff, then partition to split the
-        // levels Keep track of which levels the current group contains, add to final set if only
+        // levels
+        // Keep track of which levels the current group contains, add to final set if only
         // one level remains
         std::vector<edge_list> final_levels(num_levels);
 
@@ -285,30 +283,28 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
         // list
         std::list<std::pair<std::pair<uint32_t, uint32_t>, edge_list>> processor;
 
-        processor.push_back({ { 0, num_levels - 1 }, input.edges(v) });
+        processor.push_back({{0, num_levels - 1}, input.edges(v)});
         uint32_t current_vertex_degree = input.degree(v);
 
         while (!processor.empty()) {
-            std::pair<std::pair<uint32_t, uint32_t>, edge_list> current
-                = std::move(processor.front());
+            std::pair<std::pair<uint32_t, uint32_t>, edge_list> current =
+              std::move(processor.front());
             processor.pop_front();
             if (current.first.first == current.first.second) {
                 final_levels[current.first.first] = std::move(current.second);
             } else {
                 uint32_t split = (current.first.first + current.first.second) / 2;
                 std::pair<std::pair<uint32_t, uint32_t>, edge_list> next_1(
-                    { { current.first.first, split }, edge_list() }),
-                    next_2({ { split + 1, current.first.second }, edge_list() });
-                uint32_t cutoff_point = (current_vertex_degree * (split + 1)) / num_levels
-                    - (current_vertex_degree * current.first.first) / num_levels;
+                  {{current.first.first, split}, edge_list()}),
+                  next_2({{split + 1, current.first.second}, edge_list()});
+                uint32_t cutoff_point = (current_vertex_degree * (split + 1)) / num_levels -
+                                        (current_vertex_degree * current.first.first) / num_levels;
 
                 if (cutoff_point != current.second.size()) {
                     std::pair<Vertex, EdgeWeight> pivot = sequence::selection(
-                        current.second.begin(), current.second.end(), cutoff_point,
-                        [](const std::pair<Vertex, EdgeWeight>& x,
-                            const std::pair<Vertex, EdgeWeight>& y) {
-                            return x.second < y.second;
-                        });
+                      current.second.begin(), current.second.end(), cutoff_point,
+                      [](const std::pair<Vertex, EdgeWeight>& x,
+                         const std::pair<Vertex, EdgeWeight>& y) { return x.second < y.second; });
 
                     // Partition current list based on our median, skip any that are equal to the
                     // pivot
@@ -326,8 +322,8 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
 
                     // For ones that are equal, split so that the groups are roughly proportional to
                     // the number of edges they should have
-                    double expected_ratio = static_cast<double>(split - current.first.first + 1)
-                        / (current.first.second - split);
+                    double expected_ratio = static_cast<double>(split - current.first.first + 1) /
+                                            (current.first.second - split);
                     for (auto it = current.second.begin(); it != current.second.end();) {
                         auto temp(it++);
                         if (next_1.second.size() < expected_ratio * next_2.second.size())
@@ -385,9 +381,9 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
                     } else {
                         if (!found_edge) {
                             found_edge = true;
-                            candidate = { v, it->first, it->second };
+                            candidate = {v, it->first, it->second};
                         } else if (it->second < candidate.weight) {
-                            candidate = { v, it->first, it->second };
+                            candidate = {v, it->first, it->second};
                         }
                         ++it;
                     }
@@ -397,23 +393,22 @@ graph::graph<Vertex, false, true, EdgeWeight, Args...> minimum_spanning_Yao(
             }
 
             // compare with what we have for this component, assuming we have an edge
-            if (found_edge
-                && (to_add.find(component_root) == to_add.end()
-                    || candidate.weight < to_add[component_root].weight))
+            if (found_edge && (to_add.find(component_root) == to_add.end() ||
+                               candidate.weight < to_add[component_root].weight))
                 to_add[component_root] = std::move(candidate);
         }
 
         // add edges and update connected components
         for (const std::pair<Vertex, edge_info>& candidate : to_add)
-            if (tree_components.find(candidate.second.start)
-                != tree_components.find(candidate.second.terminal)) {
-                result.force_add(
-                    candidate.second.start, candidate.second.terminal, candidate.second.weight);
+            if (tree_components.find(candidate.second.start) !=
+                tree_components.find(candidate.second.terminal)) {
+                result.force_add(candidate.second.start, candidate.second.terminal,
+                                 candidate.second.weight);
                 tree_components.union_sets(candidate.second.start, candidate.second.terminal);
             }
     }
     return result;
 }
-}
+} // namespace graph_alg
 
 #endif // GRAPH_ALG_SPANNING_TREE_H
