@@ -56,8 +56,8 @@ class van_Emde_Boas_tree {
     std::size_t _size;  // num values currently stored
 
     van_Emde_Boas_tree* _subtrees;
+    std::size_t _num_bits; // number of bits required to store permitted values
     std::size_t _num_trees;
-    std::size_t _subtree_size; // size of every tree, except possibly final
 
     // space-initialization trick
     std::size_t* _init_check;

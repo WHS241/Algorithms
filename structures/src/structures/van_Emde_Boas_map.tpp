@@ -116,7 +116,7 @@ van_Emde_Boas_map<T>::van_Emde_Boas_map(const van_Emde_Boas_map<T>& src) :
     std::size_t last = -1;
     try {
         for (const value_type& val : src) {
-            _allocator.construct(_elements + val.first, val);
+            std::construct_at(_elements + val.first, val);
             last = val.first;
         }
     } catch (...) {
@@ -124,7 +124,7 @@ van_Emde_Boas_map<T>::van_Emde_Boas_map(const van_Emde_Boas_map<T>& src) :
             if (last == -1 || val.first > last)
                 break;
             else
-                _allocator.destroy(_elements + val.first);
+                std::destroy_at(_elements + val.first);
         }
         _allocator.deallocate(_elements, _tree.max_size());
         throw;
@@ -297,7 +297,7 @@ template<typename T>
 typename van_Emde_Boas_map<T>::size_type
   van_Emde_Boas_map<T>::erase(const typename van_Emde_Boas_map<T>::key_type& key) {
     if (_tree.contains(key)) {
-        _allocator.destroy(_elements + key);
+        std::destroy_at(_elements + key);
         _tree.erase(key);
         return 1U;
     }

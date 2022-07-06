@@ -5,7 +5,7 @@
 
 namespace graph_alg {
 
-    // WIP
+// WIP
 template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
 graph::graph<Vertex, true, Weighted, EdgeWeight, Args...>
   transitive_orientation(const graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>& input) {

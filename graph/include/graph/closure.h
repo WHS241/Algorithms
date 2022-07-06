@@ -5,8 +5,10 @@
 
 #include <cstdint>
 
+#include <graph/components.h>
 #include <structures/dynamic_matrix.h>
 #include <structures/graph.h>
+#include <unordered_set>
 
 #include "search.h"
 
@@ -51,11 +53,11 @@ graph::graph<Vertex, false, Weighted, EdgeWeight, Args...>
 
 /**
  * Find the transitive closure of a graph
- * Θ(mn)
+ * Θ(mn), good for sparse graphs
  */
 template<typename Vertex, bool Directed, bool Weighted, typename... Args>
 graph::graph<Vertex, Directed, false, Args...>
-  transitive_closure(const graph::graph<Vertex, Directed, Weighted, Args...>& src) {
+  transitive_closure_sparse(const graph::graph<Vertex, Directed, Weighted, Args...>& src) {
     // Strategy: From each vertex, find all reachable vertices
     graph::graph<Vertex, Directed, Weighted, Args...> result;
     std::vector<Vertex> vertices = src.vertices();
@@ -71,6 +73,139 @@ graph::graph<Vertex, Directed, false, Args...>
                 }
             }
         });
+
+    return result;
+}
+
+// helper functions for transitive_closure()
+namespace {
+    /**
+     * Recursive step for finding the transitive closure of a DAG
+     */
+    dynamic_matrix<int> transitive_closure_DAG_recurse(const dynamic_matrix<int>& src) {
+        if (src.num_rows() <= 1)
+            return src;
+
+        // Since DAG has already been topologically sorted, src is always upper triangular
+        std::size_t div_size = src.num_rows() / 2;
+        dynamic_matrix<int> front(div_size, div_size),
+          back(src.num_rows() - div_size, src.num_cols() - div_size);
+        for (std::size_t i = 0; i < div_size; ++i) {
+            for (std::size_t j = i; j < div_size; ++j) {
+                front[i][j] = src[i][j];
+            }
+        }
+        for (std::size_t i = 0; i < src.num_rows() - div_size; ++i) {
+            for (std::size_t j = i; j < src.num_cols() - div_size; ++j) {
+                back[i][j] = src[i + div_size][j + div_size];
+            }
+        }
+        front = transitive_closure_DAG_recurse(front);
+        back = transitive_closure_DAG_recurse(back);
+
+        dynamic_matrix<int> result(src.num_rows(), src.num_cols());
+        for (std::size_t i = 0; i < div_size; ++i) {
+            for (std::size_t j = i; j < div_size; ++j) {
+                result[i][j] = front[i][j];
+            }
+        }
+        for (std::size_t i = 0; i < src.num_rows() - div_size; ++i) {
+            for (std::size_t j = i; j < src.num_cols() - div_size; ++j) {
+                result[i + div_size][j + div_size] = back[i][j];
+            }
+        }
+        for (std::size_t i = 0; i < div_size; ++i) {
+            for (std::size_t j = div_size; j < src.num_cols(); ++j) {
+                result[i][j] = src[i][j];
+            }
+        }
+
+        // Number of closures decreases to
+        // Current: front1 -> front2 -> back1 -> back2
+        // Edges to add: front1 -> back1, front1->back2, front2->back2
+        //
+        // Since result[i][i] != 0 for all i
+        // Can do everything in one pass with 2 matrix multiplications
+        result = result * result * result;
+
+        // Slight cleanup: Reset non-zero entries to 1
+        for (std::size_t i = 0; i < result.num_rows(); ++i) {
+            for (std::size_t j = i; j < result.num_cols(); ++j) {
+                if (result[i][j] != 0) {
+                    result[i][j] = 1;
+                }
+            }
+        }
+        return result;
+    }
+} // namespace
+
+/**
+ * Find the transitive closure of a graph
+ * Θ(matrix multiplication), good for dense graphs
+ */
+template<typename Vertex, bool Weighted, typename EdgeWeight, typename... Args>
+graph::unweighted_graph<Vertex, true, Args...>
+  transitive_closure(const graph::graph<Vertex, true, Weighted, EdgeWeight, Args...>& src) {
+    std::list<std::unordered_set<Vertex, Args...>> comps =
+      graph_alg::strongly_connected_components(src);
+    std::vector<std::unordered_set<Vertex, Args...>> comps_vec(comps.begin(), comps.end());
+    std::unordered_map<Vertex, std::size_t, Args...> vert_to_comp;
+
+    std::size_t i = 0;
+    for (auto& s : comps) {
+        for (const Vertex& v : s) {
+            vert_to_comp[v] = i;
+        }
+        ++i;
+    }
+
+    // Generate equivalent DAG
+    graph::unweighted_graph<std::size_t, true, Args...> dag;
+    for (std::size_t i = 0; i < comps.size(); ++i) {
+        dag.add_vertex(i);
+    }
+
+    for (const Vertex& v : src.vertices()) {
+        for (const Vertex& u : src.neighbors(v)) {
+            if (vert_to_comp[v] != vert_to_comp[u]) {
+                dag.force_add(vert_to_comp[v], vert_to_comp[u]);
+            }
+        }
+    }
+
+    std::vector<std::size_t> top_sort = topological_sort(dag);
+    std::vector<std::size_t> reverse_lookup(top_sort.size());
+    for (std::size_t i = 0; i < top_sort.size(); ++i) {
+        reverse_lookup[top_sort[i]] = i;
+    }
+
+    dynamic_matrix<int> aug_mat(dag.order(), dag.order());
+    for (std::size_t i = 0; i < dag.order(); ++i) {
+        aug_mat[i][i] = 1; // Needed for matrix multiplication to work
+        for (std::size_t v : dag.neighbors(top_sort[i])) {
+            aug_mat[i][reverse_lookup[v]] = 1;
+        }
+    }
+
+    dynamic_matrix<int> closed = transitive_closure_DAG_recurse(aug_mat);
+
+    // Convert back to original graph
+    graph::unweighted_graph<Vertex, true, Args...> result;
+    for (const Vertex& v : src.vertices())
+        result.add_vertex(v);
+    for (std::size_t i = 0; i < closed.num_rows(); ++i) {
+        for (std::size_t j = i + 1; j < closed.num_cols(); ++j) {
+            if (closed[i][j] != 0) {
+                // Every vertex corresponding to j can be reached from each corresponding to i
+                for (const Vertex& u : comps_vec[top_sort[i]]) {
+                    for (const Vertex& v : comps_vec[top_sort[j]]) {
+                        result.force_add(u, v);
+                    }
+                }
+            }
+        }
+    }
 
     return result;
 }

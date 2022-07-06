@@ -122,7 +122,7 @@ std::ostream& operator<<(std::ostream& os,
 
 // Make parameter juggling easier
 template<typename Vertex, bool Directed, typename... Args>
-using unweighted_graph = graph<Vertex, Directed, false, bool, Args...>;
+using unweighted_graph = graph<Vertex, Directed, false, double, Args...>;
 
 } // namespace graph
 

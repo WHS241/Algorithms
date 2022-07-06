@@ -8,8 +8,22 @@
 namespace algebra {
 // Evaluate a[0] + a[1]x + a[2]x^2 + a[3]x^3 + ...
 // Θ(coefficients.size()) with Horner's method
-std::complex<double> evaluate_polynomial(
-    const std::vector<std::complex<double>>& coefficients, std::complex<double> x);
+std::complex<double> evaluate_polynomial(const std::vector<std::complex<double>>& coefficients,
+                                         std::complex<double> x);
+
+// Evaluate the Discrete Fourier Transform for a given sequence of values
+// Transforms polynomial A(x) = a[0] + a[1]x + a[2]x^2 + ... + a[n - 1]x^(n - 1)
+// into vector (c_0, c_1, ..., c_(2^k - 1))
+// where c_i = A(e^(-2 * pi * i / 2^k)) and k is the smallest number such that 2^k >= n
+//
+// Θ(n log n) using Gauss/Cooley-Tukey algorithm
+std::vector<std::complex<double>> FFT(const std::vector<std::complex<double>>& v);
+std::vector<std::complex<double>> inverse_FFT(const std::vector<std::complex<double>>& v);
+
+// Calculate the product of (p[0] + p[1]x + ...)(q[0] + q[1]x + ...)
+// Θ(n log n) using FFT/inverse FFT
+std::vector<std::complex<double>> polynomial_product(const std::vector<std::complex<double>>& p,
+                                                     const std::vector<std::complex<double>>& q);
 
 /*
 Evaluate the consecutive series of iterators such that
@@ -24,10 +38,9 @@ It::value_type It::value_type has a default constructor or is a primitive
 1. compare(a, b) is true iff compare(func(a, x), func(b, x)) is true
 2. compare(zero, x) is true iff compare(a, func(a, x)) is true
 */
-template <typename It, typename Compare = std::less<>, typename Function = std::plus<>>
-std::pair<It, It> maximum_consecutive_sum(
-    It first, It last, Compare compare = Compare(), Function func = Function())
-{
+template<typename It, typename Compare = std::less<>, typename Function = std::plus<>>
+std::pair<It, It> maximum_consecutive_sum(It first, It last, Compare compare = Compare(),
+                                          Function func = Function()) {
     if (first == last)
         return std::make_pair(first, first);
 
@@ -60,11 +73,12 @@ std::pair<It, It> maximum_consecutive_sum(
     }
 
     // find max among the sub-answers
-    auto answer = std::max_element(sub_results.begin(), sub_results.end(),
-        [&compare](const Decider& x, const Decider& y) { return compare(x.sum, y.sum); });
+    auto answer = std::max_element(
+      sub_results.begin(), sub_results.end(),
+      [&compare](const Decider& x, const Decider& y) { return compare(x.sum, y.sum); });
 
     return std::make_pair(answer->start, ++(answer->current));
 }
-}
+} // namespace algebra
 
 #endif // ALGEBRA_H

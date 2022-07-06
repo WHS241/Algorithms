@@ -130,9 +130,7 @@ std::list<std::unordered_set<Vertex, Args...>> strongly_connected_components(
       src, src.vertices().front(),
       [&current_num, &search_number, &low, &component](const Vertex& curr) {
           search_number[curr] = low[curr] = current_num++;
-          std::unordered_set<Vertex, Args...> currComp;
-          currComp.insert(curr);
-          component[curr] = std::move(currComp);
+          component[curr].insert(curr);
       },
       [&component, &finished, &low, &result, &search_number, &src](const Vertex& parent,
                                                                    const Vertex& child) {

@@ -63,8 +63,13 @@ template<typename T> class binary_tree {
         node(node&&) noexcept = default;
         virtual const node& operator=(node&&) noexcept;
 
+        // Change the left/right child of the node
+        // Returns the old child (now decoupled)
         virtual node* change_left(node* toAdd) noexcept;
         virtual node* change_right(node* toAdd) noexcept;
+
+        // Replace the left/right child of the node
+        // Similar to change_left/right but old child is destroyed
         virtual void replace_left(node* toAdd) noexcept;
         virtual void replace_right(node* toAdd) noexcept;
         virtual node* clone() const;

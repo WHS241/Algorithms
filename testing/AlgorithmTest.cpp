@@ -5,18 +5,23 @@
 
 #include <gtest/gtest.h>
 
+#include <algebra/algebra.h>
+
 #include <npc/CDCL.h>
 #include <npc/karp/certificate.h>
 #include <npc/karp/reduction.h>
 
 #include <structures/graph.h>
 
+#include <graph/closure.h>
 #include <graph/max_flow_min_cut.h>
 #include <graph/order_dimension.h>
 #include <graph/search.h>
 
 #include <special_case/model.h>
 #include <special_case/model_gen.h>
+
+#include <structures/B_tree.h>
 
 #include "CNF_reader.h"
 #include "generator.h"
@@ -86,7 +91,7 @@ TEST_F(AlgorithmTest, CNF_Test) {
         ASSERT_TRUE(NP_complete::cert_CNF_SAT(instance, result)) << std::to_string(i);
     }
 }
-
+/*
 TEST_F(AlgorithmTest, Reductions_from_CNF) {
     for (int i = 1; i < +1000; ++i) {
         std::ostringstream path_builder;
@@ -222,7 +227,7 @@ TEST_F(AlgorithmTest, Reductions_from_Vertex_Cover) {
           NP_complete::Vertex_Cover_to_DHC(vertex_cover_inst),
           std::make_pair(DHC_certificate.begin(), DHC_certificate.end())));
     }
-}
+}*/
 
 TEST_F(AlgorithmTest, Lex_BFS) {
     auto lex_compare = [](const std::set<int>& x, const std::set<int>& y, int bound) -> bool {
@@ -472,7 +477,7 @@ template<typename F> void verify_directed_min_cut(F alg_to_test, std::mt19937_64
                               [&input](double prev, const graph_alg::cut_edge<int>& curr) {
                                   return prev + input.edge_cost(curr.start, curr.end);
                               });
-            EXPECT_DOUBLE_EQ(flow_value, cut_cost);
+            EXPECT_NEAR(flow_value, cut_cost, 1e-10);
 
             // verify cut
             for (const auto& edge : min_cut) {
@@ -502,13 +507,14 @@ template<typename F> void verify_undirected_min_cut(F alg_to_test, std::mt19937_
 
             // verify max-flow-min-cut theorem
             auto flow_start = max_flow.edges(vertices[start_index]);
-            EXPECT_DOUBLE_EQ(
+            EXPECT_NEAR(
               std::accumulate(flow_start.begin(), flow_start.end(), 0.,
                               [](double prev, const auto& curr) { return prev + curr.second; }),
               std::accumulate(min_cut.begin(), min_cut.end(), 0.,
                               [&input](double prev, const graph_alg::cut_edge<int>& curr) {
                                   return prev + input.edge_cost(curr.start, curr.end);
-                              }));
+                              }),
+              1e-10);
 
             // verify cut
             for (const auto& edge : min_cut) {
@@ -546,4 +552,114 @@ TEST_F(AlgorithmTest, Max_Flow_Karzanov) {
     verify_properties(graph_alg::Karzanov_max_flow<int, true, double>, engine);
     verify_directed_min_cut(graph_alg::Karzanov_max_flow<int, true, double>, engine);
     verify_undirected_min_cut(graph_alg::Karzanov_max_flow<int, false, double>, engine);
+}
+
+TEST_F(AlgorithmTest, FFT) {
+    std::array<std::complex<double>, 16> roots_of_unity;
+    for (int i = 0; i < 16; ++i) {
+        roots_of_unity[i] = std::polar(1., std::numbers::pi * i / -8);
+    }
+    std::uniform_real_distribution<> dist(-10, 10);
+    for (int i = 0; i < 1000; ++i) {
+        std::vector<std::complex<double>> input(16);
+        for (int j = 0; j < 16; ++j) {
+            using namespace std::complex_literals;
+            input[j] = dist(engine) + dist(engine) * 1.0i;
+        }
+
+        auto FFT_out = algebra::FFT(input);
+        auto inv_FFT = algebra::inverse_FFT(input);
+
+        for (int j = 0; j < 16; ++j) {
+            auto eval = algebra::evaluate_polynomial(input, roots_of_unity[j]);
+            EXPECT_LE(std::abs(eval - FFT_out[j]), 1e-10);
+
+            eval = algebra::evaluate_polynomial(inv_FFT, roots_of_unity[j]);
+            EXPECT_LE(std::abs(eval - input[j]), 1e-10);
+        }
+    }
+}
+
+TEST_F(AlgorithmTest, PolynomialMult) {
+    std::uniform_real_distribution<> dist(-100, 100);
+    for (int i = 0; i < 100; ++i) {
+        std::vector<std::complex<double>> p(1000), q(1000);
+        for (int j = 0; j < 20; ++j) {
+            using namespace std::complex_literals;
+            p[j] = dist(engine) + dist(engine) * 1.0i;
+            q[j] = dist(engine) + dist(engine) * 1.0i;
+        }
+
+        // Only evaluate |z| = 1 values to keep outputs from blowing up in magnitude
+        std::vector<std::complex<double>> eval_points(199);
+        std::uniform_real_distribution<> root_dist(0, 2 * std::numbers::pi);
+        for (int j = 0; j < 199; ++j) {
+            using namespace std::complex_literals;
+            eval_points[j] = std::polar(1., root_dist(engine));
+        }
+
+        auto result = algebra::polynomial_product(p, q);
+        EXPECT_EQ(result.size(), p.size() + q.size() - 1);
+        for (auto z : eval_points) {
+            auto eval_from_res = algebra::evaluate_polynomial(result, z);
+            auto manual_eval =
+              algebra::evaluate_polynomial(p, z) * algebra::evaluate_polynomial(q, z);
+            EXPECT_LE(std::abs(eval_from_res - manual_eval), 1e-5);
+        }
+    }
+}
+
+TEST_F(AlgorithmTest, B_Tree) {
+    tree::B_tree<char, 2> tester;
+    std::string input = "FSQKCLHTVWMRNPABXYDZE";
+    for (char c : input) {
+        tester.insert(c);
+        ASSERT_TRUE(tester.contains(c));
+    }
+    EXPECT_EQ(tester.size(), input.size());
+
+    tree::B_tree<char, 3> test_2;
+    input = "AEPRVMNOXGYZJKSTUCDBQLF";
+    std::string rem = "FMGDBCPV";
+    for (char c : input) {
+        test_2.insert(c);
+    }
+    for (char c : rem) {
+        test_2.erase(c);
+        ASSERT_FALSE(test_2.contains(c)) << c;
+    }
+    EXPECT_EQ(test_2.size(), input.size() - rem.size());
+}
+
+TEST_F(AlgorithmTest, Transitive_Closure_Test) {
+    for (int i = 0; i < 100; ++i) {
+        bool cyclic = i % 2 == 0;
+        graph::graph<int, true, false> input =
+          random_graph<true, false>(engine, cyclic, graph::adj_list, 100);
+        graph::graph<int, true, false> closure = graph_alg::transitive_closure(input);
+        EXPECT_TRUE(graph_alg::is_transitive_closure(closure));
+
+        if (!cyclic) {
+            dynamic_matrix<int> input_matrix(input.order(), input.order(), 0),
+              closure_matrix(input.order(), input.order(), 0);
+            for (int v : input.vertices()) {
+                for (int w : input.neighbors(v))
+                    input_matrix[v][w] = 1;
+                for (int w : closure.neighbors(v))
+                    closure_matrix[v][w] = 1;
+            }
+            EXPECT_EQ(input_matrix == closure_matrix, graph_alg::is_transitive_closure(input));
+
+            // Verify closure by hand
+            for (std::size_t i = 0; i < input.order(); ++i) {
+                for (std::size_t j = i + 1; j < input.order(); ++j) {
+                    for (std::size_t k = j + 1; k < input.order(); ++k) {
+                        if (closure_matrix[i][j] != 0 && closure_matrix[j][k] != 0) {
+                            EXPECT_NE(closure_matrix[i][k], 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

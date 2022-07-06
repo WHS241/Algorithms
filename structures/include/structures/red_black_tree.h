@@ -7,9 +7,10 @@ namespace tree {
 /**
  * Red-black tree
  * 1. Each node is marked as red or black
- * 2. nullptr is black
+ * 2. nullptr is considered black
  * 3. Red nodes can only have black children
  * 4. A path from root to any nullptr contains the same number of black nodes
+ * 5. Root is black
  *
  * Leonidas Guibas, Robert Sedgewick
  * A Dichromatic Framework for Balanced Trees

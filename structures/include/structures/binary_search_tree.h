@@ -15,7 +15,7 @@ template<typename T, typename Compare> class binary_search_tree : public binary_
     public:
     typedef T value_type;
     typedef Compare value_compare;
-    typedef typename binary_tree<T>::iterator iterator;
+    typedef typename binary_tree<T>::iterator iterator; // elements are immutable
     typedef typename binary_tree<T>::const_iterator const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;

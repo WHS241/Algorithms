@@ -18,11 +18,11 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool>
     auto* next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
     while (next != nullptr) {
         ptr = next;
+        go_left = this->_compare(item, ptr->item);
 
-        if (!this->_allow_duplicates && item == ptr->item)
+        if (!this->_allow_duplicates && !go_left && !this->_compare(ptr->item, item))
             return {this->_make_iterator(ptr, traversal::in_order, false), false};
 
-        go_left = this->_compare(item, ptr->item);
         next = dynamic_cast<t_node*>(go_left ? ptr->left : ptr->right);
     }
 
@@ -45,14 +45,15 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool>
         if (parent->is_black)
             return result;
 
+        // since root is black, a red parent means there must be a black (non-null) grandparent
         auto grandparent = dynamic_cast<t_node*>(parent->parent);
         auto uncle = dynamic_cast<t_node*>((grandparent->left == parent) ? grandparent->right
                                                                          : grandparent->left);
 
         if (uncle != nullptr && !uncle->is_black) {
             // red parent and uncle
-            // we can simply repaint the parent, uncle, and grandparent, then continue
-            // balancing
+            // we repaint the parent, uncle, and grandparent
+            // black-length has increased, so continue balancing with grandparent
             parent->is_black = true;
             uncle->is_black = true;
             grandparent->is_black = false;
@@ -60,11 +61,11 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool>
         } else {
             // red parent, black uncle
             if (parent == grandparent->left) {
-                // rotate red node outside
+                // ensure a red node is one outside of subtree (left-left child of grandparent)
                 if (add == parent->right)
                     binary_search_tree<T, Compare>::_rotate(parent, false);
 
-                // rotate grandparent over
+                // rotate grandparent to uncle-side
                 binary_search_tree<T, Compare>::_rotate(grandparent, true);
 
             } else {
@@ -74,7 +75,7 @@ std::pair<typename red_black_tree<T, Compare>::iterator, bool>
                 binary_search_tree<T, Compare>::_rotate(grandparent, false);
             }
 
-            // recolor, reassign if necessary
+            // recolor old grandparent and new subtree node, no further rebalancing
             grandparent->is_black = false;
             add = dynamic_cast<t_node*>(grandparent->parent);
             add->is_black = true;
@@ -113,6 +114,7 @@ typename red_black_tree<T, Compare>::iterator
         node = dynamic_cast<t_node*>(successor);
     }
 
+    // node now has at most one non-null child
     auto child = dynamic_cast<t_node*>(node->left ? node->left : node->right);
     bool go_left = (child == node->left);
     if (node == this->_root.get()) {
@@ -122,7 +124,7 @@ typename red_black_tree<T, Compare>::iterator
         } else {
             node->right = nullptr;
         }
-        this->_root.reset(child);
+        this->_root.reset(child); // deletes old root (variable node)
         child->parent = nullptr;
         child->is_black = true;
         --this->_size;
@@ -133,6 +135,7 @@ typename red_black_tree<T, Compare>::iterator
     bool is_left_child = (node == parent->left);
 
     auto swap_out = [](t_node* new_parent, t_node* new_child, bool change_left) {
+        // detach new_child from its old parent (variable node)
         if (new_child && new_child->parent) {
             if (new_child == new_child->parent->left)
                 new_child->parent->change_left(nullptr);
@@ -140,6 +143,7 @@ typename red_black_tree<T, Compare>::iterator
                 new_child->parent->change_right(nullptr);
         }
 
+        // Attach to new parent (deletes variable node)
         if (change_left)
             new_parent->replace_left(new_child);
         else
@@ -151,7 +155,7 @@ typename red_black_tree<T, Compare>::iterator
         // removing won't change black-distances
         swap_out(parent, child, is_left_child);
         --this->_size;
-    } else if (child != nullptr) { // must be red, otherwise unbalanced
+    } else if (child != nullptr) { // child must be red, otherwise unbalanced
         // repaint child before deletion to preserve black-distances
         child->is_black = true;
         swap_out(parent, child, is_left_child);
@@ -162,7 +166,7 @@ typename red_black_tree<T, Compare>::iterator
         node = child;
 
         // need to rebalance
-        // since parent-node-child has black-height 2, sibling subtree needs at
+        // since parent-node-child had black-height 2, sibling subtree needs at
         // least one level, so sibling will never be nullptr
         auto sibling = dynamic_cast<t_node*>(is_left_child ? parent->right : parent->left);
         auto outer_sibling = dynamic_cast<t_node*>(sibling->left);
@@ -215,28 +219,29 @@ typename red_black_tree<T, Compare>::iterator
             }
         }
 
-        // parent must be red by here
         if ((!inner_sibling || inner_sibling->is_black) &&
             (!outer_sibling || outer_sibling->is_black)) {
+            // parent must be red by here
             // recoloring parent and sibling restores original black-lengths
             parent->is_black = true;
             sibling->is_black = false;
         } else {
-            // we need red on the outside, regardless of the inside color
+            // we need outer to be red, inside color doesn't matter
             if ((!outer_sibling || outer_sibling->is_black)) {
-                // inner must be red if we reach here
+                // must have red inner, black sibling if we reach here
+                // rotate and swap colors
                 binary_search_tree<T, Compare>::_rotate(sibling, is_left_child);
                 sibling->is_black = false;
                 inner_sibling->is_black = true;
 
-                // reassign to new nodes
+                // reassign based on new structure
                 outer_sibling = sibling;
                 sibling = inner_sibling;
                 inner_sibling =
                   dynamic_cast<t_node*>(is_left_child ? inner_sibling->left : inner_sibling->right);
             }
 
-            // outer_sibling now must be red, sibling is black
+            // must now have red outer, black sibling
             binary_search_tree<T, Compare>::_rotate(parent, !is_left_child);
             sibling->is_black = parent->is_black;
             parent->is_black = true;

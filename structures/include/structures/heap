@@ -4,7 +4,7 @@
 // header for all heaps, should include this instead of any specific heap types
 
 #include "heap_Fibonacci.h"
-#include "heap_binomial.h"
 #include "heap_binary.h"
+#include "heap_binomial.h"
 
 #endif // STRUCTURES_HEAP

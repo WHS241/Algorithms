@@ -104,7 +104,7 @@ dynamic_matrix<T>::dynamic_matrix(const std::initializer_list<std::initializer_l
 
 template<typename T> dynamic_matrix<T>::~dynamic_matrix() noexcept {
     for (std::size_t i = 0U; i < _check_size; ++i)
-        _allocator.destroy(_elements + _check_2[i]);
+        std::destroy_at(_elements + _check_2[i]);
     std::size_t size = _rows * _cols;
     if (size != 0) {
         _check_allocator.deallocate(_check_2, size);
@@ -146,7 +146,7 @@ dynamic_matrix<T>::dynamic_matrix(const dynamic_matrix<T>& src) :
 
     } catch (...) {
         for (std::size_t i = 0U; i < _check_size; ++i)
-            _allocator.destroy(_elements + _check_2[i]);
+            std::destroy_at(_elements + _check_2[i]);
 
         if (tracker == 3)
             _check_allocator.deallocate(_check_2, size);
@@ -671,7 +671,7 @@ template<typename T> void dynamic_matrix<T>::_initialize(std::size_t pos, const 
     if (_is_initialized(pos)) {
         _elements[pos] = value;
     } else {
-        _allocator.construct(_elements + pos, value);
+        std::construct_at(_elements + pos, value);
         _check_1[pos] = _check_size;
         _check_2[_check_size] = pos;
         ++_check_size;

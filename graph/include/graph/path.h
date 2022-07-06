@@ -175,8 +175,9 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>
                (x.current != x.from && (y.current == y.from || x.cost < y.cost));
     };
     typedef typename heap::node_base<data, decltype(compare)>::node node;
+    typedef typename heap::node_base<data, decltype(compare)>::node_wrapper node_wrapper;
     heap::Fibonacci<data, decltype(compare)> heap(compare);
-    std::unordered_map<Vertex, node*, Args...> tracker; // pointers to items in the heap
+    std::unordered_map<Vertex, node_wrapper, Args...> tracker; // pointers to items in the heap
 
     auto it1 = vertices.cbegin();
     for (data& vertex_data : data_map)
@@ -200,8 +201,8 @@ std::unordered_map<Vertex, std::pair<EdgeWeight, Vertex>, Args...>
             for (const Vertex& neighbor : src.neighbors(to_add.current)) {
                 auto it = tracker.find(neighbor);
                 if (it != tracker.end()) {
-                    node* ptr = it->second;
-                    const node* read_ptr = ptr;
+                    node_wrapper ptr = it->second;
+                    const node* read_ptr = ptr.get();
                     EdgeWeight edge = src.edge_cost(to_add.current, neighbor);
                     if (edge < zero)
                         throw std::invalid_argument("Negative weight");
